@@ -1,4 +1,19 @@
 <?php
+//todo: move that to core
+function _civicrm_api3_basic_getsql ($params,$sql) {
+  $dao = CRM_Core_DAO::executeQuery($sql);
+  $returnSQL        = CRM_Utils_Array::value('sql', $params, CRM_Utils_Array::value('options_sql', $params));
+  if ($returnSQL) {
+    return array("is_error"=>1,"sql"=>$sql);
+  }
+  $dao = CRM_Core_DAO::executeQuery($sql);
+  $values = array();
+  while ($dao->fetch()) {
+    $values[] = $dao->toArray();
+  }
+  return civicrm_api3_create_success($values, $params, NULL, NULL, $dao);
+}
+
 
 require_once 'civisualize.civix.php';
 

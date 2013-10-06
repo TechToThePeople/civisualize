@@ -14,6 +14,7 @@ class CRM_Civisualize_Page_Main extends CRM_Core_Page {
 
     $tpl = 'dataviz/'.$tplfile.'.tpl';
     $smarty= CRM_Core_Smarty::singleton( );
+    $smarty->assign("options",array());
     if( !$smarty->template_exists($tpl) ){
       header("Status: 404 Not Found");
       die ("Can't find the requested template file templates/$tpl");

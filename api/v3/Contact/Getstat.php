@@ -21,17 +21,12 @@ function civicrm_api3_contact_getstat ($params) {
       if(!is_array($$varToFilter)){
         continue;
       }
-      //I was going to throw an exception rather than silently filter out - but
-      //would need to diff out of exceptions arr other keys like 'options', 'return', 'api. etcetc
-      //so we are silently ignoring parts of their request
-      //$exceptionsArr = array_diff(array_keys($$varToFilter), array_keys($fields['values']));
       $$varToFilter = array_intersect_key($$varToFilter, $fields['values']);
     }
   }
 //  $options = array_merge($options,$additional_options);
   $sort             = CRM_Utils_Array::value('sort', $options, NULL);
-  $offset             = CRM_Utils_Array::value('offset', $options, NULL);
-  $limit             = CRM_Utils_Array::value('limit', $options, NULL);
+  $returnSQL        = CRM_Utils_Array::value('sql', $options, CRM_Utils_Array::value('options_sql', $options['input_params']));
   $smartGroupCache  = CRM_Utils_Array::value('smartGroupCache', $params);
 
   $newParams = CRM_Contact_BAO_Query::convertFormValues($inputParams);
@@ -70,6 +65,17 @@ function civicrm_api3_contact_getstat ($params) {
     $sql = "SELECT count(*) AS total  $from $where $having";
     $extra = array ("tip"=>"if you need to group by a field, use the return param, eg return=contact_type,gender",
                     "warning"=> "use getcount, getstat without param might be blocked in the future"); 
+
+    if (!empty($sort)) {
+      $sql .= " ORDER BY $sort ";
+    } else {
+      $sql .= " ORDER BY total DESC ";
+    }
+
+  }
+
+  if ($returnSQL) {
+    return array("is_error"=>1,"sql"=>$sql,"from"=>$from,"where"=>$where,"having"=>$having);
   }
   $dao = CRM_Core_DAO::executeQuery($sql);
   $values = array();
@@ -77,5 +83,5 @@ function civicrm_api3_contact_getstat ($params) {
     $values[] = $dao->toArray();
   }
   
-  return civicrm_api3_create_success($values, $params, $entity = "contact", "getstat", $dao,$extra);
+  return civicrm_api3_create_success($values, $params, "contact", "getstat", $dao,$extra);
 }
