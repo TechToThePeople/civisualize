@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<extension key="eu.tttp.civisualize" type="module">
+  <file>civisualize</file>
+  <name>Civisualize. The missing data vizualisation extension</name>
+  <description>Framework to generate easily (as in, if you know SQL and d3 at least) better visualisation about what's happening in your CiviCRM</description>
+  <license>aGPL</license>
+  <maintainer>
+    <author>Xavier</author>
+    <email>xavier@tttp.eu</email>
+  </maintainer>
+  <releaseDate>2013-10-05</releaseDate>
+  <version>1.0</version>
+  <develStage>alpha</develStage>
+  <compatibility>
+    <ver>4.3</ver>
+    <ver>4.4</ver>
+  </compatibility>
+  <civix>
+    <namespace>CRM/Civisualize</namespace>
+  </civix>
+</extension>
