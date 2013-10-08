@@ -35,11 +35,15 @@ class CRM_Civisualize_Page_Main extends CRM_Core_Page {
    CRM_Core_Resources::singleton()
     ->addScriptFile('eu.tttp.civisualize', 'js/d3.v3.js', 110, 'html-header', FALSE);
 
+  require_once 'CRM/Core/Smarty/plugins/function.crmSQL.php';
+   $smarty->register_function("crmSQL", "smarty_function_crmSQL");
 
     if  ( ! array_key_exists ( 'HTTP_X_REQUESTED_WITH', $_SERVER ) ||
       $_SERVER['HTTP_X_REQUESTED_WITH'] != "XMLHttpRequest"  )  {
 
         $smarty->assign( 'tplFile', $tpl );
+
+        
         $config = CRM_Core_Config::singleton();
         $content = $smarty->fetch( 'CRM/common/'. strtolower($config->userFramework) .'.tpl' );
 
