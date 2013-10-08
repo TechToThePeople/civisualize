@@ -2,15 +2,19 @@
 
 function smarty_function_crmSQL($params, &$smarty) { 
   
-  if (!array_key_exists('sql', $params)) { 
-    $smarty->trigger_error("assign: missing 'sql' parameter"); 
-    return "crmAPI: missing 'sql' parameter"; 
+  if (!array_key_exists('sql', $params) && !array_key_exists('file', $params)) { 
+    $smarty->trigger_error("assign: missing 'sql' OR 'file' parameter"); 
+    return "crmAPI: missing 'sql' or 'file' parameter"; 
   } 
-  $sql = $params["sql"]; // TODO: remove "DELETE "
+  if (array_key_exists('sql', $params)){
+    $sql = $params["sql"];
+  } else {
+    $sql=file_get_contents (dirname( __FILE__ ). '/../../../../queries/'.$params["file"].".sql");
+  } 
+  // TODO: remove "DELETE " and "UPDATE " and "GRANT " and ...
 
   if (array_key_exists('debug', $params)) { 
     $smarty->trigger_error("sql:". $params["sql"]); 
-    return "crmAPI: missing 'sql' parameter"; 
   }
 
 //  CRM_Core_Error::setCallback(array('CRM_Utils_REST', 'fatal')); 
