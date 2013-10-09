@@ -1,0 +1,1 @@
+SELECT COUNT(*) as count,DATE(receive_date) as receive_date, contact_type, gender_id,SUM(total_amount) as total,AVG(total_amount) as avg from civicrm_contribution JOIN civicrm_contact as contact ON contact_id=contact.id  group by DATE(receive_date),contact.contact_type;
