@@ -4,18 +4,28 @@
 var data={crmAPI entity="tag" action="getstat"};
 {literal}
 
-var nesta =function (data) {
-  var nest = d3.nest()
-    .key(function(d) { 
-console.log(d);
-//      if (!d.parent_id) 
-//        return 0;
-      return d.parent_id; })
-    .entries(data);
-console.log(nest);
-};
+function tree(nodes,p) 
+  var p = p || function (d){return d.parent_id};
+  var nodeById = {};
 
-//nesta(data.values);
+  // Index the nodes by id, in case they come out of order.
+  nodes.forEach(function(d) {
+    nodeById[d.id] = d;
+  });
+
+  // Lazily compute children.
+  nodes.forEach(function(d) {
+    if ("manager" in d) {
+      var parent = nodeById[p(d)];
+      if (parent.children) manager.children.push(d);
+      else manager.children = [d];
+    }
+  });
+
+  return nodes[0];
+}
+
+var t = tree (data.values);
 
 
 
