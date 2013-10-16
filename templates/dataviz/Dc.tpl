@@ -5,8 +5,10 @@
 
         <div class="clearfix"></div>
     </div>
+<div id="instrument">
+</div>
 
-<div class="row">
+<div class="row clear">
     <div id="monthly-move-chart">
         <strong>Amount by month</strong>
         <span class="reset" style="display: none;">range: <span class="filter"></span></span>
@@ -31,7 +33,14 @@
 
 var data = {crmSQL file="contribution_by_date"};
 
+var i = {crmAPI entity="OptionValue" option_group_id="10"}; {*todo on 4.4, use the payment_instrument as id *}
+
 {literal}
+var instrumentLabel = {};
+i.values.forEach (function(d) {
+  instrumentLabel[d.value] = d.label;
+});
+console.log(instrument);
 
 var numberFormat = d3.format(".2f");
 var volumeChart =null,dayOfWeekChart=null,moveChart=null;  
@@ -39,6 +48,7 @@ var volumeChart =null,dayOfWeekChart=null,moveChart=null;
 cj(function($) {
 // create a pie chart under #chart-container1 element using the default global chart group
 var pietype = dc.pieChart("#type").innerRadius(20).radius(70);
+var pieinstrument = dc.pieChart("#instrument").innerRadius(50).radius(70);
 volumeChart = dc.barChart("#monthly-volume-chart");
 dayOfWeekChart = dc.rowChart("#day-of-week-chart");
 //var moveChart = dc.seriesChart("#monthly-move-chart");
@@ -54,6 +64,9 @@ all = ndx.groupAll();
 
 var type        = ndx.dimension(function(d) {return d.contact_type;});
 var typeGroup   = type.group().reduceSum(function(d) { return d.count; });
+
+var instrument        = ndx.dimension(function(d) {return d.instrument;});
+var instrumentGroup   = instrument.group().reduceSum(function(d) { return d.count; });
  
 var byMonth = ndx.dimension(function(d) { return d3.time.month(d.dd); });
 var byDay = ndx.dimension(function(d) { return d.dd; });
@@ -83,6 +96,20 @@ dayOfWeekChart.width(180)
   .elasticX(true)
   .xAxis().ticks(4);
 
+
+pieinstrument
+  .width(200)
+  .height(200)
+  .dimension(instrument)
+  .group(instrumentGroup)
+  .title(function(d) {
+   return instrumentLabel[d.data.key]+":"+d.data.value;
+})
+  .label(function(d) {
+     return instrumentLabel[d.data.key];
+})
+  .renderlet(function (chart) {
+  });
 
 pietype
   .width(200)
