@@ -5,13 +5,14 @@ require_once 'CRM/Core/Page.php';
 class CRM_Civisualize_Page_Main extends CRM_Core_Page {
   function run() {
     $dummy = NULL;
-    $request = CRM_Utils_Request::retrieve( 'q', 'String',$dummy, true, NULL, 'REQUEST');
+print_r($_GET);
+    $request = CRM_Utils_Request::retrieve( 'q', 'String',$dummy, true, NULL, 'GET');
     if (false !== strpos($request, '..')) {
       die ("SECURITY FATAL: the url can't contain '..'. Please report the issue on the forum at civicrm.org");
     }
 
     $request = split ('/',$request);
-    $tplfile=_civicrm_api_get_camel_name($request[3]);
+    $tplfile=_civicrm_api_get_camel_name($request[2]);
 
     $tpl = 'dataviz/'.$tplfile.'.tpl';
     $smarty= CRM_Core_Smarty::singleton( );
