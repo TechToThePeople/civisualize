@@ -5,8 +5,7 @@ require_once 'CRM/Core/Page.php';
 class CRM_Civisualize_Page_Main extends CRM_Core_Page {
   function run() {
     $dummy = NULL;
-    $request = CRM_Utils_Request::retrieve( 'q', 'String',$dummy, true, NULL, 'GET');
-$request = "/civicrm/dataviz/dc";
+    $request = CRM_Utils_Request::retrieve( 'q', 'String',$dummy, true, NULL, 'REQUEST');
     if (false !== strpos($request, '..')) {
       die ("SECURITY FATAL: the url can't contain '..'. Please report the issue on the forum at civicrm.org");
     }
@@ -35,10 +34,10 @@ $request = "/civicrm/dataviz/dc";
     $smarty->assign_by_ref("request", $param);
 
    CRM_Core_Resources::singleton()
-    ->addScriptFile('eu.tttp.civisualize', 'js/d3.v3.js', 110, 'html-header', FALSE);
-    ->addScriptFile('eu.tttp.civisualize', 'js/dc/dc.js', 110, 'html-header', FALSE);
-    ->addScriptFile('eu.tttp.civisualize', 'js/dc/crossfilter.js', 110, 'html-header', FALSE);
-    ->addStyleFile('eu.tttp.civisualize', 'js/cd/dc.css');
+    ->addScriptFile('eu.tttp.civisualize', 'js/d3.v3.js', 110, 'html-header', FALSE)
+    ->addScriptFile('eu.tttp.civisualize', 'js/dc/dc.js', 110, 'html-header', FALSE)
+    ->addScriptFile('eu.tttp.civisualize', 'js/dc/crossfilter.js', 110, 'html-header', FALSE)
+    ->addStyleFile('eu.tttp.civisualize', 'js/dc/dc.css');
 
   require_once 'CRM/Core/Smarty/plugins/function.crmSQL.php';
    $smarty->register_function("crmSQL", "smarty_function_crmSQL");
