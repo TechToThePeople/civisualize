@@ -20,9 +20,9 @@
 
 <div id="monthly-volume-chart"></div>
 
-{crmStyle ext="eu.tttp.civisualize" file="js/dc/dc.css"}
+{*crmStyle ext="eu.tttp.civisualize" file="js/dc/dc.css"}
 {crmScript ext="eu.tttp.civisualize" file="js/dc/dc.js"}
-{crmScript ext="eu.tttp.civisualize" file="js/dc/crossfilter.js"}
+{crmScript ext="eu.tttp.civisualize" file="js/dc/crossfilter.js"*}
 <!--script scr="{crmResURL ext="eu.tttp.civisualize"}js/dc/dc.js"></script>
 <script scr="{crmResURL ext="eu.tttp.civisualize"}js/dc/crossfilter.js"></script--!>
 
