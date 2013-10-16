@@ -141,4 +141,4 @@ dc.renderAll();
 });
 {/literal}
 </script>
-
+<div class="clear"></div>
