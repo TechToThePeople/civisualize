@@ -23,11 +23,17 @@ dc.printers.filter = function (filter) {
             else if (filter.length >= 1)
                 s = dc.utils.printSingleValue(filter[0]);
         } else {
-            s = dc.utils.printSingleValue(filter)
+            s = dc.utils.printSingleValue(filter);
         }
     }
 
     return s;
+};
+
+dc.pluck = function(n,f) {
+    return function(d) {
+        return f ? f.call(this,d[n]) : d[n];
+    };
 };
 
 dc.utils = {};
@@ -39,18 +45,21 @@ dc.utils.printSingleValue = function (filter) {
         s = dc.dateFormat(filter);
     else if (typeof(filter) == "string")
         s = filter;
-    else if (typeof(filter) == "number")
+    else if (dc.utils.isFloat(filter))
+        s = dc.utils.printSingleValue.fformat(filter);
+    else if (dc.utils.isInteger(filter))
         s = Math.round(filter);
 
     return s;
 };
+dc.utils.printSingleValue.fformat = d3.format(".2f");
 
 dc.utils.add = function (l, r) {
     if (typeof r === "string")
-        r = r.replace("%", "")
+        r = r.replace("%", "");
 
     if (l instanceof Date) {
-        if (typeof r === "string") r = +r
+        if (typeof r === "string") r = +r;
         var d = new Date();
         d.setTime(l.getTime());
         d.setDate(l.getDate() + r);
@@ -65,10 +74,10 @@ dc.utils.add = function (l, r) {
 
 dc.utils.subtract = function (l, r) {
     if (typeof r === "string")
-        r = r.replace("%", "")
+        r = r.replace("%", "");
 
     if (l instanceof Date) {
-        if (typeof r === "string") r = +r
+        if (typeof r === "string") r = +r;
         var d = new Date();
         d.setTime(l.getTime());
         d.setDate(l.getDate() - r);
@@ -82,9 +91,10 @@ dc.utils.subtract = function (l, r) {
 };
 
 dc.utils.GroupStack = function () {
-    var _dataLayers = [];
+    var _dataLayers = [[ ]];
     var _groups = [];
     var _defaultAccessor;
+    var _hideChartGroup;
 
     function initializeDataLayer(i) {
         if (!_dataLayers[i])
@@ -99,7 +109,7 @@ dc.utils.GroupStack = function () {
     this.getDataPoint = function (x, y) {
         initializeDataLayer(x);
         var dataPoint = _dataLayers[x][y];
-        if (dataPoint == undefined)
+        if (dataPoint === undefined)
             dataPoint = 0;
         return dataPoint;
     };
@@ -109,6 +119,11 @@ dc.utils.GroupStack = function () {
             accessor = _defaultAccessor;
         _groups.push([group, accessor]);
         return _groups.length - 1;
+    };
+
+    this.addNamedGroup = function (group, name, accessor) {
+        var groupIndex = this.addGroup(group, accessor);
+        return _groups[groupIndex].name = name;
     };
 
     this.getGroupByIndex = function (index) {
@@ -136,10 +151,36 @@ dc.utils.GroupStack = function () {
         return _dataLayers;
     };
 
+    this.clearDataLayers = function() {
+        _dataLayers = [[ ]];
+    };
+
+    this.showGroups = function(name, showChartGroup) {
+        if (showChartGroup) _hideChartGroup = false;
+        this.toggleGroups(name, false);
+    };
+
+    this.hideGroups = function(name, hideChartGroup) {
+        if (hideChartGroup) _hideChartGroup = true;
+        this.toggleGroups(name, true);
+    };
+
+    this.toggleGroups = function(name, value) {
+        for (var i = 0; i < _groups.length; ++i) {
+            if (_groups[i].name === name)
+                _groups[i].hidden = value;
+        }
+    };
+
     this.toLayers = function () {
         var layers = [];
 
         for (var i = 0; i < _dataLayers.length; ++i) {
+            if (i == 0 && _hideChartGroup)
+                continue;
+            if (i > 0 && _groups[i-1].hidden)
+                continue;
+
             var layer = {index: i, points: []};
             var dataPoints = _dataLayers[i];
 
@@ -153,22 +194,30 @@ dc.utils.GroupStack = function () {
     };
 };
 
+dc.utils.isNumber = function(n) {
+    return n===+n;
+};
+
+dc.utils.isFloat = function (n) {
+    return n===+n && n!==(n|0);
+};
+
+dc.utils.isInteger = function (n) {
+    return n===+n && n===(n|0);
+};
+
 dc.utils.isNegligible = function (max) {
     return max === undefined || (max < dc.constants.NEGLIGIBLE_NUMBER && max > -dc.constants.NEGLIGIBLE_NUMBER);
-}
+};
 
 dc.utils.groupMax = function (group, accessor) {
-    var max = d3.max(group.all(), function (e) {
-        return accessor(e);
-    });
+    var max = d3.max(group.all(), accessor);
     if (dc.utils.isNegligible(max)) max = 0;
     return max;
 };
 
 dc.utils.groupMin = function (group, accessor) {
-    var min = d3.min(group.all(), function (e) {
-        return accessor(e);
-    });
+    var min = d3.min(group.all(), accessor);
     if (dc.utils.isNegligible(min)) min = 0;
     return min;
 };
@@ -183,10 +232,10 @@ dc.utils.appendOrSelect = function (parent, name) {
     return element;
 };
 
-dc.utils.createLegendable = function (chart, group, index, accessor) {
-    var legendable = {name: chart.getGroupName(group, accessor), data: group};
-    if (typeof chart.colors === 'function') legendable.color = chart.colors()(index);
+dc.utils.createLegendable = function (chart, group, accessor, color) {
+    var legendable = {name: chart._getGroupName(group, accessor), data: group};
+    if (color) legendable.color = color;
     return legendable;
 };
 
-dc.utils.safeNumber = function(n){return isNaN(n)?0:n;};
+dc.utils.safeNumber = function(n){return dc.utils.isNumber(+n)?+n:0;};

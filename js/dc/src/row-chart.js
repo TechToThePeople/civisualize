@@ -1,3 +1,25 @@
+/**
+## <a name="row-chart" href="#row-chart">#</a> Row Chart [Concrete] < [Color Chart](#color-chart) < [Base Chart](#base-chart)
+Concrete row chart implementation.
+
+#### dc.rowChart(parent[, chartGroup])
+Create a row chart instance and attach it to the given parent element.
+
+Parameters:
+
+* parent : string - any valid d3 single selector representing typically a dom block element such as a div.
+* chartGroup : string (optional) - name of the chart group this chart instance should be placed in. Once a chart is placed in a certain chart group then any interaction with such instance will only trigger events and redraw within the same chart group.
+
+Return a newly created row chart instance
+
+```js
+// create a row chart under #chart-container1 element using the default global chart group
+var chart1 = dc.rowChart("#chart-container1");
+// create a row chart under #chart-container2 element using chart group A
+var chart2 = dc.rowChart("#chart-container2", "chartGroupA");
+```
+
+**/
 dc.rowChart = function (parent, chartGroup) {
 
     var _g;
@@ -10,7 +32,7 @@ dc.rowChart = function (parent, chartGroup) {
 
     var _rowCssClass = "row";
 
-    var _chart = dc.marginable(dc.colorChart(dc.baseChart({})));
+    var _chart = dc.capped(dc.marginable(dc.colorChart(dc.baseChart({}))));
 
     var _x;
 
@@ -18,13 +40,18 @@ dc.rowChart = function (parent, chartGroup) {
 
     var _xAxis = d3.svg.axis().orient("bottom");
 
+    var _rowData;
+
+    _chart.rowsCap = _chart.cap;
+
     function calculateAxisScale() {
         if (!_x || _elasticX) {
-            _x = d3.scale.linear().domain([0, d3.max(_chart.group().all(), _chart.valueAccessor())])
+            var extent = d3.extent(_rowData, _chart.valueAccessor());
+            if (extent[0] > 0) extent[0] = 0;
+            _x = d3.scale.linear().domain(extent)
                 .range([0, _chart.effectiveWidth()]);
-
-            _xAxis.scale(_x);
         }
+        _xAxis.scale(_x);
     }
 
     function drawAxis() {
@@ -47,8 +74,6 @@ dc.rowChart = function (parent, chartGroup) {
             .append("g")
             .attr("transform", "translate(" + _chart.margins().left + "," + _chart.margins().top + ")");
 
-        drawAxis();
-        drawGridLines();
         drawChart();
 
         return _chart;
@@ -79,17 +104,19 @@ dc.rowChart = function (parent, chartGroup) {
             .attr("x1", 0)
             .attr("y1", 0)
             .attr("x2", 0)
-            .attr("y2", function (d) {
+            .attr("y2", function () {
                 return -_chart.effectiveHeight();
             });
     }
 
     function drawChart() {
+        _rowData = _chart._assembleCappedData();
+
         drawAxis();
         drawGridLines();
 
         var rows = _g.selectAll("g." + _rowCssClass)
-            .data(_chart.group().all());
+            .data(_rowData);
 
         createElements(rows);
         removeElements(rows);
@@ -114,9 +141,11 @@ dc.rowChart = function (parent, chartGroup) {
     }
 
     function updateElements(rows) {
-        var height = rowHeight();
+        var n = _rowData.length;
 
-        rows = rows.attr("transform",function (d, i) {
+        var height = (_chart.effectiveHeight() - (n + 1) * _gap) / n;
+
+        var rect = rows.attr("transform",function (d, i) {
                 return "translate(0," + ((i + 1) * _gap + i * height) + ")";
             }).select("rect")
             .attr("height", height)
@@ -129,12 +158,15 @@ dc.rowChart = function (parent, chartGroup) {
                 return (_chart.hasFilter()) ? _chart.isSelectedRow(d) : false;
             });
 
-        dc.transition(rows, _chart.transitionDuration())
+        dc.transition(rect, _chart.transitionDuration())
             .attr("width", function (d) {
-                return _x(_chart.valueAccessor()(d));
-            });
+                var start = _x(0) == -Infinity ? _x(1) : _x(0);
+                return Math.abs(start - _x(_chart.valueAccessor()(d)));
+            })
+            .attr("transform", translateX);
 
         createTitles(rows);
+        updateLabels(rows);
     }
 
     function createTitles(rows) {
@@ -155,29 +187,30 @@ dc.rowChart = function (parent, chartGroup) {
 
     function updateLabels(rows) {
         if (_chart.renderLabel()) {
-            rows.select("text")
+            var lab = rows.select("text")
                 .attr("x", _labelOffsetX)
                 .attr("y", _labelOffsetY)
+                .on("click", onClick)
                 .attr("class", function (d, i) {
                     return _rowCssClass + " _" + i;
                 })
                 .text(function (d) {
                     return _chart.label()(d);
                 });
+            dc.transition(lab, _chart.transitionDuration())
+                .attr("transform", translateX);
         }
-    }
-
-    function numberOfRows() {
-        return _chart.group().all().length;
-    }
-
-    function rowHeight() {
-        var n = numberOfRows();
-        return (_chart.effectiveHeight() - (n + 1) * _gap) / n;
     }
 
     function onClick(d) {
         _chart.onClick(d);
+    }
+
+    function translateX(d) {
+        var x = _x(_chart.valueAccessor()(d)),
+            x0 = _x(0),
+            s = x > x0 ? x0 : x;
+        return "translate("+s+",0)";
     }
 
     _chart.doRedraw = function () {
@@ -189,24 +222,45 @@ dc.rowChart = function (parent, chartGroup) {
         return _xAxis;
     };
 
+    /**
+    #### .gap([gap])
+    Get or set the vertical gap space between rows on a particular row chart instance. Default gap is 5px;
+
+    **/
     _chart.gap = function (g) {
         if (!arguments.length) return _gap;
         _gap = g;
         return _chart;
     };
 
+    /**
+    #### .elasticX([boolean])
+    Get or set the elasticity on x axis. If this attribute is set to true, then the x axis will rescle to auto-fit the data
+    range when filtered.
+
+    **/
     _chart.elasticX = function (_) {
         if (!arguments.length) return _elasticX;
         _elasticX = _;
         return _chart;
     };
 
+    /**
+    #### .labelOffsetX([x])
+    Get or set the x offset (horizontal space to the top left corner of a row) for labels on a particular row chart. Default x offset is 10px;
+
+    **/
     _chart.labelOffsetX = function (o) {
         if (!arguments.length) return _labelOffsetX;
         _labelOffsetX = o;
         return _chart;
     };
 
+    /**
+    #### .labelOffsetY([y])
+    Get of set the y offset (vertical space to the top left corner of a row) for labels on a particular row chart. Default y offset is 15px;
+
+    **/
     _chart.labelOffsetY = function (o) {
         if (!arguments.length) return _labelOffsetY;
         _labelOffsetY = o;

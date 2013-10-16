@@ -1,3 +1,35 @@
+/**
+## <a name="line-chart" href="#line-chart">#</a> Line Chart [Concrete] < [Stackable Chart](#stackable-chart) < [CoordinateGrid Chart](#coordinate-grid-chart)
+Concrete line/area chart implementation.
+
+Examples:
+* [Nasdaq 100 Index](http://nickqizhu.github.com/dc.js/)
+* [Canadian City Crime Stats](http://nickqizhu.github.com/dc.js/crime/index.html)
+
+#### dc.lineChart(parent[, chartGroup])
+Create a line chart instance and attach it to the given parent element.
+
+Parameters:
+
+* parent : string|compositeChart - any valid d3 single selector representing typically a dom block element such
+   as a div, or if this line chart is a sub-chart in a [Composite Chart](#composite-chart) then pass in the parent composite chart instance.
+* chartGroup : string (optional) - name of the chart group this chart instance should be placed in. Once a chart is placed
+   in a certain chart group then any interaction with such instance will only trigger events and redraw within the same
+   chart group.
+
+Return:
+A newly created line chart instance
+
+```js
+// create a line chart under #chart-container1 element using the default global chart group
+var chart1 = dc.lineChart("#chart-container1");
+// create a line chart under #chart-container2 element using chart group A
+var chart2 = dc.lineChart("#chart-container2", "chartGroupA");
+// create a sub-chart under a composite parent chart
+var chart3 = dc.lineChart(compositeChart);
+```
+
+**/
 dc.lineChart = function (parent, chartGroup) {
     var DEFAULT_DOT_RADIUS = 5;
     var TOOLTIP_G_CLASS = "dc-tooltip";
@@ -8,12 +40,19 @@ dc.lineChart = function (parent, chartGroup) {
     var _chart = dc.stackableChart(dc.coordinateGridChart({}));
     var _renderArea = false;
     var _dotRadius = DEFAULT_DOT_RADIUS;
+    var _interpolate = 'linear';
+    var _tension = 0.7;
+    var _defined;
 
     _chart.transitionDuration(500);
 
     _chart.plotData = function () {
-        var layers = _chart.chartBodyG().selectAll("g.stack")
-            .data(_chart.stackLayers());
+        var chartBody = _chart.chartBodyG();
+        var layersList = chartBody.selectAll("g.stack-list");
+
+        if (layersList.empty()) layersList = chartBody.append("g").attr("class", "stack-list");
+
+        var layers = layersList.selectAll("g.stack").data(_chart.stackLayers());
 
         var layersEnter = layers
             .enter()
@@ -26,11 +65,35 @@ dc.lineChart = function (parent, chartGroup) {
 
         drawArea(layersEnter, layers);
 
-        drawDots(layers);
+        drawDots(chartBody, layers);
 
         _chart.stackLayers(null);
     };
 
+    _chart.interpolate = function(_){
+        if (!arguments.length) return _interpolate;
+        _interpolate = _;
+        return _chart;
+    };
+
+    _chart.tension = function(_){
+        if (!arguments.length) return _tension;
+        _tension = _;
+        return _chart;
+    };
+
+    _chart.defined = function(_){
+        if (!arguments.length) return _defined;
+        _defined = _;
+        return _chart;
+    };
+
+    /**
+    #### .renderArea([boolean])
+    Get or set render area flag. If the flag is set to true then the chart will render the area beneath each line and effectively
+    becomes an area chart.
+
+    **/
     _chart.renderArea = function (_) {
         if (!arguments.length) return _renderArea;
         _renderArea = _;
@@ -44,16 +107,17 @@ dc.lineChart = function (parent, chartGroup) {
             })
             .y(function (d) {
                 return _chart.y()(d.y + d.y0);
-            });
+            })
+            .interpolate(_interpolate)
+            .tension(_tension);
+        if (_defined)
+            line.defined(_defined);
+
 
         layersEnter.append("path")
             .attr("class", "line")
-            .attr("stroke", function (d, i) {
-                return _chart.colors()(i);
-            })
-            .attr("fill", function (d, i) {
-                return _chart.colors()(i);
-            });
+            .attr("stroke", _chart.getColor)
+            .attr("fill", _chart.getColor);
 
         dc.transition(layers.select("path.line"), _chart.transitionDuration())
             .attr("d", function (d) {
@@ -72,13 +136,16 @@ dc.lineChart = function (parent, chartGroup) {
                 })
                 .y0(function (d) {
                     return _chart.y()(d.y0);
-                });
+                })
+                .interpolate(_interpolate)
+                .tension(_tension);
+            if (_defined)
+                area.defined(_defined);
+
 
             layersEnter.append("path")
                 .attr("class", "area")
-                .attr("fill", function (d, i) {
-                    return _chart.colors()(i);
-                })
+                .attr("fill", _chart.getColor)
                 .attr("d", function (d) {
                     return safeD(area(d.points));
                 });
@@ -91,29 +158,34 @@ dc.lineChart = function (parent, chartGroup) {
     }
 
     function safeD(d){
-        return d.indexOf("NaN") >= 0 ? "M0,0" : d;
-    };
+        return (!d || d.indexOf("NaN") >= 0) ? "M0,0" : d;
+    }
 
-    function drawDots(layersEnter) {
+    function drawDots(chartBody, layers) {
         if (!_chart.brushOn()) {
-            layersEnter.each(function (d, i) {
-                var layer = d3.select(this);
 
-                var g = layer.select("g." + TOOLTIP_G_CLASS);
-                if (g.empty()) g = layer.append("g").attr("class", TOOLTIP_G_CLASS);
+            var tooltipListClass = TOOLTIP_G_CLASS + "-list";
+            var tooltips = chartBody.select("g." + tooltipListClass);
+
+            if (tooltips.empty()) tooltips = chartBody.append("g").attr("class", tooltipListClass);
+
+            layers.each(function (d, layerIndex) {
+                var layer = d3.select(this);
+                var points = layer.datum().points;
+                if (_defined) points = points.filter(_defined);
+
+                var g = tooltips.select("g." + TOOLTIP_G_CLASS + "._" + layerIndex);
+                if (g.empty()) g = tooltips.append("g").attr("class", TOOLTIP_G_CLASS + " _" + layerIndex);
 
                 createRefLines(g);
 
-                var dots = g.selectAll("circle." + DOT_CIRCLE_CLASS)
-                    .data(g.datum().points);
+                var dots = g.selectAll("circle." + DOT_CIRCLE_CLASS).data(points);
 
                 dots.enter()
                     .append("circle")
                     .attr("class", DOT_CIRCLE_CLASS)
                     .attr("r", _dotRadius)
-                    .attr("fill", function (d) {
-                        return _chart.colors()(i);
-                    })
+                    .attr("fill", function() {return _chart.colorCalculator()(layerIndex);})
                     .style("fill-opacity", 1e-6)
                     .style("stroke-opacity", 1e-6)
                     .on("mousemove", function (d) {
@@ -129,8 +201,8 @@ dc.lineChart = function (parent, chartGroup) {
                     .append("title").text(_chart.title());
 
                 dots.attr("cx", function (d) {
-                    return dc.utils.safeNumber(_chart.x()(d.x));
-                })
+                        return dc.utils.safeNumber(_chart.x()(d.x));
+                    })
                     .attr("cy", function (d) {
                         return dc.utils.safeNumber(_chart.y()(d.y + d.y0));
                     })
@@ -150,8 +222,8 @@ dc.lineChart = function (parent, chartGroup) {
     }
 
     function showDot(dot) {
-        dot.style("fill-opacity", .8);
-        dot.style("stroke-opacity", .8);
+        dot.style("fill-opacity", 0.8);
+        dot.style("stroke-opacity", 0.8);
         return dot;
     }
 
@@ -171,6 +243,11 @@ dc.lineChart = function (parent, chartGroup) {
         g.select("path." + X_AXIS_REF_LINE_CLASS).style("display", "none");
     }
 
+    /**
+    #### .dotRadius([dotRadius])
+    Get or set the radius (in px) for data points. Default dot radius is 5.
+
+    **/
     _chart.dotRadius = function (_) {
         if (!arguments.length) return _dotRadius;
         _dotRadius = _;

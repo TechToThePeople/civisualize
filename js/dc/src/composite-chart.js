@@ -1,21 +1,54 @@
+/**
+## <a name="composite-chart" href="#composite-chart">#</a> Composite Chart [Concrete] < [CoordinateGrid Chart](#coordinate-grid-chart)
+Composite chart is a special kind of chart that resides somewhere between abstract and concrete charts. It does not
+generate data visualization directly, but rather working with other concrete charts to do the job. You can essentially
+overlay(compose) different bar/line/area charts in a single composite chart to achieve some quite flexible charting
+effects.
+
+Examples:
+* [Nasdaq 100 Index](http://nickqizhu.github.com/dc.js/)
+
+#### dc.compositeChart(parent[, chartGroup])
+Create a composite chart instance and attach it to the given parent element.
+
+Parameters:
+* parent : string - any valid d3 single selector representing typically a dom block element such as a div.
+* chartGroup : string (optional) - name of the chart group this chart instance should be placed in. Once a chart is placed
+   in a certain chart group then any interaction with such instance will only trigger events and redraw within the same
+   chart group.
+
+Return:
+A newly created composite chart instance
+
+```js
+// create a composite chart under #chart-container1 element using the default global chart group
+var compositeChart1 = dc.compositeChart("#chart-container1");
+// create a composite chart under #chart-container2 element using chart group A
+var compositeChart2 = dc.compositeChart("#chart-container2", "chartGroupA");
+```
+
+**/
 dc.compositeChart = function (parent, chartGroup) {
     var SUB_CHART_CLASS = "sub";
 
     var _chart = dc.coordinateGridChart({});
     var _children = [];
 
+    var _shareColors = false;
+
+    _chart._mandatoryAttributes([]);
     _chart.transitionDuration(500);
 
-    dc.override(_chart, "generateG", function () {
-        var g = this._generateG();
+    dc.override(_chart, "_generateG", function () {
+        var g = this.__generateG();
 
         for (var i = 0; i < _children.length; ++i) {
             var child = _children[i];
 
             generateChildG(child, i);
 
-            if (child.dimension() == null) child.dimension(_chart.dimension());
-            if (child.group() == null) child.group(_chart.group());
+            if (!child.dimension()) child.dimension(_chart.dimension());
+            if (!child.group()) child.group(_chart.group());
             child.chartGroup(_chart.chartGroup());
             child.svg(_chart.svg());
             child.xUnits(_chart.xUnits());
@@ -27,7 +60,7 @@ dc.compositeChart = function (parent, chartGroup) {
     });
 
     function generateChildG(child, i) {
-        child.generateG(_chart.g());
+        child._generateG(_chart.g());
         child.g().attr("class", SUB_CHART_CLASS + " _" + i);
     }
 
@@ -35,9 +68,12 @@ dc.compositeChart = function (parent, chartGroup) {
         for (var i = 0; i < _children.length; ++i) {
             var child = _children[i];
 
-            if (child.g() == null) {
+            if (!child.g()) {
                 generateChildG(child, i);
             }
+
+            if (_shareColors)
+              child.colors(_chart.colors());
 
             child.x(_chart.x());
             child.y(_chart.y());
@@ -58,19 +94,61 @@ dc.compositeChart = function (parent, chartGroup) {
         }
     };
 
+    /**
+    #### .compose(subChartArray)
+    Combine the given charts into one single composite coordinate grid chart.
+
+    ```js
+    // compose the given charts in the array into one single composite chart
+    moveChart.compose([
+        // when creating sub-chart you need to pass in the parent chart
+        dc.lineChart(moveChart)
+            .group(indexAvgByMonthGroup) // if group is missing then parent's group will be used
+            .valueAccessor(function(d){return d.value.avg;})
+            // most of the normal functions will continue to work in a composed chart
+            .renderArea(true)
+            .stack(monthlyMoveGroup, function(d){return d.value;})
+            .title(function(d){
+                var value = d.value.avg?d.value.avg:d.value;
+                if(isNaN(value)) value = 0;
+                return dateFormat(d.key) + "\n" + numberFormat(value);
+            }),
+        dc.barChart(moveChart)
+            .group(volumeByMonthGroup)
+            .centerBar(true)
+    ]);
+    ```
+
+    **/
     _chart.compose = function (charts) {
         _children = charts;
-        for (var i = 0; i < _children.length; ++i) {
-            var child = _children[i];
+        _children.forEach(function(child, i) {
             child.height(_chart.height());
             child.width(_chart.width());
             child.margins(_chart.margins());
-        }
+
+            if (_shareColors && child.colorAccessor() === child._layerColorAccessor)
+              child.colorCalculator(function() {return child.colors()(i);});
+
+        });
         return _chart;
     };
 
     _chart.children = function () {
         return _children;
+    };
+
+    /**
+    #### .shareColors([[boolean])
+    Get or set color sharing for the chart. If set, the `.colors()` value from this chart
+    will be shared with composed children. Additionally if the child chart implements
+    Stackable and has not set a custom .colorAccesor, then it will generate a color
+    specific to its order in the composition.
+    **/
+    _chart.shareColors = function (_) {
+        if (!arguments.length) return _shareColors;
+        _shareColors = _;
+        return _chart;
     };
 
     function getAllYAxisMinFromChildCharts() {
@@ -123,14 +201,16 @@ dc.compositeChart = function (parent, chartGroup) {
 
     _chart.legendables = function () {
         var items = [];
+        _children.forEach(function(child, i) {
+            if (_shareColors)
+              child.colors(_chart.colors());
 
-        for (var j = 0; j < _children.length; ++j) {
-            var childChart = _children[j];
-            childChart.allGroups().forEach(function (g, i) {
-                items.push(dc.utils.createLegendable(childChart, g, i, childChart.getValueAccessorByIndex(i)));
-            });
-        }
-
+            var childLegendables = child.legendables();
+            if (childLegendables.length)
+                items.push.apply(items,childLegendables);
+            else
+                items.push(dc.utils.createLegendable(child, child.group(), child.valueAccessor(), child.colorCalculator()(i)));
+        });
         return items;
     };
 

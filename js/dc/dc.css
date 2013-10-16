@@ -1,4 +1,4 @@
-.dc-chart {
+div.dc-chart {
     float: left;
 }
 
@@ -43,7 +43,7 @@
 }
 
 .dc-chart .deselected path {
-    strok: none;
+    stroke: none;
     fill-opacity: .5;
     fill: #ccc;
 }
@@ -122,7 +122,7 @@
 }
 
 .dc-chart .deselected circle {
-    strok: none;
+    stroke: none;
     fill-opacity: .5;
     fill: #ccc;
 }
@@ -234,4 +234,34 @@
 .dc-chart .fadeout {
     fill-opacity: 0.2;
     stroke-opacity: 0.2;
+}
+
+.dc-chart path.dc-symbol {
+    fill-opacity: 0.5;
+    stroke-opacity: 0.5;
+}
+
+.dc-hard .number-display {
+    float: none;
+}
+
+.dc-chart .box {
+  font: 10px sans-serif;
+}
+
+.dc-chart .box line,
+.dc-chart .box rect,
+.dc-chart .box circle {
+  fill: #fff;
+  stroke: #000;
+  stroke-width: 1.5px;
+}
+
+.dc-chart .box .center {
+  stroke-dasharray: 3,3;
+}
+
+.dc-chart .box .outlier {
+  fill: none;
+  stroke: #ccc;
 }

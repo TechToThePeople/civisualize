@@ -1,3 +1,35 @@
+/**
+## <a name="pie-chart" href="#pie-chart">#</a> Pie Chart [Concrete] < [Color Chart](#color-chart) < [Base Chart](#base-chart)
+This chart is a concrete pie chart implementation usually used to visualize small number of categorical distributions.
+Pie chart implementation uses keyAccessor to generate slices, and valueAccessor to calculate the size of each slice(key)
+relatively to the total sum of all values.
+
+Examples:
+
+* [Nasdaq 100 Index](http://nickqizhu.github.com/dc.js/)
+
+#### dc.pieChart(parent[, chartGroup])
+Create a pie chart instance and attach it to the given parent element.
+
+Parameters:
+
+* parent : string - any valid d3 single selector representing typically a dom block element such
+   as a div.
+* chartGroup : string (optional) - name of the chart group this chart instance should be placed in. Once a chart is placed
+   in a certain chart group then any interaction with such instance will only trigger events and redraw within the same
+   chart group.
+
+Return:
+A newly created pie chart instance
+
+```js
+// create a pie chart under #chart-container1 element using the default global chart group
+var chart1 = dc.pieChart("#chart-container1");
+// create a pie chart under #chart-container2 element using chart group A
+var chart2 = dc.pieChart("#chart-container2", "chartGroupA");
+```
+
+**/
 dc.pieChart = function (parent, chartGroup) {
     var DEFAULT_MIN_ANGLE_FOR_LABEL = 0.5;
 
@@ -10,29 +42,17 @@ dc.pieChart = function (parent, chartGroup) {
 
     var _minAngleForLabel = DEFAULT_MIN_ANGLE_FOR_LABEL;
 
-    var _chart = dc.colorChart(dc.baseChart({}));
+    var _chart = dc.capped(dc.colorChart(dc.baseChart({})));
 
-    var _slicesCap = Infinity;
-    var _othersLabel = "Others";
-    var _othersGrouper = function (data, sum) {
-        data.push({"key": _othersLabel, "value": sum });
-    };
+    _chart.colorAccessor(function(d) { return _chart.keyAccessor()(d.data); });
 
-    function assemblePieData() {
-        if (_slicesCap == Infinity) {
-            return _chart.orderedGroup().top(_slicesCap); // ordered by keys
-        } else {
-            var topRows = _chart.group().top(_slicesCap); // ordered by value
-            var topRowsSum = d3.sum(topRows, _chart.valueAccessor());
+    /**
+    #### .slicesCap([cap])
+    Get or set the maximum number of slices the pie chart will generate. Slices are ordered by its value from high to low.
+     Other slices exeeding the cap will be rolled up into one single *Others* slice.
 
-            var allRows = _chart.group().all();
-            var allRowsSum = d3.sum(allRows, _chart.valueAccessor());
-
-            _othersGrouper(topRows, allRowsSum - topRowsSum);
-
-            return topRows;
-        }
-    }
+    **/
+    _chart.slicesCap = _chart.cap;
 
     _chart.label(function (d) {
         return _chart.keyAccessor()(d.data);
@@ -59,28 +79,26 @@ dc.pieChart = function (parent, chartGroup) {
     };
 
     function drawChart() {
-        if (_chart.dataSet()) {
-            var pie = calculateDataPie();
+        var pie = calculateDataPie();
 
-            // set radius on basis of chart dimension if missing
-            _radius = _radius ? _radius : d3.min([_chart.width(), _chart.height()]) /2;
+        // set radius on basis of chart dimension if missing
+        _radius = _radius ? _radius : d3.min([_chart.width(), _chart.height()]) /2;
 
-            var arc = _chart.buildArcs();
+        var arc = _chart.buildArcs();
 
-            var pieData = pie(assemblePieData());
+        var pieData = pie(_chart._assembleCappedData());
 
-            if (_g) {
-                var slices = _g.selectAll("g." + _sliceCssClass)
-                    .data(pieData);
+        if (_g) {
+            var slices = _g.selectAll("g." + _sliceCssClass)
+                .data(pieData);
 
-                createElements(slices, arc, pieData);
+            createElements(slices, arc, pieData);
 
-                updateElements(pieData, arc);
+            updateElements(pieData, arc);
 
-                removeElements(slices);
+            removeElements(slices);
 
-                highlightFilter();
-            }
+            highlightFilter();
         }
     }
 
@@ -130,6 +148,8 @@ dc.pieChart = function (parent, chartGroup) {
         if (_chart.renderLabel()) {
             var labels = _g.selectAll("text." + _sliceCssClass)
                 .data(pieData);
+
+            labels.exit().remove();
 
             var labelsEnter = labels
                 .enter()
@@ -236,22 +256,43 @@ dc.pieChart = function (parent, chartGroup) {
         }
     }
 
+    /**
+    #### .innerRadius([innerRadius])
+    Get or set the inner radius on a particular pie chart instance. If inner radius is greater than 0px then the pie chart
+    will be essentially rendered as a doughnut chart. Default inner radius is 0px.
+
+    **/
     _chart.innerRadius = function (r) {
         if (!arguments.length) return _innerRadius;
         _innerRadius = r;
         return _chart;
     };
 
+    /**
+    #### .radius([radius])
+    Get or set the radius on a particular pie chart instance. Default radius is 90px.
+
+    **/
     _chart.radius = function (r) {
         if (!arguments.length) return _radius;
         _radius = r;
         return _chart;
     };
 
+    /**
+    #### .cx()
+    Get center x coordinate position. This function is **not chainable**.
+
+    **/
     _chart.cx = function () {
         return _chart.width() / 2;
     };
 
+    /**
+    #### .cy()
+    Get center y coordinate position. This function is **not chainable**.
+
+    **/
     _chart.cy = function () {
         return _chart.height() / 2;
     };
@@ -269,27 +310,14 @@ dc.pieChart = function (parent, chartGroup) {
         return _chart;
     };
 
+    /**
+    #### .minAngelForLabel([minAngle])
+    Get or set the minimal slice angle for label rendering. Any slice with a smaller angle will not render slice label.
+    Default min angel is 0.5.
+    **/
     _chart.minAngleForLabel = function (_) {
         if (!arguments.length) return _minAngleForLabel;
         _minAngleForLabel = _;
-        return _chart;
-    };
-
-    _chart.slicesCap = function (_) {
-        if (!arguments.length) return _slicesCap;
-        _slicesCap = _;
-        return _chart;
-    };
-
-    _chart.othersLabel = function (_) {
-        if (!arguments.length) return _othersLabel;
-        _othersLabel = _;
-        return _chart;
-    };
-
-    _chart.othersGrouper = function (_) {
-        if (!arguments.length) return _othersGrouper;
-        _othersGrouper = _;
         return _chart;
     };
 
@@ -305,7 +333,7 @@ dc.pieChart = function (parent, chartGroup) {
     }
 
     function sliceHasNoData(data) {
-        return _chart.valueAccessor()(data) == 0;
+        return _chart.valueAccessor()(data) === 0;
     }
 
     function tweenPie(b) {
@@ -321,7 +349,7 @@ dc.pieChart = function (parent, chartGroup) {
     }
 
     function isOffCanvas(current) {
-        return current == null || isNaN(current.startAngle) || isNaN(current.endAngle);
+        return !current || isNaN(current.startAngle) || isNaN(current.endAngle);
     }
 
     function onClick(d) {

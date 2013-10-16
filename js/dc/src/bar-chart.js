@@ -1,3 +1,35 @@
+/**
+## <a name="bar-chart" href="#bar-chart">#</a> Bar Chart [Concrete] < [Stackable Chart](#stackable-chart) < [CoordinateGrid Chart](#coordinate-grid-chart)
+Concrete bar chart/histogram implementation.
+
+Examples:
+
+* [Nasdaq 100 Index](http://nickqizhu.github.com/dc.js/)
+* [Canadian City Crime Stats](http://nickqizhu.github.com/dc.js/crime/index.html)
+
+#### dc.barChart(parent[, chartGroup])
+Create a bar chart instance and attach it to the given parent element.
+
+Parameters:
+* parent : string|compositeChart - any valid d3 single selector representing typically a dom block element such
+   as a div, or if this bar chart is a sub-chart in a [Composite Chart](#composite-chart) then pass in the parent composite chart instance.
+* chartGroup : string (optional) - name of the chart group this chart instance should be placed in. Once a chart is placed
+   in a certain chart group then any interaction with such instance will only trigger events and redraw within the same
+   chart group.
+
+Return:
+A newly created bar chart instance
+
+```js
+// create a bar chart under #chart-container1 element using the default global chart group
+var chart1 = dc.barChart("#chart-container1");
+// create a bar chart under #chart-container2 element using chart group A
+var chart2 = dc.barChart("#chart-container2", "chartGroupA");
+// create a sub-chart under a composite parent chart
+var chart3 = dc.barChart(compositeChart);
+```
+
+**/
 dc.barChart = function (parent, chartGroup) {
     var MIN_BAR_WIDTH = 1;
     var DEFAULT_GAP_BETWEEN_BARS = 2;
@@ -12,8 +44,8 @@ dc.barChart = function (parent, chartGroup) {
 
     dc.override(_chart, 'rescale', function () {
         _chart._rescale();
-        _numberOfBars = null;
-        _barWidth = null;
+        _numberOfBars = undefined;
+        _barWidth = undefined;
         getNumberOfBars();
     });
 
@@ -30,10 +62,10 @@ dc.barChart = function (parent, chartGroup) {
                 return "stack " + "_" + i;
             });
 
-        layers.each(function (d, i) {
+        layers.each(function (d) {
             var layer = d3.select(this);
 
-            renderBars(layer, d, i);
+            renderBars(layer, d);
         });
 
         _chart.stackLayers(null);
@@ -43,22 +75,26 @@ dc.barChart = function (parent, chartGroup) {
         return dc.utils.safeNumber(Math.abs(_chart.y()(d.y + d.y0) - _chart.y()(d.y0)));
     }
 
-    function renderBars(layer, d, i) {
+    function renderBars(layer, d) {
         var bars = layer.selectAll("rect.bar")
-            .data(d.points);
+            .data(d.points, dc.pluck('data', _chart.keyAccessor()));
 
         bars.enter()
             .append("rect")
             .attr("class", "bar")
-            .attr("fill", function (d) {
-                return _chart.colors()(i);
-            })
-            .append("title").text(_chart.title());
+            .attr("fill", _chart.getColor);
+
+        if (_chart.renderTitle()) {
+            bars.append("title").text(_chart.title());
+        }
+
+        if (_chart.isOrdinal())
+            bars.on("click", onClick);
 
         dc.transition(bars, _chart.transitionDuration())
             .attr("x", function (d) {
                 var x = _chart.x()(d.x);
-                if (_centerBar) x -= _barWidth / 2;
+                if (_centerBar || _chart.isOrdinal()) x -= _barWidth / 2;
                 return  dc.utils.safeNumber(x);
             })
             .attr("y", function (d) {
@@ -81,7 +117,7 @@ dc.barChart = function (parent, chartGroup) {
     }
 
     function calculateBarWidth() {
-        if (_barWidth == null) {
+        if (_barWidth === undefined) {
             var numberOfBars = _chart.isOrdinal() ? getNumberOfBars() + 1 : getNumberOfBars();
 
             var w = Math.floor((_chart.xAxisLength() - (numberOfBars - 1) * _gap) / numberOfBars);
@@ -94,7 +130,7 @@ dc.barChart = function (parent, chartGroup) {
     }
 
     function getNumberOfBars() {
-        if (_numberOfBars == null) {
+        if (_numberOfBars === undefined) {
             _numberOfBars = _chart.xUnitCount();
         }
 
@@ -132,12 +168,27 @@ dc.barChart = function (parent, chartGroup) {
         }
     };
 
+    /**
+    #### .centerBar(boolean)
+    Whether the bar chart will render each bar centered around the data position on x axis. Default to false.
+
+    **/
     _chart.centerBar = function (_) {
         if (!arguments.length) return _centerBar;
         _centerBar = _;
         return _chart;
     };
 
+    function onClick(d) {
+        _chart.onClick(d.data);
+    }
+
+    /**
+    #### .gap(gapBetweenBars)
+    Manually set fixed gap (in px) between bars instead of relying on the default auto-generated gap. By default bar chart
+    implementation will calculate and set the gap automatically based on the number of data points and the length of the x axis.
+
+    **/
     _chart.gap = function (_) {
         if (!arguments.length) return _gap;
         _gap = _;
@@ -156,10 +207,6 @@ dc.barChart = function (parent, chartGroup) {
         return extent;
     };
 
-    dc.override(_chart, "prepareOrdinalXAxis", function () {
-        return this._prepareOrdinalXAxis(_chart.xUnitCount() + 1);
-    });
-
     _chart.legendHighlight = function (d) {
         _chart.select('.chart-body').selectAll('rect.bar').filter(function () {
             return d3.select(this).attr('fill') == d.color;
@@ -177,6 +224,15 @@ dc.barChart = function (parent, chartGroup) {
             return d3.select(this).attr('fill') != d.color;
         }).classed('fadeout', false);
     };
+
+    dc.override(_chart, "xAxisMax", function() {
+        var max = this._xAxisMax();
+        if('resolution' in _chart.xUnits()) {
+            var res = _chart.xUnits().resolution;
+            max += res;
+        }
+        return max;
+    });
 
     return _chart.anchor(parent, chartGroup);
 };
