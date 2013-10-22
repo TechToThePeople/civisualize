@@ -40,7 +40,6 @@ var instrumentLabel = {};
 i.values.forEach (function(d) {
   instrumentLabel[d.value] = d.label;
 });
-console.log(instrument);
 
 var numberFormat = d3.format(".2f");
 var volumeChart =null,dayOfWeekChart=null,moveChart=null;  
@@ -86,7 +85,7 @@ dayOfWeekChart.width(180)
   .margins({top: 20, left: 10, right: 10, bottom: 20})
   .group(dayOfWeekGroup)
   .dimension(dayOfWeek)
-  .ordinalColors(['#3182bd', '#6baed6', '#9ecae1', '#c6dbef', '#dadaeb'])
+  .ordinalColors(["#d95f02","#1b9e77","#7570b3","#e7298a","#66a61e","#e6ab02","#a6761d"])
   .label(function (d) {
       return d.key.split(".")[1];
   })
@@ -115,6 +114,7 @@ pietype
   .width(200)
   .height(200)
   .dimension(type)
+  .colors(d3.scale.category10())
   .group(typeGroup)
   .renderlet(function (chart) {
   });
