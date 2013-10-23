@@ -1,0 +1,1 @@
+SELECT count(*) as count, event_id, DATE(register_date) as register_date, status_id, date(event.start_date) as start_date, event.event_type_id from civicrm_participant, civicrm_event as event where event_id=event.id group by event_id, DATE(register_date), status_id;
