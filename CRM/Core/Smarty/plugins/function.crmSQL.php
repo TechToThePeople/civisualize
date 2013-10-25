@@ -9,7 +9,7 @@ function smarty_function_crmSQL($params, &$smarty) {
   if (array_key_exists('sql', $params)){
     $sql = $params["sql"];
   } else {
-    $sql=file_get_contents (dirname( __FILE__ ). '/../../../../queries/'.$params["file"].".sql");
+    $sql=file_get_contents ('queries/'.$params["file"].".sql", true);
   } 
   // TODO: remove "DELETE " and "UPDATE " and "GRANT " and ...
 
@@ -22,15 +22,7 @@ function smarty_function_crmSQL($params, &$smarty) {
   $values = array();
   while ($dao->fetch()) {
     $values[] = $dao->toArray();
-  }
+  }       
 
-//TODO run the sql
-//  CRM_Core_Error::setCallback(); 
-
-  return json_encode (array("is_error"=>0, "values" => $values));
-
-  if (!array_key_exists('var', $params)) { 
-    return json_encode($result); 
-  } 
-  $smarty->assign($params["var"], $result);
+  return json_encode (array("is_error"=>0, "values" => $values), JSON_NUMERIC_CHECK);
 }

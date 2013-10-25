@@ -12,8 +12,9 @@
     <div id="monthly-move-chart">
         <strong>Registration</strong>
         <span class="reset" style="display: none;">range: <span class="filter"></span></span>
-        <a class="reset" href="javascript:moveChart.filterAll();volumeChart.filterAll();dc.redrawAll();"
+        <a class="reset" href="javascript:count.filterAll();count.filterAll();dc.redrawAll();"
            style="display: none;">reset</a>
+<div id="count"></div>
 
         <div class="clearfix"></div>
     </div>
@@ -45,7 +46,7 @@ i.values.forEach (function(d) {
 i=null;
 
 var numberFormat = d3.format(".2f");
-var volumeChart =null,dayOfWeekChart=null,moveChart=null;  
+var count =null,dayOfWeekChart=null,volumeChart=null;  
 
 cj(function($) {
 // create a pie chart under #chart-container1 element using the default global chart group
@@ -54,15 +55,22 @@ var piestatus = dc.pieChart("#status").innerRadius(50).radius(70);
 volumeChart = dc.barChart("#monthly-volume-chart");
 dayOfWeekChart = dc.rowChart("#day-of-week-chart");
 //var moveChart = dc.seriesChart("#monthly-move-chart");
-moveChart = dc.lineChart("#monthly-move-chart");
+//moveChart = dc.lineChart("#monthly-move-chart");
+var count = dc.seriesChart("#count");
+
+
 var dateFormat = d3.time.format("%Y-%m-%d");
 var event = {};
 data.values.forEach(function(d){
   d.dd = dateFormat.parse(d.register_date)
-  if (event[d.event_id])
+/*  if (event[d.event_id])
     event[d.event_id] = event[d.event_id]+parseFloat(d.count);
   else 
     event[d.event_id] = parseFloat(d.count);
+*/
+  if (!event[d.event_id])
+    event[d.event_id]= +d.count;
+
   d.participants = event[d.event_id];
 });
 
@@ -80,10 +88,13 @@ var typeGroup   = type.group().reduceSum(function(d) { return d.count; });
 var byMonth = ndx.dimension(function(d) { return d3.time.month(d.dd); });
 var byDay = ndx.dimension(function(d) { return d.dd; });
 var volumeByMonthGroup = byMonth.group().reduceSum(function(d) { return d.count; });
-var totalByDayGroup = byDay.group().reduceSum(function(d) { 
-return d.participants; });
+var totalByDayGroup = byDay.group().reduceSum(function(d) { return d.participants; });
 
-  var dayOfWeek = ndx.dimension(function (d) { 
+var events = ndx.dimension(function(d) {return [+d.event_id,d.dd];});
+var eventGroup   = events.group().reduceSum(function(d) { 
+return +d.participants });
+  
+var dayOfWeek = ndx.dimension(function (d) { 
       var day = d.dd.getDay(); 
       var name=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
       return day+"."+name[day]; 
@@ -113,10 +124,10 @@ pietype
   .group(typeGroup)
   .colors(d3.scale.category10())
   .title(function(d) {
-   return typeLabel[d.data.key]+":"+d.data.value;
+   return typeLabel[d.key]+":"+d.value;
 })
   .label(function(d) {
-     return typeLabel[d.data.key];
+     return typeLabel[d.key];
 })
   .renderlet(function (chart) {
   });
@@ -127,41 +138,37 @@ piestatus
   .dimension(status)
   .group(statusGroup)
   .title(function(d) {
-   return statusLabel[d.data.key]+":"+d.data.value;
+   return statusLabel[d.key]+":"+d.value;
 })
   .label(function(d) {
-     return statusLabel[d.data.key];
+     return statusLabel[d.key];
 })
   .renderlet(function (chart) {
   });
 
 
-                    //.round(d3.time.month.round)
-    //.interpolate('monotone')
-            moveChart.width(800)
-                    .height(200)
-                    .transitionDuration(1000)
-                    .margins({top: 30, right: 50, bottom: 25, left: 40})
-                    .dimension(byDay)
-                    .mouseZoomable(true)
+  count
+    .width(768)
+    .height(480)
+    .chart(function(c) { return dc.lineChart(c).interpolate('step-before'); })
                     .x(d3.time.scale().domain([min,max]))
-                    .xUnits(d3.time.months)
-                    .elasticY(true)
-                    .renderHorizontalGridLines(true)
-                    .legend(dc.legend().x(800).y(10).itemHeight(13).gap(5))
-                    .brushOn(false)
-                    .rangeChart(volumeChart)
-  .group(totalByDayGroup)
-.interpolate("step-before")
-                 .valueAccessor(function (d) { 
-                        return d.value;
-                    })
- 
-                 .title(function (d) {
-                        var value = d.data.value;
-                        if (isNaN(value)) value = 0;
-                        return dateFormat(d.data.key) + "\n" + numberFormat(value);
-                    });
+    .brushOn(false)
+    .yAxisLabel("participants")
+    .xAxisLabel("Date")
+    .elasticY(true)
+    .dimension(events)
+    .group(eventGroup)
+    .mouseZoomable(true)
+    .seriesAccessor(function(d) {return "Event " + d.key[0];})
+    .keyAccessor(function(d) {
+   return +d.key[1];})
+    .valueAccessor(function(d) {
+return +d.value;})
+    .rangeChart(volumeChart)
+    .legend(dc.legend().x(700).y(300).itemHeight(13).gap(5));
+  count.yAxis().tickFormat(function(d) {return d3.format(',d')(d);});
+  count.margins().left += 40;
+
 
 volumeChart.width(800)
   .height(100)

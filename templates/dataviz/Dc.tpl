@@ -102,10 +102,10 @@ pieinstrument
   .dimension(instrument)
   .group(instrumentGroup)
   .title(function(d) {
-   return instrumentLabel[d.data.key]+":"+d.data.value;
+   return instrumentLabel[d.key]+":"+d.value;
 })
   .label(function(d) {
-     return instrumentLabel[d.data.key];
+     return instrumentLabel[d.key];
 })
   .renderlet(function (chart) {
   });
@@ -140,9 +140,9 @@ pietype
                     })
  
                  .title(function (d) {
-                        var value = d.data.value;
+                        var value = d.value;
                         if (isNaN(value)) value = 0;
-                        return dateFormat(d.data.key) + "\n" + numberFormat(value);
+                        return dateFormat(d.key) + "\n" + numberFormat(value);
                     });
 
 volumeChart.width(800)

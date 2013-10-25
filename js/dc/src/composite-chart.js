@@ -73,7 +73,7 @@ dc.compositeChart = function (parent, chartGroup) {
             }
 
             if (_shareColors)
-              child.colors(_chart.colors());
+                child.colors(_chart.colors());
 
             child.x(_chart.x());
             child.y(_chart.y());
@@ -126,9 +126,10 @@ dc.compositeChart = function (parent, chartGroup) {
             child.height(_chart.height());
             child.width(_chart.width());
             child.margins(_chart.margins());
+            child.title(_chart.title());
 
             if (_shareColors && child.colorAccessor() === child._layerColorAccessor)
-              child.colorCalculator(function() {return child.colors()(i);});
+                child.colorCalculator(function() {return child.colors()(i);});
 
         });
         return _chart;
@@ -203,7 +204,7 @@ dc.compositeChart = function (parent, chartGroup) {
         var items = [];
         _children.forEach(function(child, i) {
             if (_shareColors)
-              child.colors(_chart.colors());
+                child.colors(_chart.colors());
 
             var childLegendables = child.legendables();
             if (childLegendables.length)

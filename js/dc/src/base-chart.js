@@ -5,7 +5,7 @@ Every function on base chart are also inherited available on all concrete chart 
 
 **/
 dc.baseChart = function (_chart) {
-    _chart.__dc_flag__ = true;
+    _chart.__dc_flag__ = dc.utils.uniqueId();
 
     var _dimension;
     var _group;
@@ -32,7 +32,7 @@ dc.baseChart = function (_chart) {
     var _renderLabel = false;
 
     var _title = function (d) {
-        return d.key + ": " + d.value;
+        return _chart.keyAccessor()(d) + ": " + _chart.valueAccessor()(d);
     };
     var _renderTitle = false;
 
@@ -132,7 +132,7 @@ dc.baseChart = function (_chart) {
     };
 
     _chart.data = function(d) {
-        if (!arguments.length) return _data(_group);
+        if (!arguments.length) return _data.call(_chart,_group);
         _data = d3.functor(d);
         _chart.expireCache();
         return _chart;
@@ -170,20 +170,20 @@ dc.baseChart = function (_chart) {
         if (!g[k][c]) g[k][c] = {a:[],n:[]};
         var i = g[k][c].a.indexOf(accessor);
         if (i == -1) {
-          i = g[k][c].a.length;
-          g[k][c].a[i] = accessor;
-          g[k][c].n[i] = {name:''};
+            i = g[k][c].a.length;
+            g[k][c].a[i] = accessor;
+            g[k][c].n[i] = {name:''};
         }
         return g[k][c].n[i];
     }
 
 
     _chart._getGroupName = function (g, accessor) {
-      return groupName(_chart, g, accessor).name;
+        return groupName(_chart, g, accessor).name;
     };
 
     _chart._setGroupName = function (g, name, accessor) {
-      groupName(_chart, g, accessor).name = name;
+        groupName(_chart, g, accessor).name = name;
     };
 
     _chart.ordering = function(o) {
@@ -193,8 +193,8 @@ dc.baseChart = function (_chart) {
         return _chart;
     };
 
-    _chart.computeOrderedGroups = function(arr) {
-        var data = arr ? arr : _chart.data().slice(0); // clone
+    _chart.computeOrderedGroups = function(ga) {
+        var data = ga.slice(0); // clone
         if(data.length < 2)
             return data;
         var sort = crossfilter.quicksort.by(_chart.ordering());
@@ -270,8 +270,8 @@ dc.baseChart = function (_chart) {
     _chart.anchorName = function () {
         var a = _chart.anchor();
         if (a && a.id) return a.id;
-        if (a) return a.replace('#','');
-        return '';
+        if (a && a.replace) return a.replace('#','');
+        return "" + _chart.chartID();
     };
 
     /**
@@ -386,7 +386,8 @@ dc.baseChart = function (_chart) {
     _chart.render = function () {
         _listeners.preRender(_chart);
 
-        _mandatoryAttributes && _mandatoryAttributes.forEach(checkForMandatoryAttributes);
+        if (_mandatoryAttributes)
+            _mandatoryAttributes.forEach(checkForMandatoryAttributes);
 
         var result = _chart.doRender();
 
@@ -487,7 +488,17 @@ dc.baseChart = function (_chart) {
     _chart.filter = function (_) {
         if (!arguments.length) return _filters.length > 0 ? _filters[0] : null;
 
-        if (_ === null) {
+        if (_ instanceof Array && _[0] instanceof Array) {
+            _[0].forEach(function(d){
+                if (_chart.hasFilter(d)) {
+                    _filters.splice(_filters.indexOf(d), 1);
+                } else {
+                    _filters.push(d);
+                }
+            });
+            applyFilters();
+            _chart._invokeFilteredListener(_);
+        } else if (_ === null) {
             resetFilters();
         } else {
             if (_chart.hasFilter(_))
@@ -660,7 +671,7 @@ dc.baseChart = function (_chart) {
 
     /**
     #### .title([titleFunction])
-    Set or get the title function. Chart class will use this function to render svg title(usually interrupted by browser
+    Set or get the title function. Chart class will use this function to render svg title(usually interpreted by browser
     as tooltips) for each child element in the chart, i.e. a slice in a pie chart or a bubble in a bubble chart. Almost
     every chart supports title function however in grid coordinate chart you need to turn off brush in order to use title
     otherwise the brush layer will block tooltip trigger.
@@ -786,6 +797,10 @@ dc.baseChart = function (_chart) {
     _chart.on = function (event, listener) {
         _listeners[event] = listener;
         return _chart;
+    };
+
+    _chart.chartID = function () {
+        return _chart.__dc_flag__;
     };
 
     return _chart;
