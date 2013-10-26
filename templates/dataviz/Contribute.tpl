@@ -1,4 +1,10 @@
-<div id="type"></div>
+<h1><span id="nbcontrib"></span> Contributions for a total of <span id="amount"></span></h1>
+<div id="type">
+        <strong>Contributor</strong>
+        <a class="reset" href="javascript:pietype.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+        <div class="clearfix"></div>
+
+</div>
    <div id="day-of-week-chart">
         <strong>Day of Week</strong>
         <a class="reset" href="javascript:dayOfWeekChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
@@ -6,6 +12,9 @@
         <div class="clearfix"></div>
     </div>
 <div id="instrument">
+        <strong>Payment instrument</strong>
+        <a class="reset" href="javascript:pieinstrument.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+        <div class="clearfix"></div>
 </div>
 
 <div class="row clear">
@@ -42,22 +51,23 @@ i.values.forEach (function(d) {
 });
 
 var numberFormat = d3.format(".2f");
-var volumeChart =null,dayOfWeekChart=null,moveChart=null;  
+var volumeChart =null,dayOfWeekChart=null,moveChart=null,pieinstrument,pietype;  
+
 
 cj(function($) {
 // create a pie chart under #chart-container1 element using the default global chart group
-var pietype = dc.pieChart("#type").innerRadius(20).radius(70);
-var pieinstrument = dc.pieChart("#instrument").innerRadius(50).radius(70);
+pietype = dc.pieChart("#type").innerRadius(20).radius(70);
+pieinstrument = dc.pieChart("#instrument").innerRadius(50).radius(70);
 volumeChart = dc.barChart("#monthly-volume-chart");
 dayOfWeekChart = dc.rowChart("#day-of-week-chart");
 //var moveChart = dc.seriesChart("#monthly-move-chart");
 moveChart = dc.lineChart("#monthly-move-chart");
 var dateFormat = d3.time.format("%Y-%m-%d");
 //data.values.forEach(function(d){data.values[i].dd = new Date(d.receive_date)});
+
 data.values.forEach(function(d){d.dd = dateFormat.parse(d.receive_date)});
 var min = d3.min(data.values, function(d) { return d.dd;} );
 var max = d3.max(data.values, function(d) { return d.dd;} );
-console.log(min);
 var ndx                 = crossfilter(data.values),
 all = ndx.groupAll();
 
@@ -70,7 +80,6 @@ var instrumentGroup   = instrument.group().reduceSum(function(d) { return d.coun
 var byMonth = ndx.dimension(function(d) { return d3.time.month(d.dd); });
 var byDay = ndx.dimension(function(d) { return d.dd; });
 var volumeByMonthGroup = byMonth.group().reduceSum(function(d) { return d.count; });
-var totalByMonthGroup = byMonth.group().reduceSum(function(d) { return d.total; });
 var totalByDayGroup = byDay.group().reduceSum(function(d) { return d.total; });
 
   var dayOfWeek = ndx.dimension(function (d) { 
@@ -78,6 +87,21 @@ var totalByDayGroup = byDay.group().reduceSum(function(d) { return d.total; });
       var name=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
       return day+"."+name[day]; 
   }); 
+
+
+var amountGroup   = ndx.groupAll().reduceSum(function(d) { return d.total; });
+var countGroup   = ndx.groupAll().reduceSum(function(d) { return d.count; });
+
+var contribND = dc.numberDisplay("#nbcontrib")
+  .group(countGroup)
+  .valueAccessor(function (d) {return d;})
+  .formatNumber(d3.format("1d"));
+
+var amountND    = dc.numberDisplay("#amount")
+  .group(amountGroup)
+  .valueAccessor(function(d) {return d});
+
+
 
 var dayOfWeekGroup = dayOfWeek.group(); 
 dayOfWeekChart.width(180)
@@ -147,7 +171,7 @@ pietype
 
 volumeChart.width(800)
   .height(100)
-  .margins({top: 0, right: 50, bottom: 20, left: 40})
+  .margins({top: 0, right: 50, bottom: 20, left:40})
   .dimension(byMonth)
   .group(volumeByMonthGroup)
   .centerBar(true)
@@ -155,10 +179,6 @@ volumeChart.width(800)
   .x(d3.time.scale().domain([min, max]))
   .round(d3.time.month.round)
   .xUnits(d3.time.months);
-
-dc.dataCount(".dc-data-count")
-  .dimension(ndx)
-  .group(all);
 
 
 
