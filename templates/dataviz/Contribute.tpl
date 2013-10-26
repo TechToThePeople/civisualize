@@ -95,7 +95,7 @@ var countGroup   = ndx.groupAll().reduceSum(function(d) { return d.count; });
 var contribND = dc.numberDisplay("#nbcontrib")
   .group(countGroup)
   .valueAccessor(function (d) {return d;})
-  .formatNumber(d3.format("1d"));
+  .formatNumber(d3.format("3.3s"));
 
 var amountND    = dc.numberDisplay("#amount")
   .group(amountGroup)
