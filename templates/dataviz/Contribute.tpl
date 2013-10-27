@@ -89,17 +89,26 @@ var totalByDayGroup = byDay.group().reduceSum(function(d) { return d.total; });
   }); 
 
 
-var amountGroup   = ndx.groupAll().reduceSum(function(d) { return d.total; });
-var countGroup   = ndx.groupAll().reduceSum(function(d) { return d.count; });
+var group=ndx.groupAll().reduce( function(a, d) { 
+    a.total += d.total; 
+    a.count += d.count; 
+    return a; },
+function(a, d) { 
+     a.total -= d.total; 
+     a.count -= d.count; 
+     return a; },
+   function() { return {total:0, count:0};}
+);
 
 var contribND = dc.numberDisplay("#nbcontrib")
-  .group(countGroup)
-  .valueAccessor(function (d) {return d;})
+  .group(group)
+  .valueAccessor(function (d) {
+return d.count;})
   .formatNumber(d3.format("3.3s"));
 
 var amountND    = dc.numberDisplay("#amount")
-  .group(amountGroup)
-  .valueAccessor(function(d) {return d});
+  .group(group)
+  .valueAccessor(function(d) {return d.total});
 
 
 
