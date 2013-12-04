@@ -11,8 +11,11 @@ class CRM_Civisualize_Page_Main extends CRM_Core_Page {
     }
 
     $request = split ('/',$request);
-    $tplfile=_civicrm_api_get_camel_name($request[2]);
-    $tpl = 'dataviz/'.$tplfile.'.tpl';
+    $tplfile = NULL;
+    if (CRM_Utils_Array::value(2, $request)) {
+      $tplfile = _civicrm_api_get_camel_name($request[2]);
+      $tpl = 'dataviz/'.$tplfile.'.tpl';
+    }
     if (!$tplfile) {
       $tpl = "CRM/Civizualise/Page/Main.tpl";
     }
