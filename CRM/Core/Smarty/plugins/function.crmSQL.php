@@ -1,4 +1,4 @@
-<?
+<?php
 
 function smarty_function_crmSQL($params, &$smarty) { 
   
