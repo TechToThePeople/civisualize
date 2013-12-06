@@ -1,5 +1,8 @@
 /**
-## <a name="bubble-chart" href="#bubble-chart">#</a> Bubble Chart [Concrete] < [Abstract Bubble Chart](#abstract-bubble-chart) < [CoordinateGrid Chart](#coordinate-grid-chart)
+## Bubble Chart
+
+Includes: [Bubble Mixin](#bubble-mixin), [Coordinate Grid Mixin](#coordinate-grid-mixin)
+
 A concrete implementation of a general purpose bubble chart that allows data visualization using the following dimensions:
 
 * x axis position
@@ -32,7 +35,7 @@ var bubbleChart2 = dc.bubbleChart("#chart-container2", "chartGroupA");
 
 **/
 dc.bubbleChart = function(parent, chartGroup) {
-    var _chart = dc.abstractBubbleChart(dc.coordinateGridChart({}));
+    var _chart = dc.bubbleMixin(dc.coordinateGridMixin({}));
 
     var _elasticRadius = false;
 
@@ -85,6 +88,7 @@ dc.bubbleChart = function(parent, chartGroup) {
             .attr("fill", _chart.getColor)
             .attr("r", 0);
         dc.transition(bubbleG, _chart.transitionDuration())
+            .selectAll("circle." + _chart.BUBBLE_CLASS)
             .attr("r", function(d) {
                 return _chart.bubbleR(d);
             })
@@ -92,9 +96,9 @@ dc.bubbleChart = function(parent, chartGroup) {
                 return (_chart.bubbleR(d) > 0) ? 1 : 0;
             });
 
-        _chart.doRenderLabel(bubbleGEnter);
+        _chart._doRenderLabel(bubbleGEnter);
 
-        _chart.doRenderTitles(bubbleGEnter);
+        _chart._doRenderTitles(bubbleGEnter);
     }
 
     function updateNodes(bubbleG) {

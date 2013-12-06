@@ -1,5 +1,8 @@
 /**
-## <a name="bubble-overlay-chart" href="#bubble-overlay-chart">#</a> Bubble Overlay Chart [Concrete] < [Abstract Bubble Chart](#abstract-bubble-chart) < [Base Chart](#base-chart)
+## Bubble Overlay Chart
+
+Includes: [Bubble Mixin](#bubble-mixin), [Base Mixin](#base-mixin)
+
 Bubble overlay chart is quite different from the typical bubble chart. With bubble overlay chart you can arbitrarily place
 a finite number of bubbles on an existing svg or bitmap image (overlay on top of it), thus losing the typical x and y
 positioning that we are used to whiling retaining the capability to visualize data using it's bubble radius and
@@ -44,7 +47,7 @@ dc.bubbleOverlay = function(root, chartGroup) {
     var BUBBLE_NODE_CLASS = "node";
     var BUBBLE_CLASS = "bubble";
 
-    var _chart = dc.abstractBubbleChart(dc.baseChart({}));
+    var _chart = dc.bubbleMixin(dc.baseMixin({}));
     var _g;
     var _points = [];
 
@@ -66,7 +69,7 @@ dc.bubbleOverlay = function(root, chartGroup) {
         return _chart;
     };
 
-    _chart.doRender = function() {
+    _chart._doRender = function() {
         _g = initOverlayG();
 
         _chart.r().range([_chart.MIN_RADIUS, _chart.width() * _chart.maxBubbleRelativeSize()]);
@@ -105,9 +108,9 @@ dc.bubbleOverlay = function(root, chartGroup) {
                     return _chart.bubbleR(d);
                 });
 
-            _chart.doRenderLabel(nodeG);
+            _chart._doRenderLabel(nodeG);
 
-            _chart.doRenderTitles(nodeG);
+            _chart._doRenderTitles(nodeG);
         });
     }
 
@@ -135,7 +138,7 @@ dc.bubbleOverlay = function(root, chartGroup) {
         return nodeG;
     }
 
-    _chart.doRedraw = function() {
+    _chart._doRedraw = function() {
         updateBubbles();
 
         _chart.fadeDeselectedArea();

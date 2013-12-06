@@ -1,20 +1,81 @@
+/**
+ ## Heat Map
+
+ Includes: [Color Mixin](#color-mixin), [Margin Mixin](#margin-mixin), [Base Mixin](#base-mixin)
+
+ A heat map is matrix that represents the values of two dimensions of data using colors.
+
+ #### dc.heatMap(parent[, chartGroup])
+ Create a heat map instance and attach it to the given parent element.
+
+ Parameters:
+ * parent : string - any valid d3 single selector representing typically a dom block element such as a div.
+ * chartGroup : string (optional) - name of the chart group this chart instance should be placed in. Once a chart is placed
+ in a certain chart group then any interaction with such instance will only trigger events and redraw within the same
+ chart group.
+
+ Return:
+ A newly created heat map instance
+
+ ```js
+ // create a heat map under #chart-container1 element using the default global chart group
+ var heatMap1 = dc.heatMap("#chart-container1");
+ // create a heat map under #chart-container2 element using chart group A
+ var heatMap2 = dc.heatMap("#chart-container2", "chartGroupA");
+ ```
+
+ **/
 dc.heatMap = function (parent, chartGroup) {
+
+    var DEFAULT_BORDER_RADIUS = 6.75;
 
     var _chartBody;
 
     var _cols;
     var _rows;
+    var _xBorderRadius = DEFAULT_BORDER_RADIUS;
+    var _yBorderRadius = DEFAULT_BORDER_RADIUS;
 
-    var _chart = dc.colorChart(dc.marginable(dc.baseChart({})));
+    var _chart = dc.colorMixin(dc.marginMixin(dc.baseMixin({})));
     _chart._mandatoryAttributes(['group']);
     _chart.title(_chart.colorAccessor());
 
-    _chart.boxOnClick = function () {};
-    _chart.xAxisOnClick = function () {};
-    _chart.yAxisOnClick = function () {};
+    var _xAxisOnClick = function (d) { filterAxis(0, d); };
+    var _yAxisOnClick = function (d) { filterAxis(1, d); };
+    var _boxOnClick = function (d) {
+        var filter = d.key;
+        dc.events.trigger(function() {
+            _chart.filter(filter);
+            _chart.redrawGroup();
+        });
+    };
 
-    //_chart.colors(d3.scale.quantize().range(["#a50026","#d73027","#f46d43","#fdae61","#fee08b",
-    //                                         "#ffffbf","#d9ef8b","#a6d96a","#66bd63","#1a9850","#006837"]));
+    function filterAxis(axis, value) {
+        var cellsOnAxis = _chart.selectAll(".box-group").filter( function (d) {
+            return d.key[axis] == value;
+        });
+        var unfilteredCellsOnAxis = cellsOnAxis.filter( function (d) {
+            return !_chart.hasFilter(d.key);
+        });
+        dc.events.trigger(function() {
+            if(unfilteredCellsOnAxis.empty()) {
+                cellsOnAxis.each( function (d) {
+                    _chart.filter(d.key);
+                });
+            } else {
+                unfilteredCellsOnAxis.each( function (d) {
+                    _chart.filter(d.key);
+                });
+            }
+            _chart.redrawGroup();
+        });
+    }
+
+    dc.override(_chart, "filter", function(filter) {
+        if (!arguments.length) return _chart._filter();
+
+        return _chart._filter(dc.filters.TwoDimensionalFilter(filter));
+    });
 
     function uniq(d,i,a) {
         return !i || a[i-1] != d;
@@ -42,7 +103,7 @@ dc.heatMap = function (parent, chartGroup) {
         return d3.scale.ordinal().domain(colValues.filter(uniq));
     };
 
-    _chart.doRender = function () {
+    _chart._doRender = function () {
         _chart.resetSvg();
 
         _chartBody = _chart.svg()
@@ -50,10 +111,10 @@ dc.heatMap = function (parent, chartGroup) {
           .attr("class", "heatmap")
           .attr("transform", "translate(" + _chart.margins().left + "," + _chart.margins().top + ")");
 
-        return _chart.doRedraw();
+        return _chart._doRedraw();
     };
 
-    _chart.doRedraw = function () {
+    _chart._doRedraw = function () {
         var rows = _chart.rows(),
             cols = _chart.cols(),
             rowCount = rows.domain().length,
@@ -63,25 +124,26 @@ dc.heatMap = function (parent, chartGroup) {
 
         cols.rangeRoundBands([0, _chart.effectiveWidth()]);
         rows.rangeRoundBands([_chart.effectiveHeight(), 0]);
-        //_chart.colors().domain(d3.extent(_chart.data(),_chart.colorAccessor()));
 
         var boxes = _chartBody.selectAll("g.box-group").data(_chart.data(), function(d,i) {
             return _chart.keyAccessor()(d,i) + '\0' + _chart.valueAccessor()(d,i);
         });
         var gEnter = boxes.enter().append("g")
             .attr("class", "box-group");
-        gEnter.append("rect")
-            .attr("fill", "white")
-            .on("click", _chart.boxOnClick);
-        gEnter.append("title")
-            .text(function (d) { return _chart.title()(d); });
 
-        dc.transition(boxes.select("rect"), _chart.transitionDuration())
+        gEnter.append("rect")
             .attr("class","heat-box")
+            .attr("fill", "white")
+            .on("click", _chart.boxOnClick());
+
+        gEnter.append("title")
+            .text(_chart.title());
+
+        dc.transition(boxes.selectAll("rect"), _chart.transitionDuration())
             .attr("x", function(d,i) { return cols(_chart.keyAccessor()(d,i)); })
             .attr("y", function(d,i) { return rows(_chart.valueAccessor()(d,i)); })
-            .attr("rx", 0.15 * boxWidth)
-            .attr("ry", 0.15 * boxHeight)
+            .attr("rx", _xBorderRadius)
+            .attr("ry", _yBorderRadius)
             .attr("fill", _chart.getColor)
             .attr("width", boxWidth)
             .attr("height", boxHeight);
@@ -97,20 +159,73 @@ dc.heatMap = function (parent, chartGroup) {
               .style("text-anchor", "middle")
               .attr("y", _chart.effectiveHeight())
               .attr("dy", 12)
-              .on("click", _chart.xAxisOnClick)
+              .on("click", _chart.xAxisOnClick())
               .text(function(d) { return d; });
         var gRows = _chartBody.selectAll("g.rows");
         if (gRows.empty())
             gRows = _chartBody.append("g").attr("class", "rows axis");
         gRows.selectAll('text').data(rows.domain())
             .enter().append("text")
-              .attr("y", function(d) { return rows(d) + boxHeight/2; })
               .attr("dy", 6)
               .style("text-anchor", "end")
               .attr("x", 0)
               .attr("dx", -2)
-              .on("click", _chart.yAxisOnClick)
+              .on("click", _chart.yAxisOnClick())
               .text(function(d) { return d; });
+        dc.transition(gRows.selectAll('text'), _chart.transitionDuration())
+              .text(function(d) { return d; })
+              .attr("y", function(d) { return rows(d) + boxHeight/2; });
+
+        if (_chart.hasFilter()) {
+            _chart.selectAll("g.box-group").each(function (d) {
+                if (_chart.isSelectedNode(d)) {
+                    _chart.highlightSelected(this);
+                } else {
+                    _chart.fadeDeselected(this);
+                }
+            });
+        } else {
+            _chart.selectAll("g.box-group").each(function () {
+                _chart.resetHighlight(this);
+            });
+        }
+        return _chart;
+    };
+
+    _chart.boxOnClick = function (f) {
+        if (!arguments.length) return _boxOnClick;
+        _boxOnClick = f;
+        return _chart;
+    };
+
+    _chart.xAxisOnClick = function (f) {
+        if (!arguments.length) return _xAxisOnClick;
+        _xAxisOnClick = f;
+        return _chart;
+    };
+
+    _chart.yAxisOnClick = function (f) {
+        if (!arguments.length) return _yAxisOnClick;
+        _yAxisOnClick = f;
+        return _chart;
+    };
+
+    _chart.xBorderRadius = function (d) {
+        if (arguments.length) {
+            _xBorderRadius = d;
+        }
+        return _xBorderRadius;
+    };
+
+    _chart.yBorderRadius = function (d) {
+        if (arguments.length) {
+            _yBorderRadius = d;
+        }
+        return _yBorderRadius;
+    };
+
+    _chart.isSelectedNode = function (d) {
+        return _chart.hasFilter(d.key);
     };
 
     return _chart.anchor(parent, chartGroup);

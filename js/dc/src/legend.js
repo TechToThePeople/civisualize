@@ -1,5 +1,5 @@
 /**
-## <a name="legend" href="#legend">#</a> Legend [Concrete]
+## Legend
 Legend is a attachable widget that can be added to other dc charts to render horizontal legend labels.
 
 ```js
@@ -19,7 +19,10 @@ dc.legend = function () {
         _x = 0,
         _y = 0,
         _itemHeight = 12,
-        _gap = 5;
+        _gap = 5,
+        _horizontal = false,
+        _legendWidth = 560,
+        _itemWidth = 70;
 
     var _g;
 
@@ -34,32 +37,68 @@ dc.legend = function () {
         _g = _parent.svg().append("g")
             .attr("class", "dc-legend")
             .attr("transform", "translate(" + _x + "," + _y + ")");
+        var legendables = _parent.legendables();
 
         var itemEnter = _g.selectAll('g.dc-legend-item')
-            .data(_parent.legendables())
+            .data(legendables)
             .enter()
             .append("g")
             .attr("class", "dc-legend-item")
-            .attr("transform", function (d, i) {
-                return "translate(0," + i * legendItemHeight() + ")";
-            })
-            .on("mouseover", function(d){
+            .on("mouseover", function(d) {
                 _parent.legendHighlight(d);
             })
             .on("mouseout", function (d) {
                 _parent.legendReset(d);
+            })
+            .on("click", function (d) {
+                _parent.legendToggle(d);
             });
 
-        itemEnter
-            .append("rect")
+        _g.selectAll('g.dc-legend-item')
+            .classed("fadeout", function(d) {
+                return d.chart.isLegendableHidden(d);
+            });
+
+        if (legendables.some(dc.pluck('dashstyle'))) {
+            itemEnter
+                .append("line")
+                .attr("x1", 0)
+                .attr("y1", _itemHeight / 2)
+                .attr("x2", _itemHeight)
+                .attr("y2", _itemHeight / 2)
+                .attr("stroke-width", 2)
+                .attr("stroke-dasharray", dc.pluck('dashstyle'))
+                .attr("stroke", dc.pluck('color'));
+        } else {
+            itemEnter
+                .append("rect")
                 .attr("width", _itemHeight)
                 .attr("height", _itemHeight)
-                .attr("fill", function(d){return d.color;});
+                .attr("fill", function(d){return d?d.color:"blue";});
+        }
 
         itemEnter.append("text")
-                .text(function(d){return d.name;})
+                .text(dc.pluck('name'))
                 .attr("x", _itemHeight + LABEL_GAP)
                 .attr("y", function(){return _itemHeight / 2 + (this.clientHeight?this.clientHeight:13) / 2 - 2;});
+
+        var _cumulativeLegendTextWidth = 0;
+        var row = 0;
+        itemEnter.attr("transform", function(d, i) {
+            if(_horizontal) {
+                var translateBy = "translate(" + _cumulativeLegendTextWidth + "," + row * legendItemHeight() + ")";
+                if ((_cumulativeLegendTextWidth + _itemWidth) >= _legendWidth) {
+                    ++row ;
+                    _cumulativeLegendTextWidth = 0 ;
+                } else {
+                    _cumulativeLegendTextWidth += _itemWidth;
+                }
+                return translateBy;
+            }
+            else {
+                return "translate(0," + i * legendItemHeight() + ")";
+            }
+        });
     };
 
     function legendItemHeight() {
@@ -103,6 +142,36 @@ dc.legend = function () {
     _legend.itemHeight = function (h) {
         if (!arguments.length) return _itemHeight;
         _itemHeight = h;
+        return _legend;
+    };
+
+    /**
+    #### .horizontal([boolean])
+    Position legend horizontally instead of vertically
+    **/
+    _legend.horizontal = function(_) {
+        if (!arguments.length) return _horizontal;
+        _horizontal = _;
+        return _legend;
+    };
+
+    /**
+    #### .legendWidth([value])
+    Maximum width for horizontal legend. Default value: 560.
+    **/
+    _legend.legendWidth = function(_) {
+        if (!arguments.length) return _legendWidth;
+        _legendWidth = _;
+        return _legend;
+    };
+
+    /**
+    #### .itemWidth([value])
+    legendItem width for horizontal legend. Default value: 70.
+    **/
+    _legend.itemWidth = function(_) {
+        if (!arguments.length) return _itemWidth;
+        _itemWidth = _;
         return _legend;
     };
 

@@ -1,5 +1,8 @@
 /**
-## <a name="data-table" href="#data-table">#</a> Data Table Widget [Concrete] < [Base Chart](#base-chart)
+## Data Table Widget
+
+Includes: [Base Mixin](#base-mixin)
+
 Data table is a simple widget designed to list crossfilter focused data set (rows being filtered) in a good old tabular
 fashion.
 
@@ -25,7 +28,7 @@ dc.dataTable = function(parent, chartGroup) {
     var COLUMN_CSS_CLASS = "dc-table-column";
     var GROUP_CSS_CLASS = "dc-table-group";
 
-    var _chart = dc.baseChart({});
+    var _chart = dc.baseMixin({});
 
     var _size = 25;
     var _columns = [];
@@ -33,9 +36,8 @@ dc.dataTable = function(parent, chartGroup) {
         return d;
     };
     var _order = d3.ascending;
-    var _sort;
 
-    _chart.doRender = function() {
+    _chart._doRender = function() {
         _chart.selectAll("tbody").remove();
 
         renderRows(renderGroups());
@@ -69,16 +71,14 @@ dc.dataTable = function(parent, chartGroup) {
     }
 
     function nestEntries() {
-        if (!_sort)
-            _sort = crossfilter.quicksort.by(_sortBy);
-
         var entries = _chart.dimension().top(_size);
 
         return d3.nest()
             .key(_chart.group())
             .sortKeys(_order)
-            .sortValues(_order)
-            .entries(_sort(entries, 0, entries.length));
+            .entries(entries.sort(function(a, b){
+                return _order(_sortBy(a), _sortBy(b));
+            }));
     }
 
     function renderRows(groups) {
@@ -103,8 +103,8 @@ dc.dataTable = function(parent, chartGroup) {
         return rows;
     }
 
-    _chart.doRedraw = function() {
-        return _chart.doRender();
+    _chart._doRedraw = function() {
+        return _chart._doRender();
     };
 
     /**

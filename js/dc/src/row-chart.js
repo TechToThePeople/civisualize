@@ -1,5 +1,8 @@
 /**
-## <a name="row-chart" href="#row-chart">#</a> Row Chart [Concrete] < [Color Chart](#color-chart) < [Base Chart](#base-chart)
+## Row Chart
+
+Includes: [Cap Mixin](#cap-mixin), [Margin Mixin](#margin-mixin), [Color Mixin](#color-mixin), [Base Mixin](#base-mixin)
+
 Concrete row chart implementation.
 
 #### dc.rowChart(parent[, chartGroup])
@@ -25,14 +28,16 @@ dc.rowChart = function (parent, chartGroup) {
     var _g;
 
     var _labelOffsetX = 10;
-
     var _labelOffsetY = 15;
+    var _titleLabelOffsetX = 2;
 
     var _gap = 5;
 
     var _rowCssClass = "row";
+    var _titleRowCssClass = "titlerow";
+    var _renderTitleLabel = false;
 
-    var _chart = dc.capped(dc.marginable(dc.colorChart(dc.baseChart({}))));
+    var _chart = dc.capMixin(dc.marginMixin(dc.colorMixin(dc.baseMixin({}))));
 
     var _x;
 
@@ -67,7 +72,7 @@ dc.rowChart = function (parent, chartGroup) {
             .call(_xAxis);
     }
 
-    _chart.doRender = function () {
+    _chart._doRender = function () {
         _chart.resetSvg();
 
         _g = _chart.svg()
@@ -179,6 +184,11 @@ dc.rowChart = function (parent, chartGroup) {
             rowEnter.append("text")
                 .on("click", onClick);
         }
+        if (_chart.renderTitleLabel()) {
+            rowEnter.append("text")
+                .attr("class", _titleRowCssClass)
+                .on("click", onClick);
+        }
     }
 
     function updateLabels(rows) {
@@ -196,7 +206,33 @@ dc.rowChart = function (parent, chartGroup) {
             dc.transition(lab, _chart.transitionDuration())
                 .attr("transform", translateX);
         }
+        if (_chart.renderTitleLabel()) {
+            var titlelab = rows.select("." + _titleRowCssClass)
+                    .attr("x", _chart.effectiveWidth() - _titleLabelOffsetX)
+                    .attr("y", _labelOffsetY)
+                    .attr("text-anchor", "end")
+                    .on("click", onClick)
+                    .attr("class", function (d, i) {
+                        return _titleRowCssClass + " _" + i ;
+                    })
+                    .text(function (d) {
+                        return _chart.title()(d);
+                    });
+            dc.transition(titlelab, _chart.transitionDuration())
+                .attr("transform", translateX);
+        }
     }
+
+    /**
+    #### .renderTitleLabel(boolean)
+    Turn on/off Title label rendering (values) using SVG style of text-anchor 'end'
+
+    **/
+    _chart.renderTitleLabel = function (_) {
+        if (!arguments.length) return _renderTitleLabel;
+        _renderTitleLabel = _;
+        return _chart;
+    };
 
     function onClick(d) {
         _chart.onClick(d);
@@ -209,7 +245,7 @@ dc.rowChart = function (parent, chartGroup) {
         return "translate("+s+",0)";
     }
 
-    _chart.doRedraw = function () {
+    _chart._doRedraw = function () {
         drawChart();
         return _chart;
     };
@@ -254,12 +290,23 @@ dc.rowChart = function (parent, chartGroup) {
 
     /**
     #### .labelOffsetY([y])
-    Get of set the y offset (vertical space to the top left corner of a row) for labels on a particular row chart. Default y offset is 15px;
+    Get or set the y offset (vertical space to the top left corner of a row) for labels on a particular row chart. Default y offset is 15px;
 
     **/
     _chart.labelOffsetY = function (o) {
         if (!arguments.length) return _labelOffsetY;
         _labelOffsetY = o;
+        return _chart;
+    };
+
+    /**
+    #### .titleLabelOffsetx([x])
+    Get of set the x offset (horizontal space between right edge of row and right edge or text.   Default x offset is 2px;
+
+    **/
+    _chart.titleLabelOffsetX = function (o) {
+        if (!arguments.length) return _titleLabelOffsetX;
+        _titleLabelOffsetX = o;
         return _chart;
     };
 

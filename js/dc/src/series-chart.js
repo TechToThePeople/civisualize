@@ -1,6 +1,32 @@
 /**
-## <a name="series-chart" href="#Series-chart">#</a> Series Chart [Concrete]
-**/
+ ## Series Chart
+
+ Includes: [Composite Chart](#composite chart)
+
+ A series chart is a chart that shows multiple series of data as lines, where the series
+ is specified in the data. It is a special implementation Composite Chart and inherits
+ all composite features other than recomposing the chart.
+
+ #### dc.seriesChart(parent[, chartGroup])
+ Create a series chart instance and attach it to the given parent element.
+
+ Parameters:
+ * parent : string - any valid d3 single selector representing typically a dom block element such as a div.
+ * chartGroup : string (optional) - name of the chart group this chart instance should be placed in. Once a chart is placed
+ in a certain chart group then any interaction with such instance will only trigger events and redraw within the same
+ chart group.
+
+ Return:
+ A newly created series chart instance
+
+ ```js
+ // create a series chart under #chart-container1 element using the default global chart group
+ var seriesChart1 = dc.seriesChart("#chart-container1");
+ // create a series chart under #chart-container2 element using chart group A
+ var seriesChart2 = dc.seriesChart("#chart-container2", "chartGroupA");
+ ```
+
+ **/
 dc.seriesChart = function (parent, chartGroup) {
     var _chart = dc.compositeChart(parent, chartGroup);
 
@@ -37,8 +63,7 @@ dc.seriesChart = function (parent, chartGroup) {
                     .dimension(_chart.dimension())
                     .group({all:d3.functor(sub.values)}, sub.key)
                     .keyAccessor(_chart.keyAccessor())
-                    .valueAccessor(_chart.valueAccessor())
-                    .colorCalculator(function() {return subChart.colors()(sub.key);});
+                    .valueAccessor(_chart.valueAccessor());
             });
         // this works around the fact compositeChart doesn't really
         // have a removal interface
@@ -71,6 +96,11 @@ dc.seriesChart = function (parent, chartGroup) {
         return _chart;
     };
 
+    /**
+     #### .seriesAccessor([accessor])
+     Get or set accessor function for the displayed series. Given a datum, this function
+     should return the series that datum belongs to.
+     **/
     _chart.seriesAccessor = function(_) {
         if (!arguments.length) return _seriesAccessor;
         _seriesAccessor = _;
@@ -78,6 +108,15 @@ dc.seriesChart = function (parent, chartGroup) {
         return _chart;
     };
 
+    /**
+     #### .seriesSort([sortFunction])
+     Get or set a function to sort the list of series by, given series values.
+
+     Example:
+     ```
+     chart.seriesSort(d3.descending);
+     ```
+     **/
     _chart.seriesSort = function(_) {
         if (!arguments.length) return _seriesSort;
         _seriesSort = _;
@@ -85,6 +124,12 @@ dc.seriesChart = function (parent, chartGroup) {
         return _chart;
     };
 
+    /**
+     #### .valueSort([sortFunction])
+     Get or set a function to the sort each series values by. By default this is
+     the key accessor which, for example, a will ensure lineChart a series connects
+     its points in increasing key/x order, rather than haphazardly.
+    **/
     _chart.valueSort = function(_) {
         if (!arguments.length) return _valueSort;
         _valueSort = _;
