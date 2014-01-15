@@ -37,12 +37,13 @@ no matter if you use {crmAPI} or {crmSQL}, you end up with a json and a d3 and d
 
 In the template, put
 
+```javascript
    <div id="theplacetograph"></div>
    <script>
      var mydata={crmAPI or crmSQL};
     {literal}
     d3("#theplacetograph").selectAll(...).data(mydata.values).domagic(...);
-    
+```    
     
 You have a "work in progress" few templates, the most interesting one is probably either the dashboard or /civicrm/dataviz/contribute
 
