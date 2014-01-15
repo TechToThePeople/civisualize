@@ -19,17 +19,21 @@ or
 {crmSQL query="somethingcool"}
 that will fetch the sql query from /queries/somethingcool.sql
 
-A 3rd option is to be able to fetch data from a report instance using a {crmReport...}. It's probably not super complicted, patch welcome and all that.
+A 3rd option is to be able to fetch data from a report instance using a {crmReport...}. Eileen has done (most of?) the work already. I think it's on 4.5 
 
 Display data
 -----------
 
-The principle is to get the data in a template as a json, and apply d3 on it until it looks awesome.
+The principle is to get the data in a template as a json, and apply d3/dc on it until it looks awesome.
 
 you simply have to add your template into templates/dataviz/Something.tpl
 and you can access it from http://yoursite.org/civicrm/dataviz/something
 
-no matter if you use {crmAPI} or {crmSQL}, you end up with a json and a d3 loaded and ready to rock
+To get you started, you can visit http://yoursite.org/civicrm/dataviz/contribute 
+This is using the wondefully magic dc, that is a layer of love on the top of d3 and crossfilter. 
+Click on the graphs to filter down. magic, I told you.
+
+no matter if you use {crmAPI} or {crmSQL}, you end up with a json and a d3 and dc loaded and ready to rock
 
 In the template, put
 
@@ -40,7 +44,10 @@ In the template, put
     d3("#theplacetograph").selectAll(...).data(mydata.values).domagic(...);
     
     
-You have a "work in progress" few templates, the most interesting one is probably either the dashboard or /civicrm/dataviz/dc
+You have a "work in progress" few templates, the most interesting one is probably either the dashboard or /civicrm/dataviz/contribute
 
 You can already create a new dataviz extension, write a templates/dataviz/Magic.tpl, visit civicrm/dataviz/magic and, well, whatever magic you want.
 
+I love you
+-------
+xavier made this. You can find me in civicrm forum, [@eucampaign](http://twitter.com/eucampaign) or in the dc mailing group. Be warned, d3 is awesome, but the learning curve is steep. Worthwhile, the view at the top is beautiful. or so I've been told, I haven't reached it yet.
