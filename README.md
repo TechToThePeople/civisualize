@@ -47,7 +47,7 @@ In the template, put
 
 Predefined graphs
 ----------
-dc has a few common graphs (pie charts, barcharts...) that you can use directly with data without having to go through crossfilter (no need to define a domain...). The documentation isn't yet complete, but we've been using it for a [lapsed donor visualization](ata without having to go throu  gh crossfilter (no need to define a domain...). The documentation isn't yet complete, but we've been using it for a [lapsed donor dataviz](https://github.com/TechToThePeople/civisualize/blob/master/templates/dataviz/Lapseddonor.tpl). _one shouldn't use pie charts for that, but that's another topic_
+dc has a few common graphs (pie charts, barcharts...) that you can use directly with data without having to go through crossfilter (no need to define a domain...). The documentation isn't yet complete, but we've been using it for a [lapsed donor visualization](ata without having to go through crossfilter (no need to define a domain...). As an example, we've been using it for a [lapsed donor dataviz](https://github.com/TechToThePeople/civisualize/blob/master/templates/dataviz/Lapseddonor.tpl). _one shouldn't use pie charts for that, but that's another topic_
 
     
 You have a "work in progress" few templates, the most interesting one is probably either the dashboard or /civicrm/dataviz/contribute
