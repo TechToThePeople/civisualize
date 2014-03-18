@@ -1,4 +1,4 @@
-<?
+<?php
 
 function civicrm_api3_tag_getstat ($params) {
   $sql = "SELECT count(*) as total, civicrm_tag.id, civicrm_tag.name, civicrm_tag.parent_id, description
