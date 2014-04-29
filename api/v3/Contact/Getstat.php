@@ -1,4 +1,4 @@
-<?
+<?php
 
 function civicrm_api3_contact_getstat ($params) {
  // mostly copy pasted from contact_get and the functions called by it

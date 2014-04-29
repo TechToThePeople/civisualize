@@ -1,4 +1,4 @@
-<?
+<?php
 function civicrm_api3_group_contact_getstat ($params) {
   $sql = "SELECT count(*) as total,civicrm_group.id, civicrm_group.name 
           FROM civicrm_group_contact, civicrm_group 
