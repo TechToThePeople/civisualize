@@ -15,6 +15,12 @@
     <div class="clearfix"></div>
 </div>
 <div class="clear"></div>
+<div id="dayofweek">
+    <strong>Day Of Week</strong>
+    <a class="reset" href="javascript:weekbarchart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+    <div class="clearfix"></div>
+</div>
+<div class="clear"></div>
 <div id="contacts-by-month">
     <strong>Contacts By Month</strong>
     <a class="reset" href="javascript:contactlinechart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
@@ -39,7 +45,7 @@ data.values.forEach(function(d) {
 });
 
 var numberFormat = d3.format(".2f");
-var piegender, pietype, contactlinechart;
+var piegender=null, pietype=null, contactlinechart=null, weekbarchart=null;
 var genderLabel = {};  
 
 cj(function($) {
@@ -57,6 +63,7 @@ cj(function($) {
 	pietype = dc.pieChart("#type").innerRadius(10).radius(110);
 	piegender = dc.pieChart('#gender').innerRadius(10).radius(110);
 	contactlinechart = dc.lineChart('#contacts-by-month');
+	weekbarchart = dc.rowChart('#dayofweek');
 
 	var ndx  = crossfilter(data.values), all = ndx.groupAll();
 
@@ -68,6 +75,30 @@ cj(function($) {
 
 	var byMonth = ndx.dimension(function(d) { return d.dd; });
 	var byMonthCount = byMonth.group().reduceSum(function(d) { return d.count; });
+
+	var dayOfWeek = ndx.dimension(function (d) { 
+		var day = d.dd.getDay(); 
+		var name=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+		return day+"."+name[day]; 
+	});
+
+	var dayOfWeekGroup = dayOfWeek.group().reduceSum(function(d){return d.count;});
+
+	weekbarchart.width(180)
+		.height(180)
+		.margins({top: 20, left: 10, right: 10, bottom: 20})
+		.group(dayOfWeekGroup)
+		.dimension(dayOfWeek)
+		.ordinalColors(["#d95f02","#1b9e77","#7570b3","#e7298a","#66a61e","#e6ab02","#a6761d"])
+		.label(function (d) {
+			return d.key.split(".")[1];
+		})
+		.title(function (d) {
+			return d.value;
+		})
+		.elasticX(true)
+		.xAxis().ticks(4);
+
 
 	var _group   = byMonth.group().reduceSum(function(d) {return d.count;});
 
@@ -111,6 +142,7 @@ cj(function($) {
 		.group(group)
 		.x(d3.time.scale().domain([min, max]))
 		.round(d3.time.day.round)
+		.elasticY(true)
 		.xUnits(d3.time.days);
 	
 	dc.renderAll();
