@@ -14,6 +14,11 @@
     <a class="reset" href="javascript:piegender.filterAll();dc.redrawAll();" style="display: none;">reset</a>
     <div class="clearfix"></div>
 </div>
+<div id="source">
+    <strong>Source of Contact</strong>
+    <a class="reset" href="javascript:piesource.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+    <div class="clearfix"></div>
+</div>
 <div class="clear"></div>
 <div id="dayofweek">
     <strong>Day Of Week</strong>
@@ -45,7 +50,7 @@ data.values.forEach(function(d) {
 });
 
 var numberFormat = d3.format(".2f");
-var piegender=null, pietype=null, contactlinechart=null, weekbarchart=null;
+var piegender=null, pietype=null, piesource=null, contactlinechart=null, weekbarchart=null;
 var genderLabel = {};  
 
 cj(function($) {
@@ -56,12 +61,13 @@ cj(function($) {
 	genderLabel[3]='None';
 
 	var dateFormat = d3.time.format("%Y-%m-%d");
-	data.values.forEach(function(d){d.dd = dateFormat.parse(d.modified_date)});
+	data.values.forEach(function(d){d.dd = dateFormat.parse(d.modified_date); if(d.source=="") d.source='None';});
 	var min = d3.time.day.offset(d3.min(data.values, function(d) { return d.dd;} ),-2);
 	var max = d3.time.day.offset(d3.max(data.values, function(d) { return d.dd;} ), 2);
 
 	pietype = dc.pieChart("#type").innerRadius(10).radius(110);
 	piegender = dc.pieChart('#gender').innerRadius(10).radius(110);
+	piesource = dc.pieChart('#source').innerRadius(10).radius(110);
 	contactlinechart = dc.lineChart('#contacts-by-month');
 	weekbarchart = dc.rowChart('#dayofweek');
 
@@ -69,6 +75,9 @@ cj(function($) {
 
 	var gender = ndx.dimension(function(d){if(d.gender!="") return d.gender; else return 3;});
 	var genderGroup = gender.group().reduceSum(function(d){return d.count;});
+
+	var source = ndx.dimension(function(d){ return d.source;});
+	var sourceGroup = source.group().reduceSum(function(d){return d.count;});
 
 	var dctype        = ndx.dimension(function(d) {return d.type;});
 	var dctypeGroup   = dctype.group().reduceSum(function(d) { return d.count; });
@@ -134,6 +143,16 @@ cj(function($) {
 		})
 		.renderlet(function (chart) {			
 		});
+
+	piesource
+		.width(250)
+		.height(250)
+		.dimension(source)
+		.colors(d3.scale.category10())
+		.group(sourceGroup)
+		.renderlet(function (chart) {			
+		});
+
 
 	contactlinechart
 		.width(800)
