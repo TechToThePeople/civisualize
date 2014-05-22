@@ -71,7 +71,7 @@ cj(function($) {
 	contactlinechart = dc.lineChart('#contacts-by-month');
 	weekbarchart = dc.rowChart('#dayofweek');
 
-	var ndx  = crossfilter(data.values), all = ndx.groupAll();
+	var ndx  = crossfilter(data.values), all = ndx.groupAll().reduceSum(function(d) {return d.count;});
 
 	var gender = ndx.dimension(function(d){if(d.gender!="") return d.gender; else return 3;});
 	var genderGroup = gender.group().reduceSum(function(d){return d.count;});
@@ -123,12 +123,19 @@ cj(function($) {
 		}
 	}; 
 
+	dctypeGroup.all().forEach(function(d){console.log(d)});
+
 	pietype
 		.width(250)
 		.height(250)
 		.dimension(dctype)
 		.colors(d3.scale.category10())
 		.group(dctypeGroup)
+		.label(function(d){
+			if (pietype.hasFilter() && !pietype.hasFilter(d.key))
+                return d.key + "(0%)";
+			return d.key+"(" + Math.floor(d.value / all.value() * 100) + "%)";
+		})
 		.renderlet(function (chart) {			
 		});
 
@@ -139,7 +146,9 @@ cj(function($) {
 		.colors(d3.scale.category10())
 		.group(genderGroup)
 		.label(function(d) {
-			return genderLabel[d.key];
+			if (piegender.hasFilter() && !piegender.hasFilter(d.key))
+                return genderLabel[d.key] + "(0%)";
+			return genderLabel[d.key]+"(" + Math.floor(d.value / all.value() * 100) + "%)";;
 		})
 		.renderlet(function (chart) {			
 		});
@@ -150,6 +159,11 @@ cj(function($) {
 		.dimension(source)
 		.colors(d3.scale.category10())
 		.group(sourceGroup)
+		.label(function(d){
+			if (piesource.hasFilter() && !piesource.hasFilter(d.key))
+                return d.key + "(0%)";
+			return d.key+"(" + Math.floor(d.value / all.value() * 100) + "%)";
+		})
 		.renderlet(function (chart) {			
 		});
 
