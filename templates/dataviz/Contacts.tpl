@@ -3,32 +3,34 @@
 <div id="dataviz">
 </div>
 {/if}
-
+<div id="datacount" style="margin-bottom:20px;">
+    <h2><strong><span class="filter-count"></span></strong> contacts selected from a total of <strong><span id="total-count"></span></strong> records</h2>
+</div>
+<div class="clear"></div>
 <div id="type">
     <strong>Type</strong>
-    <a class="reset" href="javascript:pietype.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+    <a class="reset" href="javascript:typePie.filterAll();dc.redrawAll();" style="display: none;">reset</a>
     <div class="clearfix"></div>
 </div>
 <div id="gender">
     <strong>Gender</strong>
-    <a class="reset" href="javascript:piegender.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+    <a class="reset" href="javascript:genderPie.filterAll();dc.redrawAll();" style="display: none;">reset</a>
     <div class="clearfix"></div>
 </div>
 <div id="source">
     <strong>Source of Contact</strong>
-    <a class="reset" href="javascript:piesource.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+    <a class="reset" href="javascript:sourceChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
     <div class="clearfix"></div>
 </div>
-<div class="clear"></div>
 <div id="dayofweek">
-    <strong>Day Of Week</strong>
-    <a class="reset" href="javascript:weekbarchart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+    <strong>Day - Contact Created</strong>
+    <a class="reset" href="javascript:weekChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
     <div class="clearfix"></div>
 </div>
 <div class="clear"></div>
 <div id="contacts-by-month">
-    <strong>Contacts By Month</strong>
-    <a class="reset" href="javascript:contactlinechart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+    <strong>Date - Contact Created</strong>
+    <a class="reset" href="javascript:monthLineChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
     <div class="clearfix"></div>
 </div>
 
@@ -50,7 +52,7 @@ data.values.forEach(function(d) {
 });
 
 var numberFormat = d3.format(".2f");
-var piegender=null, pietype=null, piesource=null, contactlinechart=null, weekbarchart=null;
+var genderPie=null, typePie=null, sourceChart=null, monthLineChart=null, weekChart=null;
 var genderLabel = {};  
 
 cj(function($) {
@@ -61,17 +63,26 @@ cj(function($) {
 	genderLabel[3]='None';
 
 	var dateFormat = d3.time.format("%Y-%m-%d");
-	data.values.forEach(function(d){d.dd = dateFormat.parse(d.modified_date); if(d.source=="") d.source='None';});
+
+	var totalContacts = 0;
+	
+	data.values.forEach(function(d){ totalContacts+=d.count; d.dd = dateFormat.parse(d.modified_date); if(d.source=="") d.source='None';});
 	var min = d3.time.day.offset(d3.min(data.values, function(d) { return d.dd;} ),-2);
 	var max = d3.time.day.offset(d3.max(data.values, function(d) { return d.dd;} ), 2);
 
-	pietype = dc.pieChart("#type").innerRadius(10).radius(110);
-	piegender = dc.pieChart('#gender').innerRadius(10).radius(110);
-	piesource = dc.pieChart('#source').innerRadius(10).radius(110);
-	contactlinechart = dc.lineChart('#contacts-by-month');
-	weekbarchart = dc.rowChart('#dayofweek');
+	typePie = dc.pieChart("#type").innerRadius(10).radius(90);
+	genderPie = dc.pieChart('#gender').innerRadius(10).radius(90);
+	sourceChart = dc.rowChart('#source');
+	monthLineChart = dc.lineChart('#contacts-by-month');
+	weekChart = dc.rowChart('#dayofweek');
 
-	var ndx  = crossfilter(data.values), all = ndx.groupAll().reduceSum(function(d) {return d.count;});
+	var ndx  = crossfilter(data.values), all = ndx.groupAll();
+
+	var totalCount = dc.dataCount("#datacount")
+        .dimension(ndx)
+        .group(all);
+
+    document.getElementById("total-count").innerHTML=totalContacts;
 
 	var gender = ndx.dimension(function(d){if(d.gender!="") return d.gender; else return 3;});
 	var genderGroup = gender.group().reduceSum(function(d){return d.count;});
@@ -90,12 +101,66 @@ cj(function($) {
 		var name=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 		return day+"."+name[day]; 
 	});
-
 	var dayOfWeekGroup = dayOfWeek.group().reduceSum(function(d){return d.count;});
 
-	weekbarchart.width(180)
-		.height(180)
+	var _group   = byMonth.group().reduceSum(function(d) {return d.count;});
+	var group = {
+		all:function () {
+			var cumulate = 0;
+			var g = [];
+			_group.all().forEach(function(d,i) {
+				cumulate += d.value;
+				g.push({key:d.key,value:cumulate})
+			});
+			return g;
+		}
+	};
+
+	typePie
+		.width(250)
+		.height(200)
+		.dimension(dctype)
+		.colors(d3.scale.category10())
+		.group(dctypeGroup)
+		.label(function(d){
+			if (typePie.hasFilter() && !typePie.hasFilter(d.key))
+                return d.key + "(0%)";
+			return d.key+"(" + Math.floor(d.value / all.reduceSum(function(d) {return d.count;}).value() * 100) + "%)";
+		})
+		.renderlet(function (chart) {			
+		});
+
+	genderPie
+		.width(250)
+		.height(200)
+		.dimension(gender)
+		.colors(d3.scale.category10())
+		.group(genderGroup)
+		.label(function(d) {
+			if (genderPie.hasFilter() && !genderPie.hasFilter(d.key))
+                return genderLabel[d.key] + "(0%)";
+			return genderLabel[d.key]+"(" + Math.floor(d.value / all.reduceSum(function(d) {return d.count;}).value() * 100) + "%)";;
+		})
+		.renderlet(function (chart) {			
+		});
+
+	sourceChart
+		.width(300)
+		.height(200)
 		.margins({top: 20, left: 10, right: 10, bottom: 20})
+		.dimension(source)
+		.colors(d3.scale.category10())
+		.group(sourceGroup)
+		.label(function(d){
+			if (sourceChart.hasFilter() && !sourceChart.hasFilter(d.key))
+                return d.key + "(0%)";
+			return d.key+"(" + Math.floor(d.value / all.reduceSum(function(d) {return d.count;}).value() * 100) + "%)";
+		})
+		.elasticX(true);
+
+	weekChart.width(300)
+		.height(200)
+		.margins({top: 0, left: 10, right: 10, bottom: 20})
 		.group(dayOfWeekGroup)
 		.dimension(dayOfWeek)
 		.ordinalColors(["#d95f02","#1b9e77","#7570b3","#e7298a","#66a61e","#e6ab02","#a6761d"])
@@ -108,67 +173,7 @@ cj(function($) {
 		.elasticX(true)
 		.xAxis().ticks(4);
 
-
-	var _group   = byMonth.group().reduceSum(function(d) {return d.count;});
-
-	var group = {
-		all:function () {
-			var cumulate = 0;
-			var g = [];
-			_group.all().forEach(function(d,i) {
-				cumulate += d.value;
-				g.push({key:d.key,value:cumulate})
-			});
-			return g;
-		}
-	}; 
-
-	dctypeGroup.all().forEach(function(d){console.log(d)});
-
-	pietype
-		.width(250)
-		.height(250)
-		.dimension(dctype)
-		.colors(d3.scale.category10())
-		.group(dctypeGroup)
-		.label(function(d){
-			if (pietype.hasFilter() && !pietype.hasFilter(d.key))
-                return d.key + "(0%)";
-			return d.key+"(" + Math.floor(d.value / all.value() * 100) + "%)";
-		})
-		.renderlet(function (chart) {			
-		});
-
-	piegender
-		.width(250)
-		.height(250)
-		.dimension(gender)
-		.colors(d3.scale.category10())
-		.group(genderGroup)
-		.label(function(d) {
-			if (piegender.hasFilter() && !piegender.hasFilter(d.key))
-                return genderLabel[d.key] + "(0%)";
-			return genderLabel[d.key]+"(" + Math.floor(d.value / all.value() * 100) + "%)";;
-		})
-		.renderlet(function (chart) {			
-		});
-
-	piesource
-		.width(250)
-		.height(250)
-		.dimension(source)
-		.colors(d3.scale.category10())
-		.group(sourceGroup)
-		.label(function(d){
-			if (piesource.hasFilter() && !piesource.hasFilter(d.key))
-                return d.key + "(0%)";
-			return d.key+"(" + Math.floor(d.value / all.value() * 100) + "%)";
-		})
-		.renderlet(function (chart) {			
-		});
-
-
-	contactlinechart
+	monthLineChart
 		.width(800)
 		.height(200)
 		.dimension(byMonth)
