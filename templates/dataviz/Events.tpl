@@ -2,8 +2,7 @@
 <!-- For Type of Events. Not used it yet -->
 {/if}
 {php}CRM_Utils_System::setTitle('Events');{/php}
-<h1>Events Overview</h1>
-
+<h3 style="font-size:20px;"><span id="nevents"></span> Events with <span id="nparticipants"></span> Participants</h3>
 <h3>Events</h3>
 <div id="type"></div>
 <div id="duration"></div>
@@ -82,6 +81,7 @@ cj(function($) {
       a.eventcount++;
     }
     a.id[d.id] ++;
+    a.participantcount+=d.count;
     return a;
   }
 
@@ -90,13 +90,13 @@ cj(function($) {
     if(a.id[d.id]==0){
       a.eventcount--;
     }
+    a.participantcount-=d.count;
     return a;
   }
 
   function eventReduceInitial() { 
-    return {id:{}, eventcount:0};
+    return {id:{}, eventcount:0, participantcount:0};
   }
-
 
   var pieType = dc.pieChart("#type").innerRadius(20).radius(70);
   var durationRow = dc.rowChart("#duration");
@@ -144,6 +144,17 @@ cj(function($) {
   });
 
   var eventstatus_group = event_status.group().reduce(eventReduceAdd,eventReduceRemove,eventReduceInitial);
+
+  var grouped=ndx.groupAll().reduce(eventReduceAdd,eventReduceRemove,eventReduceInitial);
+
+  var eventsN = dc.numberDisplay("#nevents")
+    .group(grouped)
+    .formatNumber(d3.format(".d"))
+    .valueAccessor(function (d) {return d.eventcount;});
+
+  var participantsN = dc.numberDisplay("#nparticipants")
+    .group(grouped)
+    .valueAccessor(function(d) {return d.participantcount});
 
 
 //Events
