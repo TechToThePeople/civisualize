@@ -4,20 +4,47 @@
 {php}CRM_Utils_System::setTitle('Events');{/php}
 <h3 style="font-size:20px;"><span id="nevents"></span> Events with <span id="nparticipants"></span> Participants</h3>
 <h3>Events</h3>
-<div id="type"></div>
-<div id="duration"></div>
-<div id="eventstatus"></div>
+
+<div id="type">
+  <strong>Type</strong>
+  <a class="reset" href="javascript:pieType.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+  <div class="clearfix"></div>
+</div>
+
+<div id="duration">
+  <strong>Duration of Event</strong>
+  <a class="reset" href="javascript:durationRow.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+  <div class="clearfix"></div>
+</div>
+
+<div id="eventstatus">
+  <strong>Event Status</strong>
+  <a class="reset" href="javascript:pieEventStatus.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+  <div class="clearfix"></div>  
+</div>
 <div class="clear"></div>
 <h3>Participants</h3>
-<div id="ptype"></div>
-<div id="pduration"></div>
-<div id="status"></div>
+<div id="ptype">
+  <strong>Participants by Type</strong>
+  <a class="reset" href="javascript:piePType.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+  <div class="clearfix"></div>  
+</div>
+<div id="pduration">
+  <strong>Participants by Duration</strong>
+  <a class="reset" href="javascript:pdurationRow.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+  <div class="clearfix"></div>  
+</div>
+<div id="status">
+  <strong>Participants Status</strong>
+  <a class="reset" href="javascript:pieStatus.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+  <div class="clearfix"></div>  
+</div>
 <div class="clear"></div>
 
 <script>
 'use strict';
 
-console.log({$id});
+//console.log({$id});
 var data = {crmSQL file="events"};
 
 var i = {crmAPI entity="OptionValue" option_group_id="14"}; {*todo on 4.4, use the event-type as id *}
@@ -34,9 +61,9 @@ function dhm(t){
   return d+1;
 }
 
-data.values.forEach(function(d){
-  console.log(d);
-});
+// data.values.forEach(function(d){
+//   console.log(d);
+// });
 
 var statusLabel = {};
 s.values.forEach (function(d) {
@@ -54,26 +81,28 @@ var numberFormat = d3.format(".2f");
 var dateFormat = d3.time.format("%Y-%m-%d %H:%M:%S");
 var currentDate = new Date();
 
-console.log(currentDate);
+//console.log(currentDate);
+
+var pieType,durationRow, pieEventStatus, piePType, pdurationRow, pieStatus;
 
 cj(function($) {
 
-  function print_filter(filter) {
-    var f = eval(filter);
-    if (typeof (f.length) != "undefined") {} 
-    else {}
-    if (typeof (f.top) != "undefined") {
-      f = f.top(Infinity);
-    } 
-    else {}
-    if (typeof (f.dimension) != "undefined") {
-      f = f.dimension(function (d) {
-        return "";
-      }).top(Infinity);
-    }
-    else {}
-    console.log(filter + "(" + f.length + ") = " + JSON.stringify(f).replace("[", "[\n\t").replace(/}\,/g, "},\n\t").replace("]", "\n]"));
-  }
+  // function print_filter(filter) {
+  //   var f = eval(filter);
+  //   if (typeof (f.length) != "undefined") {} 
+  //   else {}
+  //   if (typeof (f.top) != "undefined") {
+  //     f = f.top(Infinity);
+  //   } 
+  //   else {}
+  //   if (typeof (f.dimension) != "undefined") {
+  //     f = f.dimension(function (d) {
+  //       return "";
+  //     }).top(Infinity);
+  //   }
+  //   else {}
+  //   console.log(filter + "(" + f.length + ") = " + JSON.stringify(f).replace("[", "[\n\t").replace(/}\,/g, "},\n\t").replace("]", "\n]"));
+  // }
 
   function eventReduceAdd(a,d){
     if(!a.id[d.id]){
@@ -98,12 +127,12 @@ cj(function($) {
     return {id:{}, eventcount:0, participantcount:0};
   }
 
-  var pieType = dc.pieChart("#type").innerRadius(20).radius(70);
-  var durationRow = dc.rowChart("#duration");
-  var pieEventStatus = dc.pieChart("#eventstatus").innerRadius(50).radius(70);
-  var piePType = dc.pieChart("#ptype").innerRadius(20).radius(70);
-  var pdurationRow = dc.rowChart("#pduration");
-  var pieStatus = dc.pieChart("#status").innerRadius(20).radius(70);
+  pieType = dc.pieChart("#type").innerRadius(20).radius(70);
+  durationRow = dc.rowChart("#duration");
+  pieEventStatus = dc.pieChart("#eventstatus").innerRadius(50).radius(70);
+  piePType = dc.pieChart("#ptype").innerRadius(20).radius(70);
+  pdurationRow = dc.rowChart("#pduration");
+  pieStatus = dc.pieChart("#status").innerRadius(20).radius(70);
 
   data.values.forEach(function(d){
     d.rd = dateFormat.parse(d.register_date);
@@ -123,7 +152,7 @@ cj(function($) {
   var typeP        = ndx.dimension(function(d) {return d.event_type_id; });
   var typePGroup   = typeP.group().reduceSum(function(d){ return d.count });
 
-  print_filter("typeEGroup");
+  //print_filter("typeEGroup");
 
   var durationE = ndx.dimension(function(d){ return dhm(d.ed - d.sd)});
   var durationEGroup = durationE.group().reduce(eventReduceAdd,eventReduceRemove,eventReduceInitial);
