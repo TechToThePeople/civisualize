@@ -46,7 +46,8 @@ class CRM_Civisualize_Page_Main extends CRM_Core_Page {
     ->addScriptFile('eu.tttp.civisualize', 'js/d3.v3.js', 110, 'html-header', FALSE)
     ->addScriptFile('eu.tttp.civisualize', 'js/dc/dc.js', 110, 'html-header', FALSE)
     ->addScriptFile('eu.tttp.civisualize', 'js/dc/crossfilter.js', 110, 'html-header', FALSE)
-    ->addStyleFile('eu.tttp.civisualize', 'js/dc/dc.css');
+    ->addStyleFile('eu.tttp.civisualize', 'js/dc/dc.css')
+    ->addStyleFile('eu.tttp.civisualize', 'css/style.css');
 
   require_once 'CRM/Core/Smarty/plugins/function.crmSQL.php';
    $smarty->register_function("crmSQL", "smarty_function_crmSQL");
