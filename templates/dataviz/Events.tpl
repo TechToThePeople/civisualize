@@ -31,6 +31,17 @@
 </div>
 
 <div class="clear"></div>
+<table id="dc-data-table">
+  <thead>
+  <tr class="header">
+    <th>Event Name</th>
+    <th>Start Date</th>
+    <th>End Date</th>
+    <th>Participants</th>
+  </tr>
+  </thead>
+</table>
+<div class="clear"></div>
 <!-- <h1>The graph below are still in development</h1>
 
 
@@ -98,7 +109,7 @@ var currentDate = new Date();
 
 //console.log(currentDate);
 
-var barEvents, numberUpcomingEvents, numberPastEvents, lineParticipants, pieType, durationRow, pieEventStatus, pdurationRow, pieStatus;
+var barEvents, numberUpcomingEvents, numberPastEvents, lineParticipants, pieType, durationRow, pieEventStatus, pdurationRow, pieStatus, dataTable;
 
 cj(function($) {
 
@@ -141,10 +152,8 @@ cj(function($) {
     d.sd = dateFormat.parse(d.start_date);
     d.typeLabel = typeLabel[d.event_type_id];
     d.statusLabel = statusLabel[d.status_id];
-    Events[d.id]=d.title; 
+    Events[d.id]={'title':d.title,'sd':d.sd,'ed':d.ed}; 
   });
-
-  console.log(data);
 
   var min = d3.time.month.offset(d3.min(data.values, function(d) { return d.rd;} ),-1);
   var max = d3.time.month.offset(d3.max(data.values, function(d) { return d.ed;} ), 1);
@@ -156,6 +165,8 @@ cj(function($) {
   lineParticipants = dc.lineChart("#participants");
   pieType = dc.pieChart("#type").innerRadius(0).radius(90);
   durationRow = dc.rowChart("#duration");
+  dataTable = dc.dataTable("#dc-data-table");
+
   // pieEventStatus = dc.pieChart("#eventstatus").innerRadius(50).radius(70);
   // pdurationRow = dc.rowChart("#pduration");
   // pieStatus = dc.pieChart("#status").innerRadius(20).radius(70);
@@ -195,6 +206,16 @@ cj(function($) {
 
   // var durationP = ndx.dimension(function(d){ return dhm(d.ed - d.sd)});
   // var durationPGroup = durationP.group().reduceSum(function(d){ return d.count });
+
+  var list = ndx.dimension(function(d){return d.id});
+  var listGroup = list.group().reduceSum(function(d){return d.count});
+
+  var pseudoList = {
+  top: function (x) {
+    return listGroup.top(x)
+      .map(function (d) { return {"id":d.key, "count":d.value, "title":Events[d.key].title, "sd":Events[d.key].sd, "ed":Events[d.key].ed}; });
+    }
+  };
 
   var status = ndx.dimension(function(d){ return d.status_id});
   var statusgroup = status.group().reduceSum(function(d){ return d.count });
@@ -343,6 +364,20 @@ cj(function($) {
       return d.value.eventcount;
     })
     .xAxis().ticks(1);
+
+  dataTable
+    .dimension(pseudoList)
+    .group(function(d) {return d.sd.getFullYear();})
+    // dynamic columns creation using an array of closures
+    .columns([
+        function(d) {return "<a href='event/"+d.id+"'>"+d.title+"</a>"; },
+        function(d) {return d.sd.getDate()+"/"+(d.sd.getMonth()+1)+"/"+d.sd.getFullYear();},
+        function(d) {return d.ed.getDate()+"/"+(d.ed.getMonth()+1)+"/"+d.ed.getFullYear();},
+        function(d) {return d.count;}
+    ])
+    .sortBy(function (d) {
+      return d.sd;
+    });
 
   // pieEventStatus
   //   .width(200)
