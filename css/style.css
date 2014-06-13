@@ -1,3 +1,2 @@
-#type svg {
-	width:400px;
-}
+#type svg { width:400px; }
+#duration > svg > g > g.row > text {fill:black;}

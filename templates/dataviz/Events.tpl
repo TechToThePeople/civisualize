@@ -25,8 +25,8 @@
 </div>
 
 <div id="duration">
-  <strong>Duration of Event</strong>
-  <a class="reset" href="javascript:durationRow.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+  <strong>Day of Week</strong>
+  <a class="reset" href="javascript:dayofweekRow.filterAll();dc.redrawAll();" style="display: none;">reset</a>
   <div class="clearfix"></div>
 </div>
 
@@ -109,7 +109,7 @@ var currentDate = new Date();
 
 //console.log(currentDate);
 
-var barEvents, numberUpcomingEvents, numberPastEvents, lineParticipants, pieType, durationRow, pieEventStatus, pdurationRow, pieStatus, dataTable;
+var barEvents, numberUpcomingEvents, numberPastEvents, lineParticipants, pieType, dayofweekRow, pieEventStatus, pdurationRow, pieStatus, dataTable;
 
 cj(function($) {
 
@@ -164,7 +164,7 @@ cj(function($) {
   barEvents = dc.barChart("#events");
   lineParticipants = dc.lineChart("#participants");
   pieType = dc.pieChart("#type").innerRadius(0).radius(90);
-  durationRow = dc.rowChart("#duration");
+  dayofweekRow = dc.rowChart("#duration");
   dataTable = dc.dataTable("#dc-data-table");
 
   // pieEventStatus = dc.pieChart("#eventstatus").innerRadius(50).radius(70);
@@ -178,31 +178,27 @@ cj(function($) {
 
   var typeE        = ndx.dimension(function(d) {return d.typeLabel; });
   var typeEGroup   = typeE.group().reduce(eventReduceAdd,eventReduceRemove,eventReduceInitial);
-  
-  var durationE = ndx.dimension(function(d){
-    var days = dhm(d.ed - d.sd);
-    var weeks = Math.ceil(days/7);
-    var months = Math.ceil(weeks/4);
-    if(months>12)
-      return "More than 1 Year";
-    if(months>6)
-      return "6-12 Months";
-    if(months>3)
-      return "3-6 Months";
-    if(months==2)
-      return "2 Months";
-    if(weeks>4)
-      return "1-2 Months";
-    if(weeks>2)
-      return "2-4 Weeks";
-    if(days>5)
-      return "5 Days to Week"; 
-    if(days>1)
-      return "2-4 Days";
-    return "1 Day"
-
+    
+  var dayOfWeek = ndx.dimension(function (d) {
+    var day = d.sd.getDay();
+    switch (day) {
+        case 0:
+            return "Sunday";
+        case 1:
+            return "Monday";
+        case 2:
+            return "Tuesday";
+        case 3:
+            return "Wednesday";
+        case 4:
+            return "Thursday";
+        case 5:
+            return "Friday";
+        case 6:
+            return "Saturday";
+      }
   });
-  var durationEGroup = durationE.group().reduce(eventReduceAdd,eventReduceRemove,eventReduceInitial);
+  var dayOfWeekGroup = dayOfWeek.group().reduce(eventReduceAdd,eventReduceRemove,eventReduceInitial);
 
   // var durationP = ndx.dimension(function(d){ return dhm(d.ed - d.sd)});
   // var durationPGroup = durationP.group().reduceSum(function(d){ return d.count });
@@ -355,11 +351,11 @@ cj(function($) {
     .legend(dc.legend().x(200).y(10).itemHeight(13).gap(5))
     .renderlet(function(chart){});
 
-  durationRow
+  dayofweekRow
     .width(300)
     .height(200)
-    .dimension(durationE)
-    .group(durationEGroup)
+    .dimension(dayOfWeek)
+    .group(dayOfWeekGroup)
     .valueAccessor(function (d) {
       return d.value.eventcount;
     })
