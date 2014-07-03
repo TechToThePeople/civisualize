@@ -49,8 +49,8 @@ class CRM_Civisualize_Page_Main extends CRM_Core_Page {
     ->addStyleFile('eu.tttp.civisualize', 'js/dc/dc.css')
     ->addStyleFile('eu.tttp.civisualize', 'css/style.css');
 
-  require_once 'CRM/Core/Smarty/plugins/function.crmSQL.php';
-   $smarty->register_function("crmSQL", "smarty_function_crmSQL");
+    require_once 'CRM/Core/Smarty/plugins/function.crmSQL.php';
+    $smarty->register_function("crmSQL", "smarty_function_crmSQL");
 
     if  ( ! array_key_exists ( 'HTTP_X_REQUESTED_WITH', $_SERVER ) ||
       $_SERVER['HTTP_X_REQUESTED_WITH'] != "XMLHttpRequest"  )  {

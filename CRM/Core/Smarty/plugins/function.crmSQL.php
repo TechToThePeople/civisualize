@@ -10,8 +10,24 @@ function smarty_function_crmSQL($params, &$smarty) {
     $sql = $params["sql"];
   } else {
     $sql=file_get_contents ('queries/'.$params["file"].".sql", true);
-  } 
-  // TODO: remove "DELETE " and "UPDATE " and "GRANT " and ...
+  }
+
+  if(strpos(strtolower($sql), "delete ")!==false){
+    $smarty->trigger_error("DELETE command not allowed");
+    return "crmAPI: you can not delete using crmSQL";
+  }
+  else if(strpos(strtolower($sql), "drop ")!==false){
+    $smarty->trigger_error("DROP command not allowed");
+    return "crmAPI: you can not drop using crmSQL";
+  }
+  else if(strpos(strtolower($sql), "update ")!==false){
+    $smarty->trigger_error("UPDATE command not allowed");
+    return "crmAPI: you can not update using crmSQL";
+  }
+  else if(strpos(strtolower($sql), "grant ")!==false){
+    $smarty->trigger_error("GRANT command not allowed");
+    return "crmAPI: you can not grant privileges using crmSQL";
+  }
 
   if (array_key_exists('debug', $params)) { 
     $smarty->trigger_error("sql:". $params["sql"]); 
