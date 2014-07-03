@@ -3,76 +3,56 @@
 {/if}
 {php}CRM_Utils_System::setTitle('Events');{/php}
 
-<div style="font-size:20px; float:left; width:100%; text-align:center; height:90px;">
-<span id="pastevents" style="color:steelblue; font-size:50px; line-height:80px"></span> <span id="isPast"></span><span id="isboth"></span><span id="upcomingevents" style="color:steelblue; font-size:50px; line-height:80px"></span> <span id="isUpcoming"></span> with a total of <span id="nparticipants" style="color:steelblue; font-size:50px; line-height:80px"></span> Participants.
-</div>
-<div id="events" style="width:100%;">
-  <strong>Events</strong>
-  <a class="reset" href="javascript:barEvents.filterAll();dc.redrawAll();" style="display: none;">reset</a>
-  <div class="clearfix"></div>
-</div>
-<div id="participants" style="width:100%;">
-  <strong>Participants</strong>
-  <a class="reset" href="javascript:lineParticipants.filterAll();dc.redrawAll();" style="display: none;">reset</a>
-  <div class="clearfix"></div>
-</div>
-<div class="clear">
+<div class="eventsoverview">
+  <div style="font-size:20px; float:left; width:100%; text-align:center; height:90px;">
+  <span id="pastevents" style="color:steelblue; font-size:50px; line-height:80px"></span> past events, 
+  <span id="currentevents" style="color:steelblue; font-size:50px; line-height:80px"></span> ongoing events and 
+  <span id="upcomingevents" style="color:steelblue; font-size:50px; line-height:80px"></span> upcoming event
+   with a total of <span id="nparticipants" style="color:steelblue; font-size:50px; line-height:80px"></span> Participants.
+  </div>
+  <div id="events" style="width:100%;">
+    <strong>Events</strong>
+    <a class="reset" href="javascript:barEvents.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+    <div class="clearfix"></div>
+  </div>
+  <div id="participants" style="width:100%;">
+    <strong>Participants</strong>
+    <a class="reset" href="javascript:lineParticipants.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+    <div class="clearfix"></div>
+  </div>
+  <div class="clear">
 
-<div id="type">
-  <strong>Type</strong>
-  <a class="reset" href="javascript:pieType.filterAll();dc.redrawAll();" style="display: none;">reset</a>
-  <div class="clearfix"></div>
+  <div id="type">
+    <strong>Type</strong>
+    <a class="reset" href="javascript:pieType.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+    <div class="clearfix"></div>
+  </div>
+
+  <div id="duration">
+    <strong>Day of Week</strong>
+    <a class="reset" href="javascript:dayofweekRow.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+    <div class="clearfix"></div>
+  </div>
+
+  <div id="ismonetory">
+    <strong>Is Monetory</strong>
+    <a class="reset" href="javascript:pieMonetory.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+    <div class="clearfix"></div>
+  </div>
+
+  <div class="clear"></div>
+  <table id="dc-data-table">
+    <thead>
+    <tr class="header">
+      <th>Event Name</th>
+      <th>Start Date</th>
+      <th>End Date</th>
+      <th>Participants</th>
+    </tr>
+    </thead>
+  </table>
+  <div class="clear"></div>
 </div>
-
-<div id="duration">
-  <strong>Day of Week</strong>
-  <a class="reset" href="javascript:dayofweekRow.filterAll();dc.redrawAll();" style="display: none;">reset</a>
-  <div class="clearfix"></div>
-</div>
-
-<div class="clear"></div>
-<table id="dc-data-table">
-  <thead>
-  <tr class="header">
-    <th>Event Name</th>
-    <th>Start Date</th>
-    <th>End Date</th>
-    <th>Participants</th>
-  </tr>
-  </thead>
-</table>
-<div class="clear"></div>
-<!-- <h1>The graph below are still in development</h1>
-
-
-
-
-
-<div id="eventstatus">
-  <strong>Event Status</strong>
-  <a class="reset" href="javascript:pieEventStatus.filterAll();dc.redrawAll();" style="display: none;">reset</a>
-  <div class="clearfix"></div>  
-</div>
-<div class="clear"></div>
-<h3>Participants</h3>
-
-<div id="ptype">
-  <strong>Participants by Type</strong>
-  <a class="reset" href="javascript:piePType.filterAll();dc.redrawAll();" style="display: none;">reset</a>
-  <div class="clearfix"></div>  
-</div>
-<div id="pduration">
-  <strong>Participants by Duration</strong>
-  <a class="reset" href="javascript:pdurationRow.filterAll();dc.redrawAll();" style="display: none;">reset</a>
-  <div class="clearfix"></div>  
-</div>
-<div id="status">
-  <strong>Participants Status</strong>
-  <a class="reset" href="javascript:pieStatus.filterAll();dc.redrawAll();" style="display: none;">reset</a>
-  <div class="clearfix"></div>  
-</div>
-<div class="clear"></div>
- -->
 <script>
 'use strict';
 
@@ -109,7 +89,18 @@ var currentDate = new Date();
 
 //console.log(currentDate);
 
-var barEvents, numberUpcomingEvents, numberPastEvents, lineParticipants, pieType, dayofweekRow, pieEventStatus, pdurationRow, pieStatus, dataTable;
+var Events={};
+
+data.values.forEach(function(d){
+  d.rd = dateFormat.parse(d.register_date);
+  d.ed = dateFormat.parse(d.end_date);
+  d.sd = dateFormat.parse(d.start_date);
+  d.typeLabel = typeLabel[d.tid]
+  d.statusLabel = statusLabel[d.status_id];
+  Events[d.id]={'title':d.title,'sd':d.sd,'ed':d.ed}; 
+});
+
+var barEvents, numberUpcomingEvents, numberPastEvents, lineParticipants, pieType, dayofweekRow, pieEventStatus, pdurationRow, pieMonetory, dataTable;
 
 cj(function($) {
 
@@ -144,17 +135,6 @@ cj(function($) {
     return {events:eventlist, eventcount:0, participantcount:0};
   }
 
-  var Events={};
-
-  data.values.forEach(function(d){
-    d.rd = dateFormat.parse(d.register_date);
-    d.ed = dateFormat.parse(d.end_date);
-    d.sd = dateFormat.parse(d.start_date);
-    d.typeLabel = typeLabel[d.event_type_id];
-    d.statusLabel = statusLabel[d.status_id];
-    Events[d.id]={'title':d.title,'sd':d.sd,'ed':d.ed}; 
-  });
-
   var min = d3.time.month.offset(d3.min(data.values, function(d) { return d.rd;} ),-1);
   var max = d3.time.month.offset(d3.max(data.values, function(d) { return d.ed;} ), 1);
 
@@ -166,10 +146,11 @@ cj(function($) {
   pieType = dc.pieChart("#type").innerRadius(0).radius(90);
   dayofweekRow = dc.rowChart("#duration");
   dataTable = dc.dataTable("#dc-data-table");
+  pieMonetory = dc.pieChart("#ismonetory").innerRadius(20).radius(70);
 
   // pieEventStatus = dc.pieChart("#eventstatus").innerRadius(50).radius(70);
   // pdurationRow = dc.rowChart("#pduration");
-  // pieStatus = dc.pieChart("#status").innerRadius(20).radius(70);
+  
 
   var byMonth = ndx.dimension(function(d) { return d3.time.month(d.sd);});
   var eventsByMonth = byMonth.group().reduce(eventReduceAdd,eventReduceRemove,eventReduceInitial);
@@ -200,8 +181,8 @@ cj(function($) {
   });
   var dayOfWeekGroup = dayOfWeek.group().reduce(eventReduceAdd,eventReduceRemove,eventReduceInitial);
 
-  // var durationP = ndx.dimension(function(d){ return dhm(d.ed - d.sd)});
-  // var durationPGroup = durationP.group().reduceSum(function(d){ return d.count });
+  var monetory = ndx.dimension(function(d){ return d.im; });
+  var monetoryGroup = monetory.group().reduce(eventReduceAdd,eventReduceRemove,eventReduceInitial);
 
   var list = ndx.dimension(function(d){return d.id});
   var listGroup = list.group().reduceSum(function(d){return d.count});
@@ -220,41 +201,23 @@ cj(function($) {
     {
       if(d.sd>currentDate)
         return "Upcoming Event";
+      if(d.ed>currentDate)
+        return "Ongoing Event";
       return "Past Event";
   });
   var eventstatus_group = event_status.group().reduce(eventReduceAdd,eventReduceRemove,eventReduceInitial);
-  var upcoming_event =  {
-    all:function () {
-      var g = [];
-      eventstatus_group.all().forEach(function(d,i){
-        if (d.key == 'Upcoming Event') {g.push(d);}
-      });
-      return g;
-    },
-    top:function () {
-      var g = [];
-      eventstatus_group.all().forEach(function(d,i){
-        if (d.key == 'Upcoming Event') {g.push(d);}
-      });
-      return g;
-    }
-  };
-  var past_event =  {
-    all:function () {
-      var g = [];
-      eventstatus_group.all().forEach(function(d,i){
-        if (d.key == 'Past Event') {g.push(d);}
-      });
-      return g;
-    },
-    top:function () {
-      var g = [];
-      eventstatus_group.all().forEach(function(d,i){
-        if (d.key == 'Past Event') {g.push(d);}
-      });
-      return g;
-    }
-  };
+
+  function statusevent(status){
+    return {
+      value:function(){
+        var v = {'value':0};
+        eventstatus_group.all().forEach(function(d,i){
+          if (d.key == status) {v.value=d.value.eventcount;}
+        });
+        return v;
+      }
+    };
+  }
 
   var grouped=ndx.groupAll().reduce(eventReduceAdd,eventReduceRemove,eventReduceInitial);
 
@@ -269,29 +232,29 @@ cj(function($) {
 
   var numberPastEvents = dc.numberDisplay('#pastevents')
     .dimension(event_status)
-    .group(past_event)
-    .valueAccessor(function(d){
-        return d.value.eventcount;
-    })
+    .group(statusevent('Past Event'))
     .formatNumber(d3.format("d"));
 
   var numberUpcomingEvents = dc.numberDisplay('#upcomingevents')
     .dimension(event_status)
-    .group(upcoming_event)
-    .valueAccessor(function(d){
-        return d.value.eventcount;
-    })
+    .group(statusevent('Upcoming Event'))
     .formatNumber(d3.format("d"));
 
-  if(numberUpcomingEvents.value()>0){
-    document.getElementById("isUpcoming").innerHTML=" Upcoming Events ";
-  }
+  var numberOngoingEvents = dc.numberDisplay('#currentevents')
+    .dimension(event_status)
+    .group(statusevent('Ongoing Event'))
+    .formatNumber(d3.format("d"));
 
+  var uflag = 0, cflag=0, pflag=0;
+
+  if(numberUpcomingEvents.value()>0){
+    uflag=1;
+  }
   if(numberPastEvents.value()>0){
-      if(numberUpcomingEvents.value()>0){
-        document.getElementById("isboth").innerHTML=" and ";
-      }
-    document.getElementById("isPast").innerHTML=" Past Events ";
+    pflag=1;
+  }
+  if(numberOngoingEvents.value()>0){
+    cflag=1;
   }
 
 //Events
@@ -361,6 +324,16 @@ cj(function($) {
     })
     .xAxis().ticks(1);
 
+  pieMonetory
+    .width(200)
+    .height(200)
+    .dimension(monetory)
+    .group(monetoryGroup)
+    .valueAccessor(function(d){
+      return d.value.eventcount;
+    })
+    .renderlet(function(chart){});
+
   dataTable
     .dimension(pseudoList)
     .group(function(d) {return d.sd.getFullYear();})
@@ -397,16 +370,6 @@ cj(function($) {
   //       return d.key + " Days Event: " + d.value;
   //   })
   //   .xAxis().ticks(1);
-
-  // pieStatus
-  //   .width(200)
-  //   .height(200)
-  //   .dimension(status)
-  //   .group(statusgroup)
-  //   .label(function(d){
-  //     return statusLabel[d.key];
-  //   })
-  //   .renderlet(function(chart){});
 
   dc.renderAll();
 });
