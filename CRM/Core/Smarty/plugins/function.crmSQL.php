@@ -2,13 +2,31 @@
 
 function smarty_function_crmSQL($params, &$smarty) { 
   
-  if (!array_key_exists('sql', $params) && !array_key_exists('file', $params)) { 
-    $smarty->trigger_error("assign: missing 'sql' OR 'file' parameter"); 
-    return "crmAPI: missing 'sql' or 'file' parameter"; 
+  if (!array_key_exists('sql', $params) && !array_key_exists('file', $params) && !array_key_exists('json', $params)) { 
+    $smarty->trigger_error("assign: missing 'sql', 'json' OR 'file' parameter"); 
+    return "crmAPI: missing 'sql', 'json' or 'file' parameter"; 
   } 
-  if (array_key_exists('sql', $params)){
+  
+  $parameters = array();
+
+  if(array_key_exists('json', $params)){
+    $json=json_decode(file_get_contents('queries/'.$params["json"].".json", true));//file_get_contents('queries/'.$params["json"].".json", true)
+    $sql=$json->{"query"};
+    foreach ($json->{"params"} as $key => $value) {
+      $var=intval($key);
+      $name=$value->{"name"};
+      $type=$value->{"type"};
+      if(array_key_exists($name, $params)){
+        $parameters[$var] = array($params[$name],$type);
+      }
+      //return var_dump(array($params[$name],$type));  
+    }
+  }
+
+  else if (array_key_exists('sql', $params)){
     $sql = $params["sql"];
-  } else {
+  } 
+  else {
     $sql=file_get_contents ('queries/'.$params["file"].".sql", true);
   }
 
@@ -33,12 +51,12 @@ function smarty_function_crmSQL($params, &$smarty) {
     $smarty->trigger_error("sql:". $params["sql"]); 
   }
 
-//  CRM_Core_Error::setCallback(array('CRM_Utils_REST', 'fatal')); 
-  $dao = CRM_Core_DAO::executeQuery($sql);
+  //  CRM_Core_Error::setCallback(array('CRM_Utils_REST', 'fatal')); 
+  $dao = CRM_Core_DAO::executeQuery($sql,$parameters);
   $values = array();
   while ($dao->fetch()) {
     $values[] = $dao->toArray();
   }       
 
-  return json_encode (array("is_error"=>0, "values" => $values), JSON_NUMERIC_CHECK);
+  return json_encode(array("is_error"=>0, "values" => $values), JSON_NUMERIC_CHECK);
 }
