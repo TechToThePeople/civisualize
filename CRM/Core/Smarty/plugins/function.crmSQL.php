@@ -19,7 +19,6 @@ function smarty_function_crmSQL($params, &$smarty) {
       if(array_key_exists($name, $params)){
         $parameters[$var] = array($params[$name],$type);
       }
-      //return var_dump(array($params[$name],$type));  
     }
   }
 

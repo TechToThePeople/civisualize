@@ -40,11 +40,11 @@
 <!--script scr="{crmResURL ext="eu.tttp.civisualize"}js/dc/dc.js"></script>
 <script scr="{crmResURL ext="eu.tttp.civisualize"}js/dc/crossfilter.js"></script -->
 
+
 <script>
 'use strict';
 
 var data = {crmSQL file="contacts"};
-
 {literal}
 
 data.values.forEach(function(d) {
