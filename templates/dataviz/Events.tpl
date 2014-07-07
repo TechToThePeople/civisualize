@@ -5,9 +5,9 @@
 
 <div class="eventsoverview">
   <div style="font-size:20px; float:left; width:100%; text-align:center; height:90px;">
-  <span id="pastevents" style="color:steelblue; font-size:50px; line-height:80px"></span> past events, 
-  <span id="currentevents" style="color:steelblue; font-size:50px; line-height:80px"></span> ongoing events and 
-  <span id="upcomingevents" style="color:steelblue; font-size:50px; line-height:80px"></span> upcoming event
+  <span id="pastevents"></span>, 
+  <span id="currentevents"></span> and 
+  <span id="upcomingevents"></span>
    with a total of <span id="nparticipants" style="color:steelblue; font-size:50px; line-height:80px"></span> Participants.
   </div>
   <div id="events" style="width:100%;">
@@ -138,6 +138,7 @@ cj(function($) {
   var min = d3.time.month.offset(d3.min(data.values, function(d) { return d.rd;} ),-1);
   var max = d3.time.month.offset(d3.max(data.values, function(d) { return d.ed;} ), 1);
 
+
   var ndx                 = crossfilter(data.values),
   all = ndx.groupAll();
 
@@ -232,16 +233,19 @@ cj(function($) {
 
   var numberPastEvents = dc.numberDisplay('#pastevents')
     .dimension(event_status)
+    .html({some:"<span style='color:steelblue; font-size:50px; line-height:80px'>%number</span> past events",one:"<span style=\"color:steelblue; font-size:50px; line-height:80px\">%number</span> past event", none:"no past events"})
     .group(statusevent('Past Event'))
     .formatNumber(d3.format("d"));
 
   var numberUpcomingEvents = dc.numberDisplay('#upcomingevents')
     .dimension(event_status)
+    .html({some:"<span style=\"color:steelblue; font-size:50px; line-height:80px\">%number</span> upcoming events",one:"<span style=\"color:steelblue; font-size:50px; line-height:80px\">%number</span> upcoming event", none:"no upcoming events"})
     .group(statusevent('Upcoming Event'))
     .formatNumber(d3.format("d"));
 
   var numberOngoingEvents = dc.numberDisplay('#currentevents')
     .dimension(event_status)
+    .html({some:"<div style=\"color:steelblue; font-size:50px; line-height:80px\">%number</div> ongoing events",one:"<span style=\"color:steelblue; font-size:50px; line-height:80px\">%number</span> ongoing event", none:"no ongoing events"})
     .group(statusevent('Ongoing Event'))
     .formatNumber(d3.format("d"));
 
@@ -305,9 +309,6 @@ cj(function($) {
     .height(200)
     .dimension(typeE)
     .group(typeEGroup)
-    // .label(function(d){
-    //   return typeLabel[d.key];
-    // })
     .valueAccessor(function (d) {
       return d.value.eventcount;
     })
@@ -347,29 +348,6 @@ cj(function($) {
     .sortBy(function (d) {
       return d.sd;
     });
-
-  // pieEventStatus
-  //   .width(200)
-  //   .height(200)
-  //   .dimension(event_status)
-  //   .group(eventstatus_group)
-  //   .valueAccessor(function (d) {
-  //     return d.value.eventcount;
-  //   })
-  //   .renderlet(function(chart){});
-
-  // pdurationRow
-  //   .width(300)
-  //   .height(200)
-  //   .dimension(durationP)
-  //   .group(durationPGroup)
-  //   .label(function(d){
-  //     if(d.key==1)
-  //       return d.key + " Day Event: " + d.value;
-  //     else
-  //       return d.key + " Days Event: " + d.value;
-  //   })
-  //   .xAxis().ticks(1);
 
   dc.renderAll();
 });
