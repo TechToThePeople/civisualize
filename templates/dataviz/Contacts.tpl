@@ -40,11 +40,11 @@
 <!--script scr="{crmResURL ext="eu.tttp.civisualize"}js/dc/dc.js"></script>
 <script scr="{crmResURL ext="eu.tttp.civisualize"}js/dc/crossfilter.js"></script -->
 
+
 <script>
 'use strict';
 
 var data = {crmSQL file="contacts"};
-
 {literal}
 
 data.values.forEach(function(d) {
@@ -66,7 +66,7 @@ cj(function($) {
 
 	var totalContacts = 0;
 	
-	data.values.forEach(function(d){ totalContacts+=d.count; d.dd = dateFormat.parse(d.created_date); if(d.source=="") d.source='None';});
+	data.values.forEach(function(d){ totalContacts+=d.count; d.dd = dateFormat.parse(d.modified_date); if(d.source=="") d.source='None';});
 	var min = d3.time.day.offset(d3.min(data.values, function(d) { return d.dd;} ),-2);
 	var max = d3.time.day.offset(d3.max(data.values, function(d) { return d.dd;} ), 2);
 
