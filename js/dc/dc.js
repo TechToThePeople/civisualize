@@ -611,7 +611,7 @@ dc.baseMixin = function (_chart) {
                     var filter = filters[i];
                     if (filter.isFiltered && filter.isFiltered(d)) {
                         return true;
-                    } else if (filter == d) {
+                    } else if (filter <= d && filter >= d) {
                         return true;
                     }
                 }
@@ -1007,11 +1007,18 @@ dc.baseMixin = function (_chart) {
     **/
     _chart.hasFilter = function (filter) {
         if (!arguments.length) return _filters.length > 0;
-        return _filters.indexOf(filter) >= 0;
+        return _filters.some(function(f) {
+            return filter <= f && filter >= f;
+        });
     };
 
     function removeFilter(_) {
-        _filters.splice(_filters.indexOf(_), 1);
+        for(var i = 0; i < _filters.length; i++) {
+            if(_filters[i] <= _ && _filters[i] >= _) {
+                _filters.splice(i, 1);
+                break;
+            }
+        }
         applyFilters();
         _chart._invokeFilteredListener(_);
     }
@@ -4282,10 +4289,10 @@ dc.dataCount = function(parent, chartGroup) {
         var selected = _formatNumber(val);
 
         if((tot===val)&&(_html.all!=="")) {
-            _chart.root().text(_html.all.replace('%total-count',all).replace('%filter-count',selected));
+            _chart.root().html(_html.all.replace('%total-count',all).replace('%filter-count',selected));
         }
         else if(_html.some!=="") {
-            _chart.root().text(_html.some.replace('%total-count',all).replace('%filter-count',selected));
+            _chart.root().html(_html.some.replace('%total-count',all).replace('%filter-count',selected));
         } else {
             _chart.selectAll(".total-count").text(all);
             _chart.selectAll(".filter-count").text(selected);
@@ -6703,7 +6710,7 @@ dc.numberDisplay = function (parent, chartGroup) {
                         html = _html.one;
                     else if(_html.some!=="")
                         html = _html.some;
-                    this.textContent = html ? html.replace("%number", num) : num;
+                    this.innerHTML = html ? html.replace("%number", num) : num;
                 };
             });
     };
