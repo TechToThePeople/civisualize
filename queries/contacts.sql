@@ -1,1 +1,1 @@
-SELECT COUNT(*) as count, source, gender_id as gender, contact_type as type, DATE(created_date) as created_date from civicrm_contact as contact where modified_date is not null group by DATE(modified_date), contact_type, gender, source;
+SELECT COUNT(*) as count, source, gender_id as gender, contact_type as type, DATE(created_date) as created_date from civicrm_contact as contact where is_deleted=0 AND modified_date is not null group by DATE(modified_date), contact_type, gender, source;
