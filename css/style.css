@@ -1,3 +1,4 @@
 .eventsoverview #type svg { width:400px; }
 .eventsoverview #duration > svg > g > g.row > text {fill:black;}
 .eventsoverview #ismonetory svg {width: 300px; }
+.dc_contacts #source > svg > g > g.row > text {fill:black;}
