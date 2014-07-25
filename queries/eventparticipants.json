@@ -1,0 +1,1 @@
+{"query":"SELECT * from civicrm_participant as participant where participant.event_id=%1;","params":{"1":{"name":"eventid","type":"Integer"}}}

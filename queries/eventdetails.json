@@ -1,0 +1,1 @@
+{"query":"SELECT title, event_type_id, created_date, end_date, start_date, registration_start_date, registration_end_date, is_monetary, is_active from civicrm_event as event where event.id=%1;","params":{"1":{"name":"eventid","type":"Integer"}}}
