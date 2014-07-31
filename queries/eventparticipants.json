@@ -1,1 +1,1 @@
-{"query":"SELECT * from civicrm_participant as participant where participant.event_id=%1;","params":{"1":{"name":"eventid","type":"Integer"}}}
+{"query":"SELECT contact.birth_date, contact.contact_type, contact.gender_id, participant.status_id, participant.fee_amount, participant.fee_currency, participant.register_date from civicrm_participant as participant INNER JOIN civicrm_contact as contact on participant.contact_id = contact.id and contact.is_deleted=0 where participant.event_id=%1;","params":{"1":{"name":"eventid","type":"Integer"}}}
