@@ -64,9 +64,7 @@ if(!data.is_error){//Check for database error
 		data.values.forEach(function(d){ 
 			totalContacts+=d.count;
 			d.gender=genderLabel[d.gender_id];
-			else{
-				d.dd = dateFormat.parse(d.created_date);
-			}
+			d.dd = dateFormat.parse(d.created_date);
 			if(d.source=="")
 				d.source='None';
 			if(d.gender_id=="")
