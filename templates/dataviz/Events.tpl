@@ -239,17 +239,6 @@ if(!data.is_error){
       .group(statusevent('Ongoing Event'))
       .formatNumber(d3.format("d"));
 
-    var uflag = 0, cflag=0, pflag=0;
-
-    if(numberUpcomingEvents.value()>0){
-      uflag=1;
-    }
-    if(numberPastEvents.value()>0){
-      pflag=1;
-    }
-    if(numberOngoingEvents.value()>0){
-      cflag=1;
-    }
 
   //Events
     barEvents
