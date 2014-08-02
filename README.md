@@ -11,14 +11,43 @@ This extension has two parts:
 Extract Data
 -------------
 
-for the first part, we are 
-- adding getstat as a new action on some entities in the api
-- add a new crmSQL to run a query. it has two modes
-{crmSQL sql="SELECT count(*) ... group by ...."}
-or 
-{crmSQL query="somethingcool"}
-that will fetch the sql query from /queries/somethingcool.sql
+For the first part, we are using the following methods
 
+###{crmAPI}
+You can add getstat as a new action on some entities in the api
+
+###{crmSQL}
+We have added a new crmSQL to run a query. It has the following three modes.
+- SQL String
+- SQL File
+- JSON Object
+
+####SQL String
+{crmSQL sql="SELECT count(*) ... group by ...."}
+CRM SQL only accept SELECT statemente
+   
+####SQL File
+{crmSQL query="somethingcool"} 
+This will fetch the sql query from /queries/somethingcool.sql
+
+####JSON Object
+{crmSQL json="somethingcooler" cid=4 bla="hello"}
+This will fetch a json object from /queries/somethingcooler.json
+The format of the json is 
+
+```javascript
+{  "query":"SELECT * from ABC where id=%1 and bla=%2",
+   "params":{  "1":{ "name":"cid",
+                     "type":"Integer"},
+               "2":{ "name":"bla",
+                     "type":"String"}
+            }
+}
+```
+You can further use {crmRetrieve var="a" name="b" type="Integer"}
+This will pull the POST or GET variable named b into a.
+
+###{crmReport}
 A 3rd option is to be able to fetch data from a report instance using a {crmReport...}. Eileen has done (most of?) the work already. I think it's on 4.5 
 
 Display data
