@@ -55,6 +55,9 @@ class CRM_Civisualize_Page_Main extends CRM_Core_Page {
     require_once 'CRM/Core/Smarty/plugins/function.crmRetrieve.php';
     $smarty->register_function("crmRetrieve", "smarty_function_crmRetrieve");
 
+    require_once 'CRM/Core/Smarty/plugins/function.crmTitle.php';
+    $smarty->register_function("crmTitle", "smarty_function_crmTitle");
+
     if  ( ! array_key_exists ( 'HTTP_X_REQUESTED_WITH', $_SERVER ) ||
       $_SERVER['HTTP_X_REQUESTED_WITH'] != "XMLHttpRequest"  )  {
 

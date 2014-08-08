@@ -1,3 +1,5 @@
+{crmTitle string="Civisualize"}
+
 You need to choose one data visualisation. check you url.
 
 To get you started:
