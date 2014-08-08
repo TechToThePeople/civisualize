@@ -34,6 +34,9 @@
     position: absolute;
     bottom: 0;
   }
+  #participants{
+    width:100%;
+  }
 </style>
 {/literal}
 
@@ -69,8 +72,6 @@ console.log(eventdetails);
 eventdetails = eventdetails.values[0];
 
 console.log(participantdetails);
-
-{php}CRM_Utils_System::setTitle('Siddharth');{/php}
 
 var i = {crmAPI entity="OptionValue" option_group_id="14"}; {*todo on 4.4, use the event-type as id *}
 var s = {crmAPI entity='ParticipantStatusType' option_sort="is_counted desc"};
@@ -150,7 +151,7 @@ cj(function($) {
     .height(200)
     .dimension(RByDay)
     .group(RByDayGroup)
-    .brushOn(false)
+    .brushOn(true)
     .x(d3.time.scale().domain([min, max]))
     .round(d3.time.day.round)
     .elasticY(true)
@@ -182,6 +183,7 @@ cj(function($) {
   barFee
     .height(220)
     .width(300)
+    .elasticX(true)
     .dimension(Fee)
     .group(FeeGroup);
 
