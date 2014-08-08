@@ -61,7 +61,7 @@
 
 //console.log({$id});
 
-var eventdetails = {crmSQL json="eventdetails" eventid=$id};
+var eventdetails = {crmSQL json="eventdetails" eventid=$id setTitle="title"};
 var participantdetails = {crmSQL json="eventparticipants" eventid=$id};
 
 console.log(eventdetails);
@@ -69,8 +69,6 @@ console.log(eventdetails);
 eventdetails = eventdetails.values[0];
 
 console.log(participantdetails);
-
-{php}CRM_Utils_System::setTitle('Siddharth');{/php}
 
 var i = {crmAPI entity="OptionValue" option_group_id="14"}; {*todo on 4.4, use the event-type as id *}
 var s = {crmAPI entity='ParticipantStatusType' option_sort="is_counted desc"};

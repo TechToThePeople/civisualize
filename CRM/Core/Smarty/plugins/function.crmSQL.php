@@ -66,5 +66,13 @@ function smarty_function_crmSQL($params, &$smarty) {
     $values="";
   }
 
-  return json_encode(array("is_error"=>$is_error, "error"=>$error, "values" => $values), JSON_NUMERIC_CHECK);
+  $title=$values[0][$params['setTitle']];
+
+  if(array_key_exists('setTitle', $params)){
+    if(array_key_exists($params['setTitle'], $values[0])){
+      CRM_Utils_System::setTitle($values[0][$params['setTitle']]);
+    }
+  }
+
+  return json_encode(array("title"=>$title, "is_error"=>$is_error, "error"=>$error, "values" => $values), JSON_NUMERIC_CHECK);
 }
