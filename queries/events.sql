@@ -4,9 +4,9 @@ SELECT
 	event.title, 
 	event.event_type_id as tid, 
 	event.is_monetary as im,
-	event.start_date as start_date, 
-	event.end_date as end_date,
-	DATE(participant.register_date) as register_date
+	event.start_date as sd, 
+	event.end_date as ed,
+	DATE(participant.register_date) as rd
 FROM
 	civicrm_event as event
 	INNER JOIN 

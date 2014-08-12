@@ -66,11 +66,10 @@ function smarty_function_crmSQL($params, &$smarty) {
     $values="";
   }
 
-  $title=$values[0][$params['setTitle']];
 
-  if(array_key_exists('setTitle', $params)){
-    if(array_key_exists($params['setTitle'], $values[0])){
-      CRM_Utils_System::setTitle($values[0][$params['setTitle']]);
+  if(array_key_exists('TitleField', $params)){
+    if(array_key_exists($params['TitleField'], $values[0])){
+      CRM_Utils_System::setTitle($values[0][$params['TitleField']]);
     }
   }
 
