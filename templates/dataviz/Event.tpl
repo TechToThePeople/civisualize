@@ -145,12 +145,23 @@ cj(function($) {
 
   var RByDay = ndx.dimension(function(d) { return d3.time.day(d.rd);});
   var RByDayGroup = RByDay.group().reduceCount();
+  var group = {
+      all:function () {
+        var cumulate = 0;
+        var g = [];
+        RByDayGroup.all().forEach(function(d,i) {
+          cumulate += d.value;
+          g.push({key:d.key,value:cumulate})
+        });
+        return g;
+      }
+    };
 
   lineParticipants
     .margins({top: 10, right: 50, bottom: 20, left:40})
     .height(200)
     .dimension(RByDay)
-    .group(RByDayGroup)
+    .group(group)
     .brushOn(true)
     .x(d3.time.scale().domain([min, max]))
     .round(d3.time.day.round)
