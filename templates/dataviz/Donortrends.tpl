@@ -78,16 +78,24 @@ cj(function($){
 	}
 
 	function Initial() {
-		return { fresh:0, upgraded:0, downgraded:0, maintained:0};
+		return { fresh:0, upgraded:0, downgraded:0, maintained:0, lapsed:0};
 	}
+
+
 
 	var ndx                 = crossfilter(data.values),
     all = ndx.groupAll();
 
+
+
     var minYear=d3.min(data.values, function(d){return d.year;});
     var maxYear=d3.max(data.values, function(d){return d.year;});
 
+
+
 	donorBar = dc.barChart("#donorBar");
+
+
 
 
 	var byYear = ndx.dimension(function(d) {return d.year;});
@@ -97,16 +105,22 @@ cj(function($){
 	var group = {
 			all:function () {
 				var g=[];
-				var k={fresh:0, upgraded:0, downgraded:0, maintained:0};
-				for(var i=minYear-1; i<=maxYear+1; i++){
+				for(var i=minYear-1; i<=maxYear; i++){
+					var k={fresh:0, upgraded:0, downgraded:0, maintained:0, lapsed:0};
 					var flag=0;
+					var total=0;
 					byYearGroup.all().forEach(function(d,m) {
+						if(d.key==i-1){
+							total=d.value.fresh+d.value.upgraded+d.value.downgraded+d.value.maintained;
+						}
 						if(d.key==i){
+							d.value.lapsed=total-(d.value.upgraded+d.value.downgraded+d.value.maintained);
 							g.push({key:d.key,value:d.value});
 							flag=1;
 						}
 					});
 					if(flag==0){
+						k.lapsed=total;
 						g.push({key:i, value:k});
 					}
 				}
@@ -133,7 +147,8 @@ cj(function($){
 		.legend(dc.legend().x(50).y(10).itemHeight(13).gap(5))
 		.stack(group,"Upgraded", function(d){return d.value.upgraded;})
 		.stack(group,"Downgraded", function(d){return d.value.downgraded;})
-		.stack(group,"maintained", function(d){return d.value.maintained;});
+		.stack(group,"Maintained", function(d){return d.value.maintained;})
+		.stack(group,"Lapsed", function(d){return d.value.lapsed;});
 
 	
 
