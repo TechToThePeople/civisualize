@@ -85,14 +85,14 @@ if(!data.is_error){
   var Events={};
 
   data.values.forEach(function(d){
-    d.rd = dateFormat.parse(d.register_date);
-    d.ed = datetimeFormat.parse(d.end_date);
-    d.sd = datetimeFormat.parse(d.start_date);
+    d.rd = dateFormat.parse(d.rd);
+    d.ed = datetimeFormat.parse(d.ed);
+    d.sd = datetimeFormat.parse(d.sd);
     if(d.im==1)
       d.im='Monetory';
     else
       d.im='Free';
-    if(d.tid!="") d.typeLabel = typeLabel[d.tid];  else d.typeLabel = "Unspecified";
+    if(d.tid!="") d.tid = typeLabel[d.tid];  else d.tid = "Unspecified";
     Events[d.id]={'title':d.title,'sd':d.sd,'ed':d.ed};
   });
 
@@ -150,7 +150,7 @@ if(!data.is_error){
     var RByMonth = ndx.dimension(function(d) { return d3.time.month(d.rd);});
     var RegistrationByMonth = RByMonth.group().reduce(eventReduceAdd,eventReduceRemove,eventReduceInitial);
 
-    var typeE        = ndx.dimension(function(d) {return d.typeLabel; });
+    var typeE        = ndx.dimension(function(d) {return d.tid; });
     var typeEGroup   = typeE.group().reduce(eventReduceAdd,eventReduceRemove,eventReduceInitial);
       
     var dayOfWeek = ndx.dimension(function (d) {

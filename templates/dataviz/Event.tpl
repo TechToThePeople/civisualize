@@ -64,7 +64,7 @@
 
 //console.log({$id});
 
-var eventdetails = {crmSQL json="eventdetails" eventid=$id};
+var eventdetails = {crmSQL json="eventdetails" eventid=$id set="event"};
 var participantdetails = {crmSQL json="eventparticipants" eventid=$id};
 
 console.log(eventdetails);
