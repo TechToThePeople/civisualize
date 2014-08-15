@@ -1,6 +1,4 @@
-{if !$embedded}
-{php}CRM_Utils_System::setTitle('Your Contacts');{/php}
-{/if}
+{crmTitle string="Contacts Overview"}
 
 <div class="dc_contacts">
 	<div id="datacount" style="margin-bottom:20px;">
@@ -19,18 +17,18 @@
 	</div>
 	<div id="source">
 	    <strong>Source of Contact</strong>
-	    <a class="reset" href="javascript:sourceChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+	    <a class="reset" href="javascript:sourceRow.filterAll();dc.redrawAll();" style="display: none;">reset</a>
 	    <div class="clearfix"></div>
 	</div>
 	<div id="dayofweek">
 	    <strong>Day - Contact Created</strong>
-	    <a class="reset" href="javascript:weekChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+	    <a class="reset" href="javascript:weekRow.filterAll();dc.redrawAll();" style="display: none;">reset</a>
 	    <div class="clearfix"></div>
 	</div>
 	<div class="clear"></div>
 	<div id="contacts-by-month">
 	    <strong>Date - Contact Created</strong>
-	    <a class="reset" href="javascript:monthLineChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+	    <a class="reset" href="javascript:monthLine.filterAll();dc.redrawAll();" style="display: none;">reset</a>
 	    <div class="clearfix"></div>
 	</div>
 </div>
@@ -40,27 +38,17 @@
 
 var data = {crmSQL file="contacts"};
 
-
 {literal}
-
 if(!data.is_error){//Check for database error
-
-	
-
 	var numberFormat = d3.format(".2f");
-	var genderPie=null, typePie=null, sourceChart=null, monthLineChart=null, weekChart=null;
-	var genderLabel = {};  
+	var genderLabel = {1:'Male',2:'Female'};
+	var dateFormat = d3.time.format("%Y-%m-%d");
+
+	var genderPie=null, typePie=null, sourceRow=null, monthLine=null, weekRow=null;
 
 	cj(function($) {
-		// create a pie chart under #chart-container1 element using the default global chart group
-		
-		genderLabel[1]='Male';
-		genderLabel[2]='Female';
-
-		var dateFormat = d3.time.format("%Y-%m-%d");
-
 		var totalContacts = 0;
-		
+
 		data.values.forEach(function(d){ 
 			totalContacts+=d.count;
 			d.gender=genderLabel[d.gender_id];
@@ -78,11 +66,11 @@ if(!data.is_error){//Check for database error
 		var min = d3.time.day.offset(d3.min(data.values, function(d) { return d.dd;} ),-2);
 		var max = d3.time.day.offset(d3.max(data.values, function(d) { return d.dd;} ), 2);
 
-		typePie = dc.pieChart("#type").innerRadius(10).radius(90);
-		genderPie = dc.pieChart('#gender').innerRadius(10).radius(90);
-		sourceChart = dc.rowChart('#source');
-		monthLineChart = dc.lineChart('#contacts-by-month');
-		weekChart = dc.rowChart('#dayofweek');
+		typePie 	= dc.pieChart("#type").innerRadius(10).radius(90);
+		genderPie 	= dc.pieChart('#gender').innerRadius(10).radius(90);
+		sourceRow 	= dc.rowChart('#source');
+		monthLine 	= dc.lineChart('#contacts-by-month');
+		weekRow 	= dc.rowChart('#dayofweek');
 
 		var ndx  = crossfilter(data.values), all = ndx.groupAll();
 
@@ -98,20 +86,21 @@ if(!data.is_error){//Check for database error
 		var source = ndx.dimension(function(d){ return d.source;});
 		var sourceGroup = source.group().reduceSum(function(d){return d.count;});
 
-		var dctype        = ndx.dimension(function(d) {return d.type;});
-		var dctypeGroup   = dctype.group().reduceSum(function(d) { return d.count; });
+		var type        = ndx.dimension(function(d) {return d.type;});
+		var typeGroup   = type.group().reduceSum(function(d) { return d.count; });
 
-		var byMonth = ndx.dimension(function(d) { return d.dd; });
-		var byMonthCount = byMonth.group().reduceSum(function(d) { return d.count; });
+		var creationMonth = ndx.dimension(function(d) { return d.dd; });
+		var creationMonthGroup = creationMonth.group().reduceSum(function(d) { return d.count; });
 
-		var dayOfWeek = ndx.dimension(function (d) { 
+		var creationWeek = ndx.dimension(function (d) { 
 			var day = d.dd.getDay(); 
 			var name=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 			return day+"."+name[day]; 
 		});
 
-		var dayOfWeekGroup = dayOfWeek.group().reduceSum(function(d){return d.count;});
-		var _group   = byMonth.group().reduceSum(function(d) {return d.count;});
+		var creationWeekGroup = creationWeek.group().reduceSum(function(d){return d.count;});
+		
+		var _group   = creationMonth.group().reduceSum(function(d) {return d.count;});
 		var group = {
 			all:function () {
 				var cumulate = 0;
@@ -127,9 +116,9 @@ if(!data.is_error){//Check for database error
 		typePie
 			.width(250)
 			.height(200)
-			.dimension(dctype)
+			.dimension(type)
 			.colors(d3.scale.category10())
-			.group(dctypeGroup)
+			.group(typeGroup)
 			.label(function(d){
 				if (typePie.hasFilter() && !typePie.hasFilter(d.key))
 	                return d.key + "(0%)";
@@ -152,7 +141,7 @@ if(!data.is_error){//Check for database error
 			.renderlet(function (chart) {			
 			});
 
-		sourceChart
+		sourceRow
 			.width(300)
 			.height(200)
 			.margins({top: 20, left: 10, right: 10, bottom: 20})
@@ -160,17 +149,17 @@ if(!data.is_error){//Check for database error
 			.colors(d3.scale.category10())
 			.group(sourceGroup)
 			.label(function(d){
-				if (sourceChart.hasFilter() && !sourceChart.hasFilter(d.key))
+				if (sourceRow.hasFilter() && !sourceRow.hasFilter(d.key))
 	                return d.key + "(0%)";
 				return d.key+"(" + Math.floor(d.value / all.reduceSum(function(d) {return d.count;}).value() * 100) + "%)";
 			})
 			.elasticX(true);
 
-		weekChart.width(300)
+		weekRow.width(300)
 			.height(200)
 			.margins({top: 0, left: 10, right: 10, bottom: 20})
-			.group(dayOfWeekGroup)
-			.dimension(dayOfWeek)
+			.group(creationWeekGroup)
+			.dimension(creationWeek)
 			.ordinalColors(["#d95f02","#1b9e77","#7570b3","#e7298a","#66a61e","#e6ab02","#a6761d"])
 			.label(function (d) {
 				return d.key.split(".")[1];
@@ -181,10 +170,10 @@ if(!data.is_error){//Check for database error
 			.elasticX(true)
 			.xAxis().ticks(4);
 
-		monthLineChart
+		monthLine
 			.width(800)
 			.height(200)
-			.dimension(byMonth)
+			.dimension(creationMonth)
 			.group(group)
 			.x(d3.time.scale().domain([min, max]))
 			.round(d3.time.day.round)
