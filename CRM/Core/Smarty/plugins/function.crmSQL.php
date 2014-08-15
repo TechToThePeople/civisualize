@@ -72,5 +72,5 @@ function smarty_function_crmSQL($params, &$smarty) {
         }
     }
 
-    return json_encode(array(is_error"=>$is_error, "error"=>$error, "values" => $values), JSON_NUMERIC_CHECK);
+    return json_encode(array("is_error"=>$is_error, "error"=>$error, "values" => $values), JSON_NUMERIC_CHECK);
 }
