@@ -34,6 +34,9 @@
     position: absolute;
     bottom: 0;
   }
+  #participants{
+    width:100%;
+  }
 </style>
 {/literal}
 
@@ -69,8 +72,6 @@ console.log(eventdetails);
 eventdetails = eventdetails.values[0];
 
 console.log(participantdetails);
-
-{php}CRM_Utils_System::setTitle('Siddharth');{/php}
 
 var i = {crmAPI entity="OptionValue" option_group_id="14"}; {*todo on 4.4, use the event-type as id *}
 var s = {crmAPI entity='ParticipantStatusType' option_sort="is_counted desc"};
@@ -144,13 +145,24 @@ cj(function($) {
 
   var RByDay = ndx.dimension(function(d) { return d3.time.day(d.rd);});
   var RByDayGroup = RByDay.group().reduceCount();
+  var group = {
+      all:function () {
+        var cumulate = 0;
+        var g = [];
+        RByDayGroup.all().forEach(function(d,i) {
+          cumulate += d.value;
+          g.push({key:d.key,value:cumulate})
+        });
+        return g;
+      }
+    };
 
   lineParticipants
     .margins({top: 10, right: 50, bottom: 20, left:40})
     .height(200)
     .dimension(RByDay)
-    .group(RByDayGroup)
-    .brushOn(false)
+    .group(group)
+    .brushOn(true)
     .x(d3.time.scale().domain([min, max]))
     .round(d3.time.day.round)
     .elasticY(true)
@@ -182,6 +194,7 @@ cj(function($) {
   barFee
     .height(220)
     .width(300)
+    .elasticX(true)
     .dimension(Fee)
     .group(FeeGroup);
 
