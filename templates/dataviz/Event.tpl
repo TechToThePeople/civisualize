@@ -92,9 +92,10 @@
 
     //console.log({$id});
 
-    var eventDetails = {crmSQL json="eventdetails" eventid=$id set="event"};
+    var eventDetails        = {crmSQL json="eventdetails" eventid=$id set="event"};
+    var participantDetails  = {crmSQL json="eventparticipants" eventid=$id};
+
     {crmTitle array=$event field="title"}
-    var participantDetails = {crmSQL json="eventparticipants" eventid=$id};
 
     eventDetails = eventDetails.values[0];
 
@@ -104,16 +105,15 @@
     {literal}
 
         var statusLabel = {};
+        var typeLabel   = {};
+
         s.values.forEach (function(d) {
             statusLabel[d.id] = d.label;
         });
         s=null;
-
-        var typeLabel = {};
         i.values.forEach (function(d) {
             typeLabel[d.value] = d.label;
         });
-
         i=null;
 
         cj('.eventDetails').html(
@@ -226,18 +226,19 @@
                 .dimension(date)
                 .group(function(d){ return ""; })
                 .columns(
-                    [function (d) {
-                    return d.display_name;
-                    },
-                    function (d) {
-                    return d.gender_id;
-                    },
-                    function (d) {
-                    return d.fee_amount;
-                    },
-                    function (d) {
-                    return statusLabel[d.status_id];
-                    }
+                    [
+                        function (d) {
+                            return d.display_name;
+                        },
+                        function (d) {
+                            return d.gender_id;
+                        },
+                        function (d) {
+                            return d.fee_amount;
+                        },
+                        function (d) {
+                            return statusLabel[d.status_id];
+                        }
                     ]
                 );
 

@@ -82,10 +82,10 @@ function drawGroup (data) {
     .attr("y2", yScale.rangeExtent()[1] + gridChartOffset)
     .style("stroke", "#000");
 }
-
   if (name) {
     window[name]=this;
   }
+
 {/literal}
 }("{$name}"));
 </script>
