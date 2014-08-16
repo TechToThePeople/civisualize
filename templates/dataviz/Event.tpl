@@ -104,155 +104,161 @@
 
     {literal}
 
-        var statusLabel = {};
-        var typeLabel   = {};
+        if(!data.is_error){
 
-        s.values.forEach (function(d) {
-            statusLabel[d.id] = d.label;
-        });
-        s=null;
-        i.values.forEach (function(d) {
-            typeLabel[d.value] = d.label;
-        });
-        i=null;
+            var statusLabel = {};
+            var typeLabel   = {};
 
-        cj('.eventDetails').html(
-            "<div class='detail'><div class='detailfield'>Name:</div><div class='detailvalue'>"+eventDetails.title+"</div></div>"
-            +"<div class='detail'><div class='detailfield'>Event Type:</div><div class='detailvalue'>"+typeLabel[eventDetails.event_type_id]+"</div></div>"
-            +"<div class='detail'><div class='detailfield'>Start Date:</div><div class='detailvalue'>"+eventDetails.start_date+"</div></div>"
-            +"<div class='detail'><div class='detailfield'>End Date:</div><div class='detailvalue'>"+eventDetails.end_date+"</div></div>"
-            +"<div class='detail'><div class='detailfield'>Registration Start Date:</div><div class='detailvalue'>"+eventDetails.registration_start_date+"</div></div>"
-            +"<div class='detail'><div class='detailfield'>Registration End Date:</div><div class='detailvalue'>"+eventDetails.registration_end_date+"</div></div>"
-        );
+            s.values.forEach (function(d) {
+                statusLabel[d.id] = d.label;
+            });
+            s=null;
+            i.values.forEach (function(d) {
+                typeLabel[d.value] = d.label;
+            });
+            i=null;
 
-        var numberFormat        = d3.format(".2f");
-        var birthdateFormat     = d3.time.format("%Y-%m-%d");
-        var registerdateFormat  = d3.time.format("%Y-%m-%d %H:%M:%S");
-        var currentDate         = new Date();
+            cj('.eventDetails').html(
+                "<div class='detail'><div class='detailfield'>Name:</div><div class='detailvalue'>"+eventDetails.title+"</div></div>"
+                +"<div class='detail'><div class='detailfield'>Event Type:</div><div class='detailvalue'>"+typeLabel[eventDetails.event_type_id]+"</div></div>"
+                +"<div class='detail'><div class='detailfield'>Start Date:</div><div class='detailvalue'>"+eventDetails.start_date+"</div></div>"
+                +"<div class='detail'><div class='detailfield'>End Date:</div><div class='detailvalue'>"+eventDetails.end_date+"</div></div>"
+                +"<div class='detail'><div class='detailfield'>Registration Start Date:</div><div class='detailvalue'>"+eventDetails.registration_start_date+"</div></div>"
+                +"<div class='detail'><div class='detailfield'>Registration End Date:</div><div class='detailvalue'>"+eventDetails.registration_end_date+"</div></div>"
+            );
 
-        var genderLabel={"1":"Male","2":"Female"};
+            var numberFormat        = d3.format(".2f");
+            var birthdateFormat     = d3.time.format("%Y-%m-%d");
+            var registerdateFormat  = d3.time.format("%Y-%m-%d %H:%M:%S");
+            var currentDate         = new Date();
 
-        participantDetails.values.forEach(function(d){
-            d.bd = birthdateFormat.parse(d.birth_date);
-            d.rd = registerdateFormat.parse(d.register_date);s
-            d.status = statusLabel[d.status_id];
-            if(d.gender_id!==""){
-                d.gender_id=genderLabel[d.gender_id];
-            }
-            else{
-                d.gender_id="Not Specified";
-            }
-            if(d.fee_amount==""){
-                d.fee_amount="0";
-            }
-        });
+            var genderLabel={"1":"Male","2":"Female"};
 
-        var participantsLine, genderPie, feeRow, statusPie, dataTable, participantsNumber;
-
-        cj(function($) {
-
-            function print_filter(filter){var f=eval(filter);if(typeof(f.length)!="undefined"){}else{}if(typeof(f.top)!="undefined"){f=f.top(Infinity);}else{}if(typeof(f.dimension)!="undefined"){f=f.dimension(function(d){return "";}).top(Infinity);}else{}console.log(filter+"("+f.length+")="+JSON.stringify(f).replace("[", "[\n\t").replace(/}\,/g, "},\n\t").replace("]", "\n]"));}
-
-            var ndx = crossfilter(participantDetails.values), all = ndx.groupAll();
-            var grouped=ndx.groupAll().reduce(function(p,v){ ++p.count; return p; }, function(p,v){p.count-=1;return p;}, function(){return {count:0};});
-
-            var min = d3.time.day.offset(d3.min(participantDetails.values, function(d) { return d.rd;} ),-1);
-            var max = d3.time.day.offset(d3.max(participantDetails.values, function(d) { return d.rd;} ), 1);
-
-            participantsLine    = dc.lineChart("#participants");
-            genderPie           = dc.pieChart("#gender").radius(100);
-            statusPie           = dc.pieChart("#status").radius(100);
-            feeRow              = dc.rowChart("#feeRow");
-            dataTable           = dc.dataTable("#participantTable");
-            participantsNumber  = dc.numberDisplay("#noofparticipants");
-
-            var RByDay      = ndx.dimension(function(d) { return d3.time.day(d.rd);});
-            var RByDayGroup = RByDay.group().reduceCount();
-            var group       = {
-                all:function () {
-                    var cumulate = 0;
-                    var g = [];
-                    RByDayGroup.all().forEach(function(d,i) {
-                    cumulate += d.value;
-                    g.push({key:d.key,value:cumulate})
-                });
-                return g;
+            participantDetails.values.forEach(function(d){
+                d.bd = birthdateFormat.parse(d.birth_date);
+                d.rd = registerdateFormat.parse(d.register_date);s
+                d.status = statusLabel[d.status_id];
+                if(d.gender_id!==""){
+                    d.gender_id=genderLabel[d.gender_id];
                 }
-            };  
+                else{
+                    d.gender_id="Not Specified";
+                }
+                if(d.fee_amount==""){
+                    d.fee_amount="0";
+                }
+            });
 
-            var gender      = ndx.dimension(function(d){return d.gender_id});
-            var genderGroup = gender.group().reduceCount();
+            var participantsLine, genderPie, feeRow, statusPie, dataTable, participantsNumber;
 
-            var status      = ndx.dimension(function(d){return d.status});
-            var statusGroup = status.group().reduceCount();
+            cj(function($) {
 
-            var Fee         = ndx.dimension(function(d){return d.fee_amount});
-            var FeeGroup    = Fee.group().reduceCount();
+                function print_filter(filter){var f=eval(filter);if(typeof(f.length)!="undefined"){}else{}if(typeof(f.top)!="undefined"){f=f.top(Infinity);}else{}if(typeof(f.dimension)!="undefined"){f=f.dimension(function(d){return "";}).top(Infinity);}else{}console.log(filter+"("+f.length+")="+JSON.stringify(f).replace("[", "[\n\t").replace(/}\,/g, "},\n\t").replace("]", "\n]"));}
 
-            var date        = ndx.dimension(function(d){return d.rd;});
+                var ndx = crossfilter(participantDetails.values), all = ndx.groupAll();
+                var grouped=ndx.groupAll().reduce(function(p,v){ ++p.count; return p; }, function(p,v){p.count-=1;return p;}, function(){return {count:0};});
 
-            participantsLine
-                .margins({top: 10, right: 50, bottom: 20, left:40})
-                .height(200)
-                .dimension(RByDay)
-                .group(group)
-                .brushOn(true)
-                .x(d3.time.scale().domain([min, max]))
-                .round(d3.time.day.round)
-                .elasticY(true)
-                .xUnits(d3.time.days);
+                var min = d3.time.day.offset(d3.min(participantDetails.values, function(d) { return d.rd;} ),-1);
+                var max = d3.time.day.offset(d3.max(participantDetails.values, function(d) { return d.rd;} ), 1);
 
-            genderPie
-                .width(220)
-                .height(220)
-                .dimension(gender)
-                .group(genderGroup);
+                participantsLine    = dc.lineChart("#participants");
+                genderPie           = dc.pieChart("#gender").radius(100);
+                statusPie           = dc.pieChart("#status").radius(100);
+                feeRow              = dc.rowChart("#feeRow");
+                dataTable           = dc.dataTable("#participantTable");
+                participantsNumber  = dc.numberDisplay("#noofparticipants");
+
+                var RByDay      = ndx.dimension(function(d) { return d3.time.day(d.rd);});
+                var RByDayGroup = RByDay.group().reduceCount();
+                var group       = {
+                    all:function () {
+                        var cumulate = 0;
+                        var g = [];
+                        RByDayGroup.all().forEach(function(d,i) {
+                        cumulate += d.value;
+                        g.push({key:d.key,value:cumulate})
+                    });
+                    return g;
+                    }
+                };  
+
+                var gender      = ndx.dimension(function(d){return d.gender_id});
+                var genderGroup = gender.group().reduceCount();
+
+                var status      = ndx.dimension(function(d){return d.status});
+                var statusGroup = status.group().reduceCount();
+
+                var Fee         = ndx.dimension(function(d){return d.fee_amount});
+                var FeeGroup    = Fee.group().reduceCount();
+
+                var date        = ndx.dimension(function(d){return d.rd;});
+
+                participantsLine
+                    .margins({top: 10, right: 50, bottom: 20, left:40})
+                    .height(200)
+                    .dimension(RByDay)
+                    .group(group)
+                    .brushOn(true)
+                    .x(d3.time.scale().domain([min, max]))
+                    .round(d3.time.day.round)
+                    .elasticY(true)
+                    .xUnits(d3.time.days);
+
+                genderPie
+                    .width(220)
+                    .height(220)
+                    .dimension(gender)
+                    .group(genderGroup);
 
 
-            statusPie
-                .width(220)
-                .height(220)
-                .dimension(status)
-                .group(statusGroup);
+                statusPie
+                    .width(220)
+                    .height(220)
+                    .dimension(status)
+                    .group(statusGroup);
 
-            feeRow
-                .height(220)
-                .width(300)
-                .elasticX(true)
-                .dimension(Fee)
-                .group(FeeGroup);
+                feeRow
+                    .height(220)
+                    .width(300)
+                    .elasticX(true)
+                    .dimension(Fee)
+                    .group(FeeGroup);
 
-            dataTable
-                .dimension(date)
-                .group(function(d){ return ""; })
-                .columns(
-                    [
-                        function (d) {
-                            return d.display_name;
-                        },
-                        function (d) {
-                            return d.gender_id;
-                        },
-                        function (d) {
-                            return d.fee_amount;
-                        },
-                        function (d) {
-                            return statusLabel[d.status_id];
-                        }
-                    ]
-                );
+                dataTable
+                    .dimension(date)
+                    .group(function(d){ return ""; })
+                    .columns(
+                        [
+                            function (d) {
+                                return d.display_name;
+                            },
+                            function (d) {
+                                return d.gender_id;
+                            },
+                            function (d) {
+                                return d.fee_amount;
+                            },
+                            function (d) {
+                                return statusLabel[d.status_id];
+                            }
+                        ]
+                    );
 
 
-            participantsNumber
-                .group(grouped)
-                .html({some:'<span style="font-size:90px; line-height:102px; color:steelblue;">%number</span> Participants', one:'<span style="font-size:90px;  line-height:102px; color: steelblue;">%number</span> Participant'})
-                .valueAccessor(function(d) {
-                    return d.count;
-                });
+                participantsNumber
+                    .group(grouped)
+                    .html({some:'<span style="font-size:90px; line-height:102px; color:steelblue;">%number</span> Participants', one:'<span style="font-size:90px;  line-height:102px; color: steelblue;">%number</span> Participant'})
+                    .valueAccessor(function(d) {
+                        return d.count;
+                    });
 
-            dc.renderAll();
+                dc.renderAll();
 
-        });
+            });
+        }
+        else{
+            cj('.eventsoverview').html('<div style="color:red; font-size:18px;">Civisualize Error. Please contact Admin.'+data.error+'</div>');
+        }
     {/literal}
 </script>
 <div class="clear"></div>
