@@ -54,7 +54,7 @@
 </div>
 
 <div class="clear"></div>
-
+<div id="participantsCount" style="font-size:14px; margin-bottom:10px;"></div>
 <div id="participants">
     <strong>Participants</strong>
     <a class="reset" href="javascript:participantsLine.filterAll();dc.redrawAll();" style="display: none;">reset</a>
@@ -97,14 +97,16 @@
 
     {crmTitle array=$event field="title"}
 
-    eventDetails = eventDetails.values[0];
+    
 
     var i = {crmAPI entity="OptionValue" option_group_id="14"};
     var s = {crmAPI entity='ParticipantStatusType' option_sort="is_counted desc"};
 
     {literal}
 
-        if(!data.is_error){
+        if((!eventDetails.is_error)&&(!participantDetails.is_error)){
+
+            eventDetails = eventDetails.values[0];
 
             var statusLabel = {};
             var typeLabel   = {};
@@ -127,7 +129,7 @@
                 +"<div class='detail'><div class='detailfield'>Registration End Date:</div><div class='detailvalue'>"+eventDetails.registration_end_date+"</div></div>"
             );
 
-            var numberFormat        = d3.format(".2f");
+            var numberFormat        = d3.format("d");
             var birthdateFormat     = d3.time.format("%Y-%m-%d");
             var registerdateFormat  = d3.time.format("%Y-%m-%d %H:%M:%S");
             var currentDate         = new Date();
@@ -149,7 +151,7 @@
                 }
             });
 
-            var participantsLine, genderPie, feeRow, statusPie, dataTable, participantsNumber;
+            var participantsLine, genderPie, feeRow, statusPie, dataTable, participantsNumber, participantsCount;
 
             cj(function($) {
 
@@ -167,6 +169,7 @@
                 feeRow              = dc.rowChart("#feeRow");
                 dataTable           = dc.dataTable("#participantTable");
                 participantsNumber  = dc.numberDisplay("#noofparticipants");
+                participantsCount   = dc.dataCount("#participantsCount");
 
                 var RByDay      = ndx.dimension(function(d) { return d3.time.day(d.rd);});
                 var RByDayGroup = RByDay.group().reduceCount();
@@ -192,6 +195,11 @@
                 var FeeGroup    = Fee.group().reduceCount();
 
                 var date        = ndx.dimension(function(d){return d.rd;});
+
+                participantsCount
+                    .dimension(ndx)
+                    .group(all)
+                    .html({"all":"All Records Selected","some":"<strong>%filter-count</strong> selected from <strong>%total-count</strong>"});
 
                 participantsLine
                     .margins({top: 10, right: 50, bottom: 20, left:40})
@@ -247,6 +255,7 @@
 
                 participantsNumber
                     .group(grouped)
+                    .formatNumber(numberFormat)
                     .html({some:'<span style="font-size:90px; line-height:102px; color:steelblue;">%number</span> Participants', one:'<span style="font-size:90px;  line-height:102px; color: steelblue;">%number</span> Participant'})
                     .valueAccessor(function(d) {
                         return d.count;
@@ -257,7 +266,7 @@
             });
         }
         else{
-            cj('.eventsoverview').html('<div style="color:red; font-size:18px;">Civisualize Error. Please contact Admin.'+data.error+'</div>');
+            cj('.eventsoverview').html('<div style="color:red; font-size:18px;">Civisualize Error. Please contact Admin.'+eventDetails.error+participantDetails.error+'</div>');
         }
     {/literal}
 </script>
