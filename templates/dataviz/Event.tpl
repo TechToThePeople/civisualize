@@ -48,43 +48,45 @@
     </style>
 {/literal}
 
-<div class="eventoverview">
-    <div class="eventDetails"></div>
-    <div id="noofparticipants"></div>
-</div>
+<div id="eventoverview">
+    <div class="eventoverview">
+        <div class="eventDetails"></div>
+        <div id="noofparticipants"></div>
+    </div>
 
-<div class="clear"></div>
-<div id="participantsCount" style="font-size:14px; margin-bottom:10px;"></div>
-<div id="participants">
-    <strong>Participants</strong>
-    <a class="reset" href="javascript:participantsLine.filterAll();dc.redrawAll();" style="display: none;">reset</a>
-    <div class="clearfix"></div>
+    <div class="clear"></div>
+    <div id="participantsCount" style="font-size:14px; margin-bottom:10px;"></div>
+    <div id="participants">
+        <strong>Participants</strong>
+        <a class="reset" href="javascript:participantsLine.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+        <div class="clearfix"></div>
+    </div>
+    <div id="gender">
+        <strong>Gender</strong>
+        <a class="reset" href="javascript:genderPie.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+        <div class="clearfix"></div>
+    </div>
+    <div id="status">
+        <strong>Participant Status</strong>
+        <a class="reset" href="javascript:statusPie.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+        <div class="clearfix"></div>
+    </div>
+    <div id="feeRow">
+        <strong>Fee Paid</strong>
+        <a class="reset" href="javascript:feeRow.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+        <div class="clearfix"></div>
+    </div>
+    <table id="participantTable">
+        <thead>
+            <tr class="header">
+                <th>Name</th>
+                <th>Gender</th>
+                <th>Fee Paid</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+    </table>
 </div>
-<div id="gender">
-    <strong>Gender</strong>
-    <a class="reset" href="javascript:genderPie.filterAll();dc.redrawAll();" style="display: none;">reset</a>
-    <div class="clearfix"></div>
-</div>
-<div id="status">
-    <strong>Participant Status</strong>
-    <a class="reset" href="javascript:statusPie.filterAll();dc.redrawAll();" style="display: none;">reset</a>
-    <div class="clearfix"></div>
-</div>
-<div id="feeRow">
-    <strong>Fee Paid</strong>
-    <a class="reset" href="javascript:feeRow.filterAll();dc.redrawAll();" style="display: none;">reset</a>
-    <div class="clearfix"></div>
-</div>
-<table id="participantTable">
-    <thead>
-        <tr class="header">
-            <th>Name</th>
-            <th>Gender</th>
-            <th>Fee Paid</th>
-            <th>Status</th>
-        </tr>
-    </thead>
-</table>
 
 <script>
 
@@ -266,7 +268,7 @@
             });
         }
         else{
-            cj('.eventsoverview').html('<div style="color:red; font-size:18px;">Civisualize Error. Please contact Admin.'+eventDetails.error+participantDetails.error+'</div>');
+            cj('#eventoverview').html('<div style="color:red; font-size:18px;">Civisualize Error. Please contact Admin.'+eventDetails.error+participantDetails.error+'</div>');
         }
     {/literal}
 </script>
