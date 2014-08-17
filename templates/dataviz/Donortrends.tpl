@@ -11,21 +11,35 @@
     </style>
 {/literal}
 
-<div id="donorBar"></div>
-<div id="genderPie"></div>
-<div id="ageRow"></div>
-<div class="clear"></div>
-<table id="dc-data-table">
-    <thead>
-        <tr class="header">
-            <th>Participant Name</th>
-            <th>Gender</th>
-            <th>Age</th>
-            <th>Total Amount</th>
-        </tr>
-    </thead>
-</table>
-
+<div id="donortrends">
+    <div id="donorsCount" style="font-size:14px; margin-bottom:5px;"><span id="contactNumber"></span> selected from a total of <span id="contactTotal" style="font-weight:800;"></span>.</div>
+    <div id="donorBar">
+        <strong>Donor Trends</strong>
+        <a class="reset" href="javascript:donorBar.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+        <div class="clearfix"></div>
+    </div>
+    <div id="genderPie">
+        <strong>Gender</strong>
+        <a class="reset" href="javascript:genderPie.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+        <div class="clearfix"></div>
+    </div>
+    <div id="ageRow">
+        <strong>Age</strong>
+        <a class="reset" href="javascript:ageRow.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+        <div class="clearfix"></div>
+    </div>
+    <div class="clear"></div>
+    <table id="dc-data-table">
+        <thead>
+            <tr class="header">
+                <th>Participant Name</th>
+                <th>Gender</th>
+                <th>Age</th>
+                <th>Total Amount</th>
+            </tr>
+        </thead>
+    </table>
+</div>
 <div class="clear"></div>
 
 
@@ -41,13 +55,20 @@
 
         if(!data.is_error){
 
-            var donorBar, genderPie, ageRow, dataTable;
+            var contactNumber, contactTotal, donorBar, genderPie, ageRow, dataTable;
 
             cj(function($){
 
-                var genderLabel ={1:"Male",2:"Female"};
+                var genderLabel = {1:"Male",2:"Female"};
+
+                var contactList = {};
+                contactTotal    = 0;
 
                 data.values.forEach(function(d){
+                    if(!contactList[d.contact_id]){
+                        contactTotal+=1;
+                        contactList[d.contact_id]=1;
+                    }
                     if(!d.gender_id){
                         d.gender_id = "Unspecified";
                     }
@@ -57,6 +78,8 @@
                     d.birth_date = dateFormat.parse(d.birth_date);
                     d.age=d3.time.years(d.birth_date, currentDate).length-1;
                 });
+
+                cj("#contactTotal").text(contactTotal);
 
                 function print_filter(filter){var f=eval(filter);if(typeof(f.length)!="undefined"){}else{}if(typeof(f.top)!="undefined"){f=f.top(Infinity);}else{}if(typeof(f.dimension)!="undefined"){f=f.dimension(function(d){return "";}).top(Infinity);}else{}console.log(filter+"("+f.length+")="+JSON.stringify(f).replace("[", "[\n\t").replace(/}\,/g, "},\n\t").replace("]", "\n]"));}
 
@@ -161,6 +184,7 @@
                 genderPie       = dc.pieChart("#genderPie").radius(80);
                 ageRow          = dc.rowChart("#ageRow");
                 dataTable       = dc.dataTable("#dc-data-table");
+                contactNumber   = dc.numberDisplay("#contactNumber");
 
                 var byYear      = ndx.dimension(function(d) {return d.year;});
                 var byYearGroup = byYear.group().reduce(Add, Remove, Initial);
@@ -222,6 +246,15 @@
 
                 var list        = ndx.dimension(function(d){return d.contact_id});
 
+                var grouped=ndx.groupAll().reduce(countAdd,removeCount,initialCount);
+
+                contactNumber
+                    .group(grouped)
+                    .valueAccessor(function(d){
+                        return d.count;
+                    })
+                    .html({"some":"<span style='font-weight:800;'>%number</span> Donors","one":"<span style='font-weight:800;'>%number</span> Donor","none":"No Records"});
+
                 donorBar
                     .height(200)
                     .group(group,"New")
@@ -278,7 +311,7 @@
             });
         }
         else {
-            cj('.eventsoverview').html('<div style="color:red; font-size:18px;">Civisualize Error. Please contact Admin.'+data.error+'</div>');
+            cj('#donortrends').html('<div style="color:red; font-size:18px;">Civisualize Error. Please contact Admin.'+data.error+'</div>');
         }
     {/literal}
 </script>
