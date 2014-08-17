@@ -5,6 +5,11 @@ Civisualize is a civiCRM extension which let you visualize your civiCRM data wit
 
 Civisualize will help you out with ready to use visualizations that we have created and will provide you the right resources if you plan to create your own custom visualization. 
 
+- [Installation](#installation)
+- [Ready to Use Visualizations](#ready-to-use-visualizations)
+- [Create your own visualizations](#create-your-own-visualizations)
+- [Suggestions](#we-love-you)
+
 ***
 Installation
 ------------
