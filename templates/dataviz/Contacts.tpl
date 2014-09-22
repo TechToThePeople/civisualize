@@ -146,6 +146,7 @@
 					.height(200)
 					.margins({top: 20, left: 10, right: 10, bottom: 20})
 					.dimension(source)
+					.cap(5)
 					.colors(d3.scale.category10())
 					.group(sourceGroup)
 					.label(function(d){
