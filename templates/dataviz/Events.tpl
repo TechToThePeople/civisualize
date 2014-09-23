@@ -62,6 +62,7 @@
     var s = {crmAPI entity='ParticipantStatusType' option_sort="is_counted desc"};
 
     {literal}
+
         if(!data.is_error){
 
             var statusLabel = {};
@@ -97,6 +98,8 @@
                     d.tid = "Unspecified";
                 Events[d.id]={'title':d.title,'sd':d.sd,'ed':d.ed};
             });
+
+            console.log(data.values);
 
             var eventsBar, upcomingNumber, pastNumber, participantsLine, typePie, startdayRow, eventStatusPie, monetoryPie, dataTable;
 
@@ -136,6 +139,8 @@
                 var min = d3.time.month.offset(d3.min(data.values, function(d) { return d.rd;} ),-1);
                 var max = d3.time.month.offset(d3.max(data.values, function(d) { return d.ed;} ), 1);
 
+                var firstEvent = d3.min(data.values, function(d) {return d.id});
+
 
                 var ndx                 = crossfilter(data.values),
                 all = ndx.groupAll();
@@ -152,6 +157,8 @@
                 
                 var registrationMonth = ndx.dimension(function(d) { return d3.time.month(d.rd);});
                 var registrationMonthGroup = registrationMonth.group().reduce(eventReduceAdd,eventReduceRemove,eventReduceInitial);
+
+
 
                 var type        = ndx.dimension(function(d) {return d.tid; });
                 var typeGroup   = type.group().reduce(eventReduceAdd,eventReduceRemove,eventReduceInitial);
@@ -264,12 +271,13 @@
                     .height(200)
                     .dimension(registrationMonth)
                     .valueAccessor(function (d) {
-                        return d.value.events['1'];
+                        return d.value.events[firstEvent];
                     })
                     .brushOn(false)
                     .x(d3.time.scale().domain([min, max]))
                     .round(d3.time.month.round)
                     .elasticY(true)
+                    .elasticX(true)
                     .xUnits(d3.time.months);
 
                 var flag=1;
@@ -281,11 +289,13 @@
                             flag=2;
                     }   
                     else{
-                        participantsLine
-                            .stack(registrationMonthGroup,Events[a],function(d){return d.value.events[a];})
-                            .title(Events[a], function(d) { 
-                                return Events[a]+" "+d.value.events[a]; 
-                            });
+                        if(a!=firstEvent){
+                            participantsLine
+                                .stack(registrationMonthGroup,Events[a],function(d){return d.value.events[a];})
+                                .title(Events[a], function(d) { 
+                                    return Events[a]+" "+d.value.events[a]; 
+                                });
+                        }
                     }
                 });
 
