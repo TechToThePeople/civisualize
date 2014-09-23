@@ -1,20 +1,20 @@
 {crmTitle string="Contributions"}
 <h1><span id="nbcontrib"></span> Contributions for a total of <span id="amount"></span></h1>
-<div id="type">
+<div id="type" style="width:250px;">
     <strong>Contributor</strong>
     <a class="reset" href="javascript:pietype.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+    <div class="clearfix"></div>
+</div>
+
+<div id="instrument" style="width:250px;">
+    <strong>Payment instrument</strong>
+    <a class="reset" href="javascript:pieinstrument.filterAll();dc.redrawAll();" style="display: none;">reset</a>
     <div class="clearfix"></div>
 </div>
 
 <div id="day-of-week-chart">
     <strong>Day of Week</strong>
     <a class="reset" href="javascript:dayOfWeekChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
-    <div class="clearfix"></div>
-</div>
-
-<div id="instrument">
-    <strong>Payment instrument</strong>
-    <a class="reset" href="javascript:pieinstrument.filterAll();dc.redrawAll();" style="display: none;">reset</a>
     <div class="clearfix"></div>
 </div>
 
@@ -51,8 +51,8 @@ style="display: none;">reset</a>
 
             cj(function($) {
                 // create a pie chart under #chart-container1 element using the default global chart group
-                pietype = dc.pieChart("#type").innerRadius(20).radius(70);
-                pieinstrument = dc.pieChart("#instrument").innerRadius(50).radius(70);
+                pietype = dc.pieChart("#type").innerRadius(20).radius(90);
+                pieinstrument = dc.pieChart("#instrument").innerRadius(50).radius(90);
                 volumeChart = dc.barChart("#monthly-volume-chart");
                 dayOfWeekChart = dc.rowChart("#day-of-week-chart");
                 //var moveChart = dc.seriesChart("#monthly-move-chart");
@@ -114,8 +114,8 @@ style="display: none;">reset</a>
 
                 var dayOfWeekGroup = dayOfWeek.group(); 
                 
-                dayOfWeekChart.width(180)
-                    .height(180)
+                dayOfWeekChart.width(300)
+                    .height(220)
                     .margins({top: 20, left: 10, right: 10, bottom: 20})
                     .group(dayOfWeekGroup)
                     .dimension(dayOfWeek)
@@ -155,7 +155,7 @@ style="display: none;">reset</a>
 
                 //.round(d3.time.month.round)
                 //.interpolate('monotone')
-                moveChart.width(800)
+                moveChart.width(850)
                     .height(200)
                     .transitionDuration(1000)
                     .margins({top: 30, right: 50, bottom: 25, left: 40})
@@ -178,8 +178,8 @@ style="display: none;">reset</a>
                         return dateFormat(d.key) + "\n" + numberFormat(value);
                     });
 
-                volumeChart.width(800)
-                    .height(100)
+                volumeChart.width(850)
+                    .height(200)
                     .margins({top: 0, right: 50, bottom: 20, left:40})
                     .dimension(byMonth)
                     .group(volumeByMonthGroup)
