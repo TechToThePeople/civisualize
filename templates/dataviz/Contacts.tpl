@@ -5,19 +5,20 @@
 	    <h2><strong><span class="filter-count"></span></strong> contacts selected from a total of <strong><span id="total-count"></span></strong> records</h2>
 	</div>
 	<div class="clear"></div>
-	<div id="type">
+	<div id="type" style="width:350px;">
 	    <strong>Type</strong>
 	    <a class="reset" href="javascript:typePie.filterAll();dc.redrawAll();" style="display: none;">reset</a>
 	    <div class="clearfix"></div>
 	</div>
-	<div id="gender">
-	    <strong>Gender</strong>
-	    <a class="reset" href="javascript:genderPie.filterAll();dc.redrawAll();" style="display: none;">reset</a>
-	    <div class="clearfix"></div>
-	</div>
-	<div id="source">
+		<div id="source">
 	    <strong>Source of Contact</strong>
 	    <a class="reset" href="javascript:sourceRow.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+	    <div class="clearfix"></div>
+	</div>
+	<div class="clear"></div>
+	<div id="gender" style="width:350px;">
+	    <strong>Gender</strong>
+	    <a class="reset" href="javascript:genderPie.filterAll();dc.redrawAll();" style="display: none;">reset</a>
 	    <div class="clearfix"></div>
 	</div>
 	<div id="dayofweek">
