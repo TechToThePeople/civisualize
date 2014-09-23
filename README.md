@@ -28,17 +28,25 @@ Ready to Use Visualizations
 The list of available visualizations is available at [yoursite.org/civicrm/dataviz](/civicrm/dataviz). Some of the currently available visualizations include
 
 - ####Contributions (/dataviz/contribute)
+  ![alt tag](https://raw.githubusercontent.com/TechToThePeople/civisualize/master/examples/contribution.jpg)
   This provides an overview of contributions, type of contributors, the day of week the contribution was made, payment instrument, etc.
 
+
 - ####Contacts (/dataviz/contacts)
+  ![alt tag](https://raw.githubusercontent.com/TechToThePeople/civisualize/master/examples/contacts.jpg)
   Contacts overview is a compilation of graphs showing types, gender, age, source of contact, contacts over the time etc. 
 
 - ####Events (/dataviz/events)
+  ![alt tag](https://raw.githubusercontent.com/TechToThePeople/civisualize/master/examples/events.jpg)
   Events shows a lot of information about all the events of an organization and their participants. It shows events over time, participants over time, money generated from events, type of events, etc. It also displays a table listing all the events.
-
+  
+  
   This table further links to specific event overview (/dataviz/event/<id>) showing participants, their status, their fee etc. 
+  ![alt tag](https://raw.githubusercontent.com/TechToThePeople/civisualize/master/examples/event.jpg)
+
 
 - ####Donor Trends (/dataviz/donortrends)
+  ![alt tag](https://raw.githubusercontent.com/TechToThePeople/civisualize/master/examples/donortrends.jpg)
   Based on the idea of [CiviCRM Donor Trends Extension](https://github.com/leez/org.eff.donortrends/), the donor trends overview showcases a Bar Chart with new, lapsed, upgraded, downgraded and maintained donors over the years. This further showcases the gender and age of the donors and a list of all the donors.  
 
 Need not be mentioned, you can add more graphs and details to the above mentioned visualizations. 
