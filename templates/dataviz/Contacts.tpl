@@ -176,6 +176,7 @@
 				monthLine
 					.width(800)
 					.height(200)
+           .margins({top: 10, right: 50, bottom: 30, left: 50})
 					.dimension(creationMonth)
 					.group(group)
 					.x(d3.time.scale().domain([min, max]))
