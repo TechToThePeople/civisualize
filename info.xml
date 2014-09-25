@@ -19,4 +19,12 @@
   <civix>
     <namespace>CRM/Civisualize</namespace>
   </civix>
+<urls>
+  <url desc="Main Extension Page">http://github.com/TechToThePeople/civisualize</url>
+  <url desc="Documentation">http://github.com/TechToThePeople/civisualize</url>
+  <url desc="Support">http://forum.civicrm.org</url>
+  <url desc="Licensing">http://civicrm.org/licensing</url>
+</urls>
+
+
 </extension>
