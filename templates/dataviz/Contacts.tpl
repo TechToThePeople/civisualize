@@ -38,11 +38,18 @@
 	'use strict';
 
 	var data = {crmSQL file="contacts"};
+	var gender = {crmAPI entity="contact" action="getoptions" field="gender_id"};
 
 	{literal}
+
 		if(!data.is_error){//Check for database error
 			var numberFormat = d3.format(".2f");
-			var genderLabel = {1:'Male',2:'Female'};
+			var genderLabel = {};
+
+			gender.values.forEach(function(d){
+				genderLabel[d.key]=d.value;
+			});
+
 			var dateFormat = d3.time.format("%Y-%m-%d");
 
 			var genderPie=null, typePie=null, sourceRow=null, monthLine=null, weekRow=null;
