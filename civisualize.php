@@ -92,3 +92,33 @@ function civisualize_civicrm_upgrade($op, CRM_Queue_Queue $queue = NULL) {
 function civisualize_civicrm_managed(&$entities) {
   return _civisualize_civix_civicrm_managed($entities);
 }
+
+
+/**
+*
+*Adds a navigation menu item under report.
+*
+*/
+function civisualize_civicrm_navigationMenu( &$params ) {
+  // get the id of Administer Menu
+  $reportMenuId = CRM_Core_DAO::getFieldValue('CRM_Core_BAO_Navigation', 'Reports', 'id', 'name');
+
+  // skip adding menu if there is no administer menu
+  if ($reportMenuId) {
+    // get the maximum key under adminster menu
+    $maxKey = max( array_keys($params[$reportMenuId]['child']));
+    $params[$reportMenuId]['child'][$maxKey+1] =  array (
+      'attributes' => array (
+        'label'      => 'Civisualize',
+        'name'       => 'Civisualize',
+        'url'        => 'civicrm/dataviz',
+        'permission' => 'access CiviReport',
+        'operator'   => NULL,
+        'separator'  => TRUE,
+        'parentID'   => $reportMenuId,
+        'navID'      => $maxKey+1,
+        'active'     => 1
+      )
+    );
+  }
+}
