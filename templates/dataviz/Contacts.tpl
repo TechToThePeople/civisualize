@@ -4,7 +4,7 @@
 	<div id="datacount" style="margin-bottom:20px;">
 	    <h2><strong><span class="filter-count"></span></strong> contacts selected from a total of <strong><span id="total-count"></span></strong> records</h2>
 	</div>
-	<div class="clear"></div>
+	<div style="clear:both"></div>
 	<div id="type" style="width:350px;">
 	    <strong>Type</strong>
 	    <a class="reset" href="javascript:typePie.filterAll();dc.redrawAll();" style="display: none;">reset</a>
