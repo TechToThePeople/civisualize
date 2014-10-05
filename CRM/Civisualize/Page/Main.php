@@ -5,7 +5,7 @@ require_once 'CRM/Core/Page.php';
 class CRM_Civisualize_Page_Main extends CRM_Core_Page {
 
   function getTemplateFileName () {
-    $request = CRM_Utils_Request::retrieve( 'q', 'String',$dummy, true, NULL, 'GET');
+    $request = CRM_Utils_System::currentPath();
     if (false !== strpos($request, '..')) {
       die ("SECURITY FATAL: the url can't contain '..'. Please report the issue on the forum at civicrm.org");
     }
