@@ -16,6 +16,16 @@ function _civicrm_api3_basic_getsql ($params,$sql) {
 
 require_once 'civisualize.civix.php';
 
+function civicrm_civicrm_dashboard( $contactID, &$contentPlacement ) {
+   CRM_Core_Resources::singleton()
+    ->addScriptFile('eu.tttp.civisualize', 'js/d3.v3.js', 110, 'html-header', FALSE)
+    ->addScriptFile('eu.tttp.civisualize', 'js/dc/dc.js', 110, 'html-header', FALSE)
+    ->addScriptFile('eu.tttp.civisualize', 'js/dc/crossfilter.js', 110, 'html-header', FALSE)
+    ->addStyleFile('eu.tttp.civisualize', 'js/dc/dc.css')
+    ->addStyleFile('eu.tttp.civisualize', 'css/style.css');
+}
+
+
 /**
  * Implementation of hook_civicrm_config
  */
