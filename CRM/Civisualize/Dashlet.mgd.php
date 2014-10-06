@@ -8,7 +8,7 @@ return array (
     'version'=>'3',
     'name'=>'dataviz_contact',
     'label'=> 'Dataviz of contacts',
-    'url' => CRM_Utils_System::url('civicrm/dataviz/contact', 'snippet=4'),
+    'url' => CRM_Utils_System::url('civicrm/dataviz/contacts', 'snippet=4'),
   )
 ),
 1=>array (
