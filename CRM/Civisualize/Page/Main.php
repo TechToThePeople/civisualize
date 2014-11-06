@@ -16,7 +16,8 @@ class CRM_Civisualize_Page_Main extends CRM_Core_Page {
     $smarty->assign("options",array());
     if (CRM_Utils_Array::value(2, $request)) {
       $tplfile = _civicrm_api_get_camel_name($request[2]);
-      $tpl = 'dataviz/'.$tplfile.'.tpl';
+      $tplfile = explode('?', $tplfile);
+      $tpl = 'dataviz/'.$tplfile[0].'.tpl';
     }
     if (CRM_Utils_Array::value(3, $request)) {
       $r3 = _civicrm_api_get_camel_name($request[3]);
