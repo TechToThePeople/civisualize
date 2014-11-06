@@ -11,6 +11,7 @@ return array (
     'url' => CRM_Utils_System::url('civicrm/dataviz/contacts', 'snippet=4'),
   )
 ),
+
 1=>array (
   'name'=>'dataviz_events',
   'entity'=> 'Dashboard',
@@ -21,6 +22,7 @@ return array (
     'url' => CRM_Utils_System::url('civicrm/dataviz/events', 'snippet=4'),
   )
 ),
+
 2=>array (
   'name'=>'dataviz_contribute',
   'entity'=> 'Dashboard',

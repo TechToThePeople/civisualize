@@ -104,9 +104,19 @@
     var i = {crmAPI entity="OptionValue" option_group_id="14"};
     var s = {crmAPI entity='ParticipantStatusType' option_sort="is_counted desc"};
 
+    var gender = {crmAPI entity="contact" action="getoptions" field="gender_id"};
+
+
+
     {literal}
 
         if((!eventDetails.is_error)&&(!participantDetails.is_error)){
+
+            var genderLabel = {};
+
+            gender.values.forEach(function(d){
+                genderLabel[d.key]=d.value;
+            });
 
             eventDetails = eventDetails.values[0];
 
@@ -136,7 +146,6 @@
             var registerdateFormat  = d3.time.format("%Y-%m-%d %H:%M:%S");
             var currentDate         = new Date();
 
-            var genderLabel={"1":"Male","2":"Female"};
 
             participantDetails.values.forEach(function(d){
                 d.bd = birthdateFormat.parse(d.birth_date);
