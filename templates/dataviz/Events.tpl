@@ -60,6 +60,8 @@
     var data = {crmSQL file="events"};
     var i = {crmAPI entity="OptionValue" option_group_id="14"}; {*todo on 4.4, use the event-type as id *}
     var s = {crmAPI entity='ParticipantStatusType' option_sort="is_counted desc"};
+    var URL = "{crmURL p='civicrm/dataviz/event/xx'}";
+    console.log(URL);
 
     {literal}
 
@@ -337,7 +339,7 @@
                     })
                     // dynamic columns creation using an array of closures
                     .columns([
-                        function(d) {return "<a href='event/"+d.id+"'>"+d.title+"</a>"; },
+                        function(d) {return "<a href='"+URL.replace('xx',d.id)+"'>"+d.title+"</a>"; },
                         function(d) {return d.sd.getDate()+"/"+(d.sd.getMonth()+1)+"/"+d.sd.getFullYear();},
                         function(d) {return d.ed.getDate()+"/"+(d.ed.getMonth()+1)+"/"+d.ed.getFullYear();},
                         function(d) {return d.count;}
