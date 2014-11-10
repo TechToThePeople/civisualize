@@ -1,6 +1,6 @@
 {crmTitle string="Civisualize"}
 
-You need to choose of the following visualizations to start with:
+You need to choose one of the following visualizations to start with:
 <ul>
 <li><a href="{crmURL p='civicrm/dataviz/contribute'}">Contributions</a></li>
 <li><a href="{crmURL p='civicrm/dataviz/contacts'}">Contacts</a></li>
