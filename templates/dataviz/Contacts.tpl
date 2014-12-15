@@ -35,7 +35,7 @@
 </div>
 
 <script>
-(function(guid){ {ldelim}
+(function(guid){ldelim}
 	'use strict';
 
 	var data = {crmSQL file="contacts"};
