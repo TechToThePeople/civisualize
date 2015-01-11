@@ -133,7 +133,7 @@
             i=null;
 
             cj('.eventDetails').html(
-                "<div class='detail'><div class='detailfield'>Name:</div><div class='detailvalue'>"+eventDetails.title+"</div></div>"
+                "<div class='detail'><div class='detailfield'>Name:</div><div class='detailvalue'><a href='{/literal}{crmURL p='civicrm/event/info' q='id='}{$id}{literal}'>"+eventDetails.title+"</a></div></div>"
                 +"<div class='detail'><div class='detailfield'>Event Type:</div><div class='detailvalue'>"+typeLabel[eventDetails.event_type_id]+"</div></div>"
                 +"<div class='detail'><div class='detailfield'>Start Date:</div><div class='detailvalue'>"+eventDetails.start_date+"</div></div>"
                 +"<div class='detail'><div class='detailfield'>End Date:</div><div class='detailvalue'>"+eventDetails.end_date+"</div></div>"
