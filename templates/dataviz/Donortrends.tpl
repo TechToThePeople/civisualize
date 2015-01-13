@@ -32,7 +32,7 @@
     <table id="dc-data-table">
         <thead>
             <tr class="header">
-                <th>Participant Name</th>
+                <th>Name</th>
                 <th>Gender</th>
                 <th>Age</th>
                 <th>Total Amount</th>
@@ -59,7 +59,7 @@
 
             cj(function($){
 
-                var genderLabel = {1:"Male",2:"Female"};
+                var genderLabel = {1:"Female",2:"Male"};
 
                 var contactList = {};
                 contactTotal    = 0;
