@@ -337,7 +337,8 @@
                     .group(function(d) {
                         return d.sd.getFullYear();
                     })
-                    // dynamic columns creation using an array of closures
+                    .size(9999)
+                    .order(d3.descending)
                     .columns([
                         function(d) {return "<a href='"+URL.replace('xx',d.id)+"'>"+d.title+"</a>"; },
                         function(d) {return d.sd.getDate()+"/"+(d.sd.getMonth()+1)+"/"+d.sd.getFullYear();},

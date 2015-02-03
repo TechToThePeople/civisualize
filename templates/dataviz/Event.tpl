@@ -249,6 +249,7 @@
                 dataTable
                     .dimension(date)
                     .group(function(d){ return ""; })
+                    .size(9999)
                     .columns(
                         [
                             function (d) {
