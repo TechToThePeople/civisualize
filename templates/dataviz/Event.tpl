@@ -17,7 +17,7 @@
         }
 
         .eventDetails{
-            width: 400px;z
+            width: 400px;
             float: left;
         }
 
