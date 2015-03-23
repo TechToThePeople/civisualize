@@ -201,6 +201,6 @@
 			cj('.dc_contacts').html('<div style="color:red; font-size:18px;">There is a database error. Please Contact the administrator as soon as possible.</div>');
 		}
 	{/literal}
-("#dataviz-contacts "));{rdelim}
+{rdelim})("#dataviz-contacts ");
 </script>
 <div class="clear"></div>
