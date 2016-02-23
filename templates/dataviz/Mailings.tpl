@@ -29,7 +29,7 @@
 </div>
 
 <script>
-var data = {crmSQL json="mailing"};
+var data = {crmSQL json="mailings"};
 var dateFormat = d3.time.format("%Y-%m-%d %H:%M:%S");
 var currentDate = new Date();
 
