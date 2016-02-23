@@ -1,4 +1,4 @@
-{crmTitle string="<span class='data_count'><span class='filter-count'></span> Contacts opened out of <span class='total-count'></span></span>"}
+{crmTitle string="Mailing details"}
 
 <a class="reset" href="javascript:sourceRow.filterAll();dc.redrawAll();" style="display: none;">reset</a>
 
@@ -10,7 +10,7 @@
 </div>
 
 <script>
-var data = {crmSQL json="mailing_open" mailing_id=$id};
+var data = {crmSQL json="mailing_event" mailing_id=$id};
 var dateFormat = d3.time.format("%Y-%m-%d %H:%M");
 var currentDate = new Date();
 
