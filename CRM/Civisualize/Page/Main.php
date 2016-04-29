@@ -17,14 +17,14 @@ class CRM_Civisualize_Page_Main extends CRM_Core_Page {
     if (CRM_Utils_Array::value(2, $request)) {
       $tplfile = _civicrm_api_get_camel_name($request[2]);
       $tplfile = explode('?', $tplfile);
-      $tpl = 'dataviz/'.$tplfile[0].'.tpl';
+      $tpl = 'civisualize/'.$tplfile[0].'.tpl';
     }
     if (CRM_Utils_Array::value(3, $request)) {
       $r3 = _civicrm_api_get_camel_name($request[3]);
       $smarty->assign("id",$r3);
     }
     if (!$tplfile) {
-      $tpl = "CRM/Civizualise/Page/Main.tpl";
+      $tpl = "CRM/Civisualize/Page/Main.tpl";
     }
     if( !$smarty->template_exists($tpl) ){
       header("Status: 404 Not Found");
