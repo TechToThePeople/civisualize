@@ -111,7 +111,7 @@ function civisualize_civicrm_navigationMenu( &$params ) {
       'attributes' => array (
         'label'      => 'Civisualize',
         'name'       => 'Civisualize',
-        'url'        => 'civicrm/dataviz',
+        'url'        => 'civicrm/civisualize',
         'permission' => 'access CiviReport',
         'operator'   => NULL,
         'separator'  => TRUE,
