@@ -24,7 +24,7 @@ class CRM_Civisualize_Page_Main extends CRM_Core_Page {
       $smarty->assign("id",$r3);
     }
     if (!$tplfile) {
-      $tpl = "CRM/Civizualise/Page/Main.tpl";
+      $tpl = "CRM/Civisualize/Page/Main.tpl";
     }
     if( !$smarty->template_exists($tpl) ){
       header("Status: 404 Not Found");
