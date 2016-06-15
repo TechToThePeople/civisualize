@@ -14,50 +14,62 @@ function smarty_function_crmSQL($params, &$smarty) {
 
     $parameters = array();
 
-    if(array_key_exists('json', $params)){
-        $json=json_decode(file_get_contents('queries/'.$params["json"].".json", true));//file_get_contents('queries/'.$params["json"].".json", true)
-        $sql=$json->{"query"};
-        foreach ($json->{"params"} as $key => $value) {
-            $var=intval($key);
-            $name=$value->{"name"};
-            $type=$value->{"type"};
-            if(array_key_exists($name, $params)){
-                $parameters[$var] = array($params[$name],$type);
-            }
-        }
-    }
-
-    else if(array_key_exists('sql', $params)){
-        $sql = $params["sql"];
-    }
-
-    else if(array_key_exists('file', $params)){
-        $sql = file_get_contents('queries/'.$params["file"].".sql", true);
-    }
-
-    $forbidden=array("delete ", "drop ","update ","grant ");
-    foreach ($forbidden as $check) {
-        if(strpos(strtolower($sql), $check)!==false){
-            $smarty->trigger_error($check."command not allowed");
-            $error = "crmAPI: you can not ".$check."using crmSQL";
-            $is_error = 1;
-            break;
-        }
-    }
-
-    if (array_key_exists('debug', $params)) { 
-        $smarty->trigger_error("sql:". $params["sql"]); 
-    }
-
     try{
+	    if(array_key_exists('json', $params)){
+		$json=json_decode(file_get_contents('queries/'.$params["json"].".json", true));//file_get_contents('queries/'.$params["json"].".json", true)
+		$sql=$json->{"query"};
+		foreach ($json->{"params"} as $key => $value) {
+		    $var=intval($key);
+		    $name=$value->{"name"};
+		    $type=$value->{"type"};
+		    if(array_key_exists($name, $params)){
+			$parameters[$var] = array($params[$name],$type);
+		    }
+		}
+	    }
+
+	    elseif(array_key_exists('sql', $params)){
+		$sql = $params["sql"];
+	    }
+
+	    elseif(array_key_exists('file', $params)){
+		$filename =  'queries/'.$params["file"].".sql";
+		$sql = file_get_contents($filename, true);
+		if (!$sql)  throw new Exception ("missing filename or empty ".$filename);
+
+	    }
+
+	    $forbidden=array("delete ", "drop ","update ","grant ");
+	    foreach ($forbidden as $check) {
+		if(strpos(strtolower($sql), $check)!==false){
+		    $smarty->trigger_error($check."command not allowed");
+		    $error = "crmAPI: you can not ".$check."using crmSQL";
+		    $is_error = 1;
+		    break;
+		}
+	    }
+
+      if (array_key_exists('debug', $params)) { 
+          $smarty->trigger_error("sql:". $params["sql"]); 
+      }
+
         if($is_error==0){
             $errorScope = CRM_Core_TemporaryErrorScope::useException();
             $dao = CRM_Core_DAO::executeQuery($sql,$parameters);
             $values = array();
-            while ($dao->fetch()) {
+            $keys= null;
+            if (array_key_exists('sequential', $params)) { 
+              while ($dao->fetch()) {
+                if (!$keys) $keys= array_keys($dao->toArray());
+                $values[] = array_values($dao->toArray());
+              }
+            } else {
+              while ($dao->fetch()) {
                 $values[] = $dao->toArray();
+              }
+              $keys= array_keys($values[0]);
             }
-        }
+          }
     }
     catch(Exception $e){
         $is_error=1;
@@ -72,5 +84,5 @@ function smarty_function_crmSQL($params, &$smarty) {
         }
     }
 
-    return json_encode(array("is_error"=>$is_error, "error"=>$error, "values" => $values), JSON_NUMERIC_CHECK);
+    return json_encode(array("is_error"=>$is_error, "keys"=> $keys, "error"=>$error, "values" => $values), JSON_NUMERIC_CHECK);
 }
