@@ -4,6 +4,6 @@
     <path>civicrm/dataviz</path>
     <page_callback>CRM_Civisualize_Page_Main</page_callback>
     <title>Datavisualize</title>
-    <access_arguments>access CiviCRM</access_arguments>
+    <access_arguments>access CiviReport</access_arguments>
   </item>
 </menu>

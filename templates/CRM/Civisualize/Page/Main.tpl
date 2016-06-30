@@ -5,6 +5,7 @@ You need to choose one of the following visualizations to start with:
 <li><a href="{crmURL p='civicrm/dataviz/contribute'}">Contributions</a></li>
 <li><a href="{crmURL p='civicrm/dataviz/contacts'}">Contacts</a></li>
 <li><a href="{crmURL p='civicrm/dataviz/events'}">Events</a></li>
+<li><a href="{crmURL p='civicrm/dataviz/mailings'}">Mailings</a></li>
 <li><a href="{crmURL p='civicrm/dataviz/donortrends'}">Donor Trends</a></li>
 </ul>
 <p>
