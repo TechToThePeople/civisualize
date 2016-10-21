@@ -190,8 +190,7 @@ function drawTable(dom) {
 		return prettyDate(d.date);
 	    },
 	    function (d) {
-             //return "<a title='"+d.subject+"' href='/civicrm/mailing/report?mid="+d.id+"' target='_blank'>"+d.name+"</span>";
-             return "<a title='"+d.subject+"' href='/civicrm/dataviz/mailing/"+d.id+"' >"+d.name+"</span>";
+             return "<a title='"+d.subject+"' href='/civicrm/mailing/report?mid="+d.id+"' target='_blank'>"+d.name+"</a> <small><a title='Date Open graph' href='/civicrm/dataviz/mailing/"+d.id+"' >(details)</a></small>";
 	    },
 	    function (d) {
 		return "<a href='/civicrm/campaign/add?reset=1&action=update&id="+d.campaign_id+"' target='_blank'>"+d.campaign+"</a>";
