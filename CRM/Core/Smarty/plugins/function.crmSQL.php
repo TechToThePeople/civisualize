@@ -17,11 +17,15 @@ function smarty_function_crmSQL($params, &$smarty) {
     try{
 	    if(array_key_exists('json', $params)){
 		$json=json_decode(file_get_contents('queries/'.$params["json"].".json", true));//file_get_contents('queries/'.$params["json"].".json", true)
-		$sql=$json->{"query"};
-		foreach ($json->{"params"} as $key => $value) {
+		$sql=$json->query;
+                if (!$sql){
+                   $smarty->trigger_error("assign: missing 'query' in the json file"); 
+                   $error = "crmAPI: missing 'query' in the json"; 
+                }
+		foreach ($json->params as $key => $value) {
 		    $var=intval($key);
-		    $name=$value->{"name"};
-		    $type=$value->{"type"};
+		    $name=$value->name;
+		    $type=$value->type;
 		    if(array_key_exists($name, $params)){
 			$parameters[$var] = array($params[$name],$type);
 		    }
@@ -84,5 +88,8 @@ function smarty_function_crmSQL($params, &$smarty) {
         }
     }
 
+    if (array_key_exists('debug', $params)) {
+      return json_encode(array("is_error"=>$is_error, "keys"=> $keys, "error"=>$error, "values" => $values,"sql" => trim(preg_replace('/\s+/', ' ', $sql))), JSON_NUMERIC_CHECK);
+    }
     return json_encode(array("is_error"=>$is_error, "keys"=> $keys, "error"=>$error, "values" => $values), JSON_NUMERIC_CHECK);
 }
