@@ -8,8 +8,13 @@
     <author>Xavier</author>
     <email>xavier@tttp.eu</email>
   </maintainer>
+<<<<<<< HEAD
   <releaseDate>2015-11-18</releaseDate>
   <version>1.3</version>
+=======
+  <releaseDate>2013-10-05</releaseDate>
+  <version>1.42</version>
+>>>>>>> e0a2cfe811187a7ce46238540bf341199777f5f3
   <develStage>stable</develStage>
   <compatibility>
     <ver>4.3</ver>
