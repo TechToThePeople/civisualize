@@ -59,6 +59,7 @@ function smarty_function_crmSQL($params, &$smarty) {
 
         if($is_error==0){
             $errorScope = CRM_Core_TemporaryErrorScope::useException();
+            CRM_Core_DAO::executeQuery("SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED ;");
             $dao = CRM_Core_DAO::executeQuery($sql,$parameters);
             $values = array();
             $keys= null;
