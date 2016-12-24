@@ -1,7 +1,7 @@
 {crmTitle string="Contributions"}
 <h1><span id="nbcontrib"></span> Contributions for a total of <span id="amount"></span></h1>
 <div id="type" style="width:250px;">
-    <strong>Contributor</strong>
+    <strong>Type</strong>
     <a class="reset" href="javascript:pietype.filterAll();dc.redrawAll();" style="display: none;">reset</a>
     <div class="clearfix"></div>
 </div>
@@ -66,7 +66,7 @@ style="display: none;">reset</a>
                 var ndx                 = crossfilter(data.values),
                 all = ndx.groupAll();
 
-                var type        = ndx.dimension(function(d) {return d.contact_type;});
+                var type        = ndx.dimension(function(d) {return d.financial_type;});
                 var typeGroup   = type.group().reduceSum(function(d) { return d.count; });
 
                 var instrument        = ndx.dimension(function(d) {return d.instrument;});

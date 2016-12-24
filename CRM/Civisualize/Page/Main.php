@@ -23,6 +23,10 @@ class CRM_Civisualize_Page_Main extends CRM_Core_Page {
       $r3 = _civicrm_api_get_camel_name($request[3]);
       $smarty->assign("id",$r3);
     }
+    if (CRM_Utils_Array::value(4, $request)) {
+      $r3 = CRM_Utils_String::munge($request[4]);
+      $smarty->assign("id2",$r3);
+    }
     if (!$tplfile) {
       $tpl = "CRM/Civisualize/Page/Main.tpl";
     }
