@@ -10,7 +10,7 @@ class CRM_Civisualize_Page_Main extends CRM_Core_Page {
       die ("SECURITY FATAL: the url can't contain '..'. Please report the issue on the forum at civicrm.org");
     }
 
-    $request = split ('/',$request);
+    $request = explode('/',$request);
     $tplfile = NULL;
     $smarty= CRM_Core_Smarty::singleton( );
     $smarty->assign("options",array());
