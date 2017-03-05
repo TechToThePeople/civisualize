@@ -8,8 +8,8 @@
     <author>Xavier</author>
     <email>xavier@tttp.eu</email>
   </maintainer>
-  <releaseDate>2013-10-05</releaseDate>
-  <version>1.5</version>
+  <releaseDate>2017-03-05</releaseDate>
+  <version>1.6</version>
   <develStage>stable</develStage>
   <compatibility>
     <ver>4.3</ver>
