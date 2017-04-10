@@ -129,6 +129,9 @@ We have also used {crmTitle} function which let you set the title of the page, a
 
 Checkour resources at [dc.js](http://dc-js.github.io/dc.js/) and create your first visualization.
 
+## Documentation and help
+If you want to add a document, add a markdown file that has the same name as the template into the doc folder
+
 We love you
 -------
 xavier made this, sid helped him. You can find us on civicrm forum, [@eucampaign](http://twitter.com/eucampaign) and [@sid0_o](http://twitter.com/sid0_o) on twitter, or in the dc mailing group. Be warned, d3 is awesome, but the learning curve is steep. Worthwhile, the view at the top is beautiful.
