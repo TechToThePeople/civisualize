@@ -1,6 +1,14 @@
+<textarea id="md" class="hidden">
+{$md}
+</textarea>
+{literal}
+<script>
+jQuery(function($){
+  var md=$("#md").val();
+  $("#content").html(marked(md));
+});
+</script>
+{/literal}
+<div id="content">
 
-{* Example: Display a variable directly *}
-<p>The current time is {$currentTime}</p>
-
-{* Example: Display a translated string -- which happens to include a variable *}
-<p>{ts 1=$currentTime}(In your native language) The current time is %1.{/ts}</p>
+</div>

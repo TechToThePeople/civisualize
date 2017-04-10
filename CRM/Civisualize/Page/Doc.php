@@ -3,6 +3,8 @@
 class CRM_Civisualize_Page_Doc extends CRM_Core_Page {
 
   public function run() {
+   CRM_Core_Resources::singleton()
+    ->addScriptFile('eu.tttp.civisualize', 'js/marked.min.js', 110, 'html-header', FALSE);
 
     $request = CRM_Utils_System::currentPath();
     if (false !== strpos($request, '..')) {
@@ -10,14 +12,20 @@ class CRM_Civisualize_Page_Doc extends CRM_Core_Page {
     }
 
     $request = explode('/',$request);
-print_r($request);
+//print_r($request);
     $tplfile = NULL;
     $smarty= CRM_Core_Smarty::singleton( );
     $smarty->assign("options",array());
     if (CRM_Utils_Array::value(2, $request)) {
       $tplfile = _civicrm_api_get_camel_name($request[2]);
       $tplfile = explode('?', $tplfile);
-      $tpl = 'dataviz/'.$tplfile[0].'.tpl';
+      $mdfile = 'doc/'.$tplfile[0].'.md';
+      $md = file_get_contents($mdfile, FILE_USE_INCLUDE_PATH);
+      if (!$md) $md= "$mdfile not found";
+      $smarty->assign("mdfile",$md);
+      $smarty->assign("md",$md);
+
+      
     }
     if (CRM_Utils_Array::value(3, $request)) {
       $r3 = _civicrm_api_get_camel_name($request[3]);
