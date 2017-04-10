@@ -6,4 +6,10 @@
     <title>Datavisualize</title>
     <access_arguments>access CiviReport</access_arguments>
   </item>
+  <item>
+    <path>civicrm/datadoc</path>
+    <page_callback>CRM_Civisualize_Page_Doc</page_callback>
+    <title>Documentation</title>
+    <access_arguments>access CiviReport</access_arguments>
+  </item>
 </menu>
