@@ -9,7 +9,7 @@
     <email>xavier@tttp.eu</email>
   </maintainer>
   <releaseDate>2017-04-09</releaseDate>
-  <version>1.60</version>
+  <version>1.61</version>
   <develStage>stable</develStage>
   <compatibility>
     <ver>4.3</ver>
