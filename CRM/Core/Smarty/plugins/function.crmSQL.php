@@ -16,7 +16,8 @@ function smarty_function_crmSQL($params, &$smarty) {
 
     try{
 	    if(array_key_exists('json', $params)){
-		$json=json_decode(file_get_contents('queries/'.$params["json"].".json", true));//file_get_contents('queries/'.$params["json"].".json", true)
+
+		$json=json_decode(str_replace(array("\r\n","\r","\n")," ",file_get_contents('queries/'.$params["json"].".json", true)));
 		$sql=$json->query;
                 if (!$sql){
                    $smarty->trigger_error("assign: missing 'query' in the json file"); 
