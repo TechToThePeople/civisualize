@@ -110,5 +110,5 @@ function civisualize_civicrm_navigationMenu( &$params ) {
     'active' => 1,
   );
 
-  _sumfields_civix_insert_navigation_menu($params, $path, $item);
+  _civisualize_civix_insert_navigation_menu($params, $path, $item);
 }
