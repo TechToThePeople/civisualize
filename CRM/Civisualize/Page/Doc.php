@@ -20,26 +20,26 @@ class CRM_Civisualize_Page_Doc extends CRM_Core_Page {
       $tplfile = _civicrm_api_get_camel_name($request[2]);
       $tplfile = explode('?', $tplfile);
       $mdfile = 'doc/'.$tplfile[0].'.md';
-      $md = file_get_contents($mdfile, FILE_USE_INCLUDE_PATH);
-      if (!$md) $md= "$mdfile not found";
-      $smarty->assign("mdfile",$md);
-      $smarty->assign("md",$md);
-
-      
     }
     if (CRM_Utils_Array::value(3, $request)) {
       $r3 = _civicrm_api_get_camel_name($request[3]);
+      if (!is_numeric($r3))
+        $mdfile = 'doc/'.$tplfile[0].'/'.$r3 .'.md';
       $smarty->assign("id",$r3);
     }
+
+    $md = file_get_contents($mdfile, FILE_USE_INCLUDE_PATH);
+    if (!$md) $md= "$mdfile not found"; 
+    $smarty->assign("mdfile",$md);
+    $smarty->assign("md",$md);
+
     if (CRM_Utils_Array::value(4, $request)) {
       $r3 = CRM_Utils_String::munge($request[4]);
       $smarty->assign("id2",$r3);
     }
     if (!$tplfile) {
-      $tpl = "CRM/Civisualize/Page/Main.tpl";
+      $tpl = "CRM/Civisualize/Page/Doc.tpl";
     }
-    // Example: Assign a variable for use in a template
-    $this->assign('currentTime', date('Y-m-d H:i:s'));
 
     parent::run();
   }
