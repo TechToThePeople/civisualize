@@ -29,8 +29,11 @@ class CRM_Civisualize_Page_Doc extends CRM_Core_Page {
     }
 
     $md = file_get_contents($mdfile, FILE_USE_INCLUDE_PATH);
-    if (!$md) $md= "$mdfile not found"; 
-    $smarty->assign("mdfile",$md);
+    if (!$md) {
+      $md= "$mdfile not found"; 
+      $smarty->assign("error","missing_file");
+    }
+    $smarty->assign("mdfile",$mdfile);
     $smarty->assign("md",$md);
 
     if (CRM_Utils_Array::value(4, $request)) {
