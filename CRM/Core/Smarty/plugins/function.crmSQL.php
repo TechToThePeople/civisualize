@@ -93,5 +93,8 @@ function smarty_function_crmSQL($params, &$smarty) {
     if (array_key_exists('debug', $params)) {
       return json_encode(array("is_error"=>$is_error, "keys"=> $keys, "error"=>$error, "values" => $values,"sql" => trim(preg_replace('/\s+/', ' ', $sql))), JSON_NUMERIC_CHECK);
     }
+    if (!$smarty)
+      return array("is_error"=>$is_error, "keys"=> $keys, "error"=>$error, "values" => $values);
+
     return json_encode(array("is_error"=>$is_error, "keys"=> $keys, "error"=>$error, "values" => $values), JSON_NUMERIC_CHECK);
 }
