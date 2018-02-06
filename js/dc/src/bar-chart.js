@@ -1,41 +1,33 @@
 /**
-## Bar Chart
-
-Includes: [Stack Mixin](#stack Mixin), [Coordinate Grid Mixin](#coordinate-grid-mixin)
-
-Concrete bar chart/histogram implementation.
-
-Examples:
-
-* [Nasdaq 100 Index](http://nickqizhu.github.com/dc.js/)
-* [Canadian City Crime Stats](http://nickqizhu.github.com/dc.js/crime/index.html)
-
-#### dc.barChart(parent[, chartGroup])
-Create a bar chart instance and attach it to the given parent element.
-
-Parameters:
-* parent : string|compositeChart - any valid d3 single selector representing typically a dom block element such
-   as a div, or if this bar chart is a sub-chart in a [Composite Chart](#composite-chart) then pass in the parent composite chart instance.
-* chartGroup : string (optional) - name of the chart group this chart instance should be placed in. Once a chart is placed
-   in a certain chart group then any interaction with such instance will only trigger events and redraw within the same
-   chart group.
-
-Return:
-A newly created bar chart instance
-
-```js
-// create a bar chart under #chart-container1 element using the default global chart group
-var chart1 = dc.barChart("#chart-container1");
-// create a bar chart under #chart-container2 element using chart group A
-var chart2 = dc.barChart("#chart-container2", "chartGroupA");
-// create a sub-chart under a composite parent chart
-var chart3 = dc.barChart(compositeChart);
-```
-
-**/
+ * Concrete bar chart/histogram implementation.
+ *
+ * Examples:
+ * - {@link http://dc-js.github.com/dc.js/ Nasdaq 100 Index}
+ * - {@link http://dc-js.github.com/dc.js/crime/index.html Canadian City Crime Stats}
+ * @class barChart
+ * @memberof dc
+ * @mixes dc.stackMixin
+ * @mixes dc.coordinateGridMixin
+ * @example
+ * // create a bar chart under #chart-container1 element using the default global chart group
+ * var chart1 = dc.barChart('#chart-container1');
+ * // create a bar chart under #chart-container2 element using chart group A
+ * var chart2 = dc.barChart('#chart-container2', 'chartGroupA');
+ * // create a sub-chart under a composite parent chart
+ * var chart3 = dc.barChart(compositeChart);
+ * @param {String|node|d3.selection|dc.compositeChart} parent - Any valid
+ * {@link https://github.com/d3/d3-3.x-api-reference/blob/master/Selections.md#selecting-elements d3 single selector}
+ * specifying a dom block element such as a div; or a dom element or d3 selection.  If the bar
+ * chart is a sub-chart in a {@link dc.compositeChart Composite Chart} then pass in the parent
+ * composite chart instance instead.
+ * @param {String} [chartGroup] - The name of the chart group this chart instance should be placed in.
+ * Interaction with a chart will only trigger events and redraws within the chart's group.
+ * @returns {dc.barChart}
+ */
 dc.barChart = function (parent, chartGroup) {
     var MIN_BAR_WIDTH = 1;
     var DEFAULT_GAP_BETWEEN_BARS = 2;
+    var LABEL_PADDING = 3;
 
     var _chart = dc.stackMixin(dc.coordinateGridMixin({}));
 
@@ -48,101 +40,164 @@ dc.barChart = function (parent, chartGroup) {
     dc.override(_chart, 'rescale', function () {
         _chart._rescale();
         _barWidth = undefined;
+        return _chart;
     });
 
     dc.override(_chart, 'render', function () {
         if (_chart.round() && _centerBar && !_alwaysUseRounding) {
-            dc.logger.warn("By default, brush rounding is disabled if bars are centered. " +
-                         "See dc.js bar chart API documentation for details.");
+            dc.logger.warn('By default, brush rounding is disabled if bars are centered. ' +
+                         'See dc.js bar chart API documentation for details.');
         }
 
-        _chart._render();
+        return _chart._render();
     });
 
+    _chart.label(function (d) {
+        return dc.utils.printSingleValue(d.y0 + d.y);
+    }, false);
+
     _chart.plotData = function () {
-        var layers = _chart.chartBodyG().selectAll("g.stack")
+        var layers = _chart.chartBodyG().selectAll('g.stack')
             .data(_chart.data());
 
         calculateBarWidth();
 
         layers
             .enter()
-            .append("g")
-            .attr("class", function (d, i) {
-                return "stack " + "_" + i;
+            .append('g')
+            .attr('class', function (d, i) {
+                return 'stack ' + '_' + i;
             });
 
+        var last = layers.size() - 1;
         layers.each(function (d, i) {
             var layer = d3.select(this);
 
             renderBars(layer, i, d);
+
+            if (_chart.renderLabel() && last === i) {
+                renderLabels(layer, i, d);
+            }
         });
     };
 
-    function barHeight(d) {
+    function barHeight (d) {
         return dc.utils.safeNumber(Math.abs(_chart.y()(d.y + d.y0) - _chart.y()(d.y0)));
     }
 
-    function renderBars(layer, layerIndex, d) {
-        var bars = layer.selectAll("rect.bar")
+    function renderLabels (layer, layerIndex, d) {
+        var labels = layer.selectAll('text.barLabel')
             .data(d.values, dc.pluck('x'));
 
-        bars.enter()
-            .append("rect")
-            .attr("class", "bar")
-            .attr("fill", dc.pluck('data',_chart.getColor));
+        labels.enter()
+            .append('text')
+            .attr('class', 'barLabel')
+            .attr('text-anchor', 'middle');
 
-        if (_chart.renderTitle())
-            bars.append("title").text(dc.pluck('data',_chart.title(d.name)));
+        if (_chart.isOrdinal()) {
+            labels.on('click', _chart.onClick);
+            labels.attr('cursor', 'pointer');
+        }
 
-        if (_chart.isOrdinal())
-            bars.on("click", onClick);
-
-        dc.transition(bars, _chart.transitionDuration())
-            .attr("x", function (d) {
+        dc.transition(labels, _chart.transitionDuration(), _chart.transitionDelay())
+            .attr('x', function (d) {
                 var x = _chart.x()(d.x);
-                if (_centerBar) x -= _barWidth / 2;
-                if (_chart.isOrdinal()) x += _gap/2;
+                if (!_centerBar) {
+                    x += _barWidth / 2;
+                }
                 return dc.utils.safeNumber(x);
             })
-            .attr("y", function (d) {
+            .attr('y', function (d) {
                 var y = _chart.y()(d.y + d.y0);
 
-                if (d.y < 0)
+                if (d.y < 0) {
                     y -= barHeight(d);
+                }
 
-                return dc.utils.safeNumber(y);
+                return dc.utils.safeNumber(y - LABEL_PADDING);
             })
-            .attr("width", _barWidth)
-            .attr("height", function (d) {
-                return barHeight(d);
-            })
-            .attr("fill", dc.pluck('data',_chart.getColor))
-            .select("title").text(dc.pluck('data',_chart.title(d.name)));
+            .text(function (d) {
+                return _chart.label()(d);
+            });
 
-        dc.transition(bars.exit(), _chart.transitionDuration())
-            .attr("height", 0)
+        dc.transition(labels.exit(), _chart.transitionDuration(), _chart.transitionDelay())
+            .attr('height', 0)
             .remove();
     }
 
-    function calculateBarWidth() {
+    function renderBars (layer, layerIndex, d) {
+        var bars = layer.selectAll('rect.bar')
+            .data(d.values, dc.pluck('x'));
+
+        var enter = bars.enter()
+            .append('rect')
+            .attr('class', 'bar')
+            .attr('fill', dc.pluck('data', _chart.getColor))
+            .attr('y', _chart.yAxisHeight())
+            .attr('height', 0);
+
+        if (_chart.renderTitle()) {
+            enter.append('title').text(dc.pluck('data', _chart.title(d.name)));
+        }
+
+        if (_chart.isOrdinal()) {
+            bars.on('click', _chart.onClick);
+        }
+
+        dc.transition(bars, _chart.transitionDuration(), _chart.transitionDelay())
+            .attr('x', function (d) {
+                var x = _chart.x()(d.x);
+                if (_centerBar) {
+                    x -= _barWidth / 2;
+                }
+                if (_chart.isOrdinal() && _gap !== undefined) {
+                    x += _gap / 2;
+                }
+                return dc.utils.safeNumber(x);
+            })
+            .attr('y', function (d) {
+                var y = _chart.y()(d.y + d.y0);
+
+                if (d.y < 0) {
+                    y -= barHeight(d);
+                }
+
+                return dc.utils.safeNumber(y);
+            })
+            .attr('width', _barWidth)
+            .attr('height', function (d) {
+                return barHeight(d);
+            })
+            .attr('fill', dc.pluck('data', _chart.getColor))
+            .select('title').text(dc.pluck('data', _chart.title(d.name)));
+
+        dc.transition(bars.exit(), _chart.transitionDuration(), _chart.transitionDelay())
+            .attr('x', function (d) { return _chart.x()(d.x); })
+            .attr('width', _barWidth * 0.9)
+            .remove();
+    }
+
+    function calculateBarWidth () {
         if (_barWidth === undefined) {
             var numberOfBars = _chart.xUnitCount();
 
-            if (_chart.isOrdinal() && !_gap)
+            // please can't we always use rangeBands for bar charts?
+            if (_chart.isOrdinal() && _gap === undefined) {
                 _barWidth = Math.floor(_chart.x().rangeBand());
-            else if (_gap)
+            } else if (_gap) {
                 _barWidth = Math.floor((_chart.xAxisLength() - (numberOfBars - 1) * _gap) / numberOfBars);
-            else
+            } else {
                 _barWidth = Math.floor(_chart.xAxisLength() / (1 + _chart.barPadding()) / numberOfBars);
+            }
 
-            if (_barWidth == Infinity || isNaN(_barWidth) || _barWidth < MIN_BAR_WIDTH)
+            if (_barWidth === Infinity || isNaN(_barWidth) || _barWidth < MIN_BAR_WIDTH) {
                 _barWidth = MIN_BAR_WIDTH;
+            }
         }
     }
 
     _chart.fadeDeselectedArea = function () {
-        var bars = _chart.chartBodyG().selectAll("rect.bar");
+        var bars = _chart.chartBodyG().selectAll('rect.bar');
         var extent = _chart.brush().extent();
 
         if (_chart.isOrdinal()) {
@@ -172,52 +227,75 @@ dc.barChart = function (parent, chartGroup) {
     };
 
     /**
-    #### .centerBar(boolean)
-    Whether the bar chart will render each bar centered around the data position on x axis. Default to false.
-
-    **/
-    _chart.centerBar = function (_) {
-        if (!arguments.length) return _centerBar;
-        _centerBar = _;
+     * Whether the bar chart will render each bar centered around the data position on the x-axis.
+     * @method centerBar
+     * @memberof dc.barChart
+     * @instance
+     * @param {Boolean} [centerBar=false]
+     * @returns {Boolean|dc.barChart}
+     */
+    _chart.centerBar = function (centerBar) {
+        if (!arguments.length) {
+            return _centerBar;
+        }
+        _centerBar = centerBar;
         return _chart;
     };
 
-    function onClick(d) {
-        _chart.onClick(d.data);
-    }
+    dc.override(_chart, 'onClick', function (d) {
+        _chart._onClick(d.data);
+    });
 
     /**
-    #### .barPadding([padding])
-    Get or set the spacing between bars as a fraction of bar size. Valid values are within 0-1.
-    Setting this value will also remove any previously set `gap`. See the
-    [d3 docs](https://github.com/mbostock/d3/wiki/Ordinal-Scales#wiki-ordinal_rangeBands)
-    for a visual description of how the padding is applied.
-    **/
-    _chart.barPadding = function (_) {
-        if (!arguments.length) return _chart._rangeBandPadding();
-        _chart._rangeBandPadding(_);
-        _gap = 0;
+     * Get or set the spacing between bars as a fraction of bar size. Valid values are between 0-1.
+     * Setting this value will also remove any previously set {@link dc.barChart#gap gap}. See the
+     * {@link https://github.com/d3/d3-3.x-api-reference/blob/master/Ordinal-Scales.md#ordinal_rangeBands d3 docs}
+     * for a visual description of how the padding is applied.
+     * @method barPadding
+     * @memberof dc.barChart
+     * @instance
+     * @param {Number} [barPadding=0]
+     * @returns {Number|dc.barChart}
+     */
+    _chart.barPadding = function (barPadding) {
+        if (!arguments.length) {
+            return _chart._rangeBandPadding();
+        }
+        _chart._rangeBandPadding(barPadding);
+        _gap = undefined;
         return _chart;
     };
 
-    /**
-    #### .outerPadding([padding])
-    Get or set the outer padding on an ordinal bar chart. This setting has no effect on non-ordinal charts.
-    Padding equivlent in width to `padding * barWidth` will be added on each side of the chart.
+    _chart._useOuterPadding = function () {
+        return _gap === undefined;
+    };
 
-    Default: 0.5
-    **/
+    /**
+     * Get or set the outer padding on an ordinal bar chart. This setting has no effect on non-ordinal charts.
+     * Will pad the width by `padding * barWidth` on each side of the chart.
+     * @method outerPadding
+     * @memberof dc.barChart
+     * @instance
+     * @param {Number} [padding=0.5]
+     * @returns {Number|dc.barChart}
+     */
     _chart.outerPadding = _chart._outerRangeBandPadding;
 
     /**
-    #### .gap(gapBetweenBars)
-    Manually set fixed gap (in px) between bars instead of relying on the default auto-generated gap. By default bar chart
-    implementation will calculate and set the gap automatically based on the number of data points and the length of the x axis.
-
-    **/
-    _chart.gap = function (_) {
-        if (!arguments.length) return _gap;
-        _gap = _;
+     * Manually set fixed gap (in px) between bars instead of relying on the default auto-generated
+     * gap.  By default the bar chart implementation will calculate and set the gap automatically
+     * based on the number of data points and the length of the x axis.
+     * @method gap
+     * @memberof dc.barChart
+     * @instance
+     * @param {Number} [gap=2]
+     * @returns {Number|dc.barChart}
+     */
+    _chart.gap = function (gap) {
+        if (!arguments.length) {
+            return _gap;
+        }
+        _gap = gap;
         return _chart;
     };
 
@@ -227,7 +305,7 @@ dc.barChart = function (parent, chartGroup) {
             extent[0] = extent.map(_chart.round())[0];
             extent[1] = extent.map(_chart.round())[1];
 
-            _chart.chartBodyG().select(".brush")
+            _chart.chartBodyG().select('.brush')
                 .call(_chart.brush().extent(extent));
         }
 
@@ -235,36 +313,41 @@ dc.barChart = function (parent, chartGroup) {
     };
 
     /**
-    #### .alwaysUseRounding([boolean])
-    Set or get the flag which determines whether rounding is enabled when bars are centered (default: false).
-    If false, using rounding with centered bars will result in a warning and rounding will be ignored.
-    This flag has no effect if bars are not centered.
-
-    When using standard d3.js rounding methods, the brush often doesn't align correctly with centered bars since the bars are offset.
-    The rounding function must add an offset to compensate, such as in the following example.
-    ```js
-    chart.round(function(n) {return Math.floor(n)+0.5});
-    ```
-    **/
-    _chart.alwaysUseRounding = function (_) {
-        if (!arguments.length) return _alwaysUseRounding;
-        _alwaysUseRounding = _;
+     * Set or get whether rounding is enabled when bars are centered. If false, using
+     * rounding with centered bars will result in a warning and rounding will be ignored.  This flag
+     * has no effect if bars are not {@link dc.barChart#centerBar centered}.
+     * When using standard d3.js rounding methods, the brush often doesn't align correctly with
+     * centered bars since the bars are offset.  The rounding function must add an offset to
+     * compensate, such as in the following example.
+     * @method alwaysUseRounding
+     * @memberof dc.barChart
+     * @instance
+     * @example
+     * chart.round(function(n) { return Math.floor(n) + 0.5; });
+     * @param {Boolean} [alwaysUseRounding=false]
+     * @returns {Boolean|dc.barChart}
+     */
+    _chart.alwaysUseRounding = function (alwaysUseRounding) {
+        if (!arguments.length) {
+            return _alwaysUseRounding;
+        }
+        _alwaysUseRounding = alwaysUseRounding;
         return _chart;
     };
 
-    function colorFilter(color,inv) {
-        return function() {
+    function colorFilter (color, inv) {
+        return function () {
             var item = d3.select(this);
-            var match = item.attr('fill') == color;
+            var match = item.attr('fill') === color;
             return inv ? !match : match;
         };
     }
 
     _chart.legendHighlight = function (d) {
-        if(!_chart.isLegendableHidden(d)) {
+        if (!_chart.isLegendableHidden(d)) {
             _chart.g().selectAll('rect.bar')
                 .classed('highlight', colorFilter(d.color))
-                .classed('fadeout', colorFilter(d.color,true));
+                .classed('fadeout', colorFilter(d.color, true));
         }
     };
 
@@ -274,9 +357,9 @@ dc.barChart = function (parent, chartGroup) {
             .classed('fadeout', false);
     };
 
-    dc.override(_chart, "xAxisMax", function() {
+    dc.override(_chart, 'xAxisMax', function () {
         var max = this._xAxisMax();
-        if('resolution' in _chart.xUnits()) {
+        if ('resolution' in _chart.xUnits()) {
             var res = _chart.xUnits().resolution;
             max += res;
         }

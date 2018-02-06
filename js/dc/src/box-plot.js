@@ -1,45 +1,55 @@
+
 /**
- ## Box Plot
-
- Includes: [Coordinate Grid Mixin](#coordinate-grid-mixin)
-
- A box plot is a chart that depicts numerical data via their quartile ranges.
-
- #### dc.boxPlot(parent[, chartGroup])
- Create a box plot instance and attach it to the given parent element.
-
- Parameters:
- * parent : string - any valid d3 single selector representing typically a dom block element such as a div.
- * chartGroup : string (optional) - name of the chart group this chart instance should be placed in. Once a chart is placed
- in a certain chart group then any interaction with such instance will only trigger events and redraw within the same
- chart group.
-
- Return:
- A newly created box plot instance
-
- ```js
- // create a box plot under #chart-container1 element using the default global chart group
- var boxPlot1 = dc.boxPlot("#chart-container1");
- // create a box plot under #chart-container2 element using chart group A
- var boxPlot2 = dc.boxPlot("#chart-container2", "chartGroupA");
- ```
-
- **/
+ * A box plot is a chart that depicts numerical data via their quartile ranges.
+ *
+ * Examples:
+ * - {@link http://dc-js.github.io/dc.js/examples/box-plot-time.html Box plot time example}
+ * - {@link http://dc-js.github.io/dc.js/examples/box-plot.html Box plot example}
+ * @class boxPlot
+ * @memberof dc
+ * @mixes dc.coordinateGridMixin
+ * @example
+ * // create a box plot under #chart-container1 element using the default global chart group
+ * var boxPlot1 = dc.boxPlot('#chart-container1');
+ * // create a box plot under #chart-container2 element using chart group A
+ * var boxPlot2 = dc.boxPlot('#chart-container2', 'chartGroupA');
+ * @param {String|node|d3.selection} parent - Any valid
+ * {@link https://github.com/d3/d3-3.x-api-reference/blob/master/Selections.md#selecting-elements d3 single selector} specifying
+ * a dom block element such as a div; or a dom element or d3 selection.
+ * @param {String} [chartGroup] - The name of the chart group this chart instance should be placed in.
+ * Interaction with a chart will only trigger events and redraws within the chart's group.
+ * @returns {dc.boxPlot}
+ */
 dc.boxPlot = function (parent, chartGroup) {
     var _chart = dc.coordinateGridMixin({});
 
-    var _whisker_iqr_factor = 1.5;
-    var _whiskers_iqr = default_whiskers_iqr;
-    var _whiskers = _whiskers_iqr(_whisker_iqr_factor);
+    // Returns a function to compute the interquartile range.
+    function DEFAULT_WHISKERS_IQR (k) {
+        return function (d) {
+            var q1 = d.quartiles[0],
+                q3 = d.quartiles[2],
+                iqr = (q3 - q1) * k,
+                i = -1,
+                j = d.length;
+            do { ++i; } while (d[i] < q1 - iqr);
+            do { --j; } while (d[j] > q3 + iqr);
+            return [i, j];
+        };
+    }
+
+    var _whiskerIqrFactor = 1.5;
+    var _whiskersIqr = DEFAULT_WHISKERS_IQR;
+    var _whiskers = _whiskersIqr(_whiskerIqrFactor);
 
     var _box = d3.box();
     var _tickFormat = null;
 
     var _boxWidth = function (innerChartWidth, xUnits) {
-        if (_chart.isOrdinal())
+        if (_chart.isOrdinal()) {
             return _chart.x().rangeBand();
-        else
+        } else {
             return innerChartWidth / (1 + _chart.boxPadding()) / xUnits;
+        }
     };
 
     // default padding to handle min/max whisker text
@@ -52,9 +62,9 @@ dc.boxPlot = function (parent, chartGroup) {
     // valueAccessor should return an array of values that can be coerced into numbers
     // or if data is overloaded for a static array of arrays, it should be `Number`.
     // Empty arrays are not included.
-    _chart.data(function(group) {
+    _chart.data(function (group) {
         return group.all().map(function (d) {
-            d.map = function(accessor) { return accessor.call(d,d); };
+            d.map = function (accessor) { return accessor.call(d, d); };
             return d;
         }).filter(function (d) {
             var values = _chart.valueAccessor()(d);
@@ -63,42 +73,58 @@ dc.boxPlot = function (parent, chartGroup) {
     });
 
     /**
-    #### .boxPadding([padding])
-    Get or set the spacing between boxes as a fraction of bar size. Valid values are within 0-1.
-    See the [d3 docs](https://github.com/mbostock/d3/wiki/Ordinal-Scales#wiki-ordinal_rangeBands)
-    for a visual description of how the padding is applied.
-
-    Default: 0.8
-    **/
+     * Get or set the spacing between boxes as a fraction of box size. Valid values are within 0-1.
+     * See the {@link https://github.com/d3/d3-3.x-api-reference/blob/master/Ordinal-Scales.md#ordinal_rangeBands d3 docs}
+     * for a visual description of how the padding is applied.
+     * @method boxPadding
+     * @memberof dc.boxPlot
+     * @instance
+     * @see {@link https://github.com/d3/d3-3.x-api-reference/blob/master/Ordinal-Scales.md#ordinal_rangeBands d3.scale.ordinal.rangeBands}
+     * @param {Number} [padding=0.8]
+     * @returns {Number|dc.boxPlot}
+     */
     _chart.boxPadding = _chart._rangeBandPadding;
     _chart.boxPadding(0.8);
 
     /**
-    #### .outerPadding([padding])
-    Get or set the outer padding on an ordinal box chart. This setting has no effect on non-ordinal charts
-    or on charts with a custom `.boxWidth`. Padding equivlent in width to `padding * barWidth` will be
-    added on each side of the chart.
-
-    Default: 0.5
-    **/
+     * Get or set the outer padding on an ordinal box chart. This setting has no effect on non-ordinal charts
+     * or on charts with a custom {@link dc.boxPlot#boxWidth .boxWidth}. Will pad the width by
+     * `padding * barWidth` on each side of the chart.
+     * @method outerPadding
+     * @memberof dc.boxPlot
+     * @instance
+     * @param {Number} [padding=0.5]
+     * @returns {Number|dc.boxPlot}
+     */
     _chart.outerPadding = _chart._outerRangeBandPadding;
     _chart.outerPadding(0.5);
 
     /**
-     #### .boxWidth(width || function(innerChartWidth, xUnits) { ... })
-     Get or set the numerical width of the boxplot box. Provided width may also be a function.
-     This function takes as parameters the chart width without the right and left margins
-     as well as the number of x units.
-     **/
-    _chart.boxWidth = function(_) {
-        if (!arguments.length) return _boxWidth;
-        _boxWidth = d3.functor(_);
+     * Get or set the numerical width of the boxplot box. The width may also be a function taking as
+     * parameters the chart width excluding the right and left margins, as well as the number of x
+     * units.
+     * @example
+     * // Using numerical parameter
+     * chart.boxWidth(10);
+     * // Using function
+     * chart.boxWidth((innerChartWidth, xUnits) { ... });
+     * @method boxWidth
+     * @memberof dc.boxPlot
+     * @instance
+     * @param {Number|Function} [boxWidth=0.5]
+     * @returns {Number|Function|dc.boxPlot}
+     */
+    _chart.boxWidth = function (boxWidth) {
+        if (!arguments.length) {
+            return _boxWidth;
+        }
+        _boxWidth = d3.functor(boxWidth);
         return _chart;
     };
 
     var boxTransform = function (d, i) {
-        var xOffset = _chart.x()(_chart.keyAccessor()(d,i));
-        return "translate(" + xOffset + ",0)";
+        var xOffset = _chart.x()(_chart.keyAccessor()(d, i));
+        return 'translate(' + xOffset + ', 0)';
     };
 
     _chart._preprocessData = function () {
@@ -118,7 +144,7 @@ dc.boxPlot = function (parent, chartGroup) {
             .duration(_chart.transitionDuration())
             .tickFormat(_tickFormat);
 
-        var boxesG = _chart.chartBodyG().selectAll('g.box').data(_chart.data());
+        var boxesG = _chart.chartBodyG().selectAll('g.box').data(_chart.data(), _chart.keyAccessor());
 
         renderBoxes(boxesG);
         updateBoxes(boxesG);
@@ -127,50 +153,65 @@ dc.boxPlot = function (parent, chartGroup) {
         _chart.fadeDeselectedArea();
     };
 
-    function renderBoxes(boxesG) {
-        var boxesGEnter = boxesG.enter().append("g");
+    function renderBoxes (boxesG) {
+        var boxesGEnter = boxesG.enter().append('g');
 
         boxesGEnter
-            .attr("class", "box")
-            .attr("transform", boxTransform)
+            .attr('class', 'box')
+            .attr('transform', boxTransform)
             .call(_box)
-            .on("click", function(d) {
-                _chart.filter(d.key);
+            .on('click', function (d) {
+                _chart.filter(_chart.keyAccessor()(d));
                 _chart.redrawGroup();
             });
     }
 
-    function updateBoxes(boxesG) {
-        dc.transition(boxesG, _chart.transitionDuration())
-            .attr("transform", boxTransform)
+    function updateBoxes (boxesG) {
+        dc.transition(boxesG, _chart.transitionDuration(), _chart.transitionDelay())
+            .attr('transform', boxTransform)
             .call(_box)
-            .each(function() {
-                d3.select(this).select('rect.box').attr("fill", _chart.getColor);
+            .each(function () {
+                d3.select(this).select('rect.box').attr('fill', _chart.getColor);
             });
     }
 
-    function removeBoxes(boxesG) {
+    function removeBoxes (boxesG) {
         boxesG.exit().remove().call(_box);
     }
 
     _chart.fadeDeselectedArea = function () {
         if (_chart.hasFilter()) {
-            _chart.g().selectAll("g.box").each(function (d) {
-                if (_chart.isSelectedNode(d)) {
-                    _chart.highlightSelected(this);
-                } else {
-                    _chart.fadeDeselected(this);
-                }
-            });
+            if (_chart.isOrdinal()) {
+                _chart.g().selectAll('g.box').each(function (d) {
+                    if (_chart.isSelectedNode(d)) {
+                        _chart.highlightSelected(this);
+                    } else {
+                        _chart.fadeDeselected(this);
+                    }
+                });
+            } else {
+                var extent = _chart.brush().extent();
+                var start = extent[0];
+                var end = extent[1];
+                var keyAccessor = _chart.keyAccessor();
+                _chart.g().selectAll('g.box').each(function (d) {
+                    var key = keyAccessor(d);
+                    if (key < start || key >= end) {
+                        _chart.fadeDeselected(this);
+                    } else {
+                        _chart.highlightSelected(this);
+                    }
+                });
+            }
         } else {
-            _chart.g().selectAll("g.box").each(function () {
+            _chart.g().selectAll('g.box').each(function () {
                 _chart.resetHighlight(this);
             });
         }
     };
 
     _chart.isSelectedNode = function (d) {
-        return _chart.hasFilter(d.key);
+        return _chart.hasFilter(_chart.keyAccessor()(d));
     };
 
     _chart.yAxisMin = function () {
@@ -188,32 +229,24 @@ dc.boxPlot = function (parent, chartGroup) {
     };
 
     /**
-     #### .tickFormat()
-     Set the numerical format of the boxplot median, whiskers and quartile labels. Defaults to integer.
-     ```js
-     // format ticks to 2 decimal places
-     chart.tickFormat(d3.format(".2f"));
-     ```
-     **/
-    _chart.tickFormat = function(x) {
-        if (!arguments.length) return _tickFormat;
-        _tickFormat = x;
+     * Set the numerical format of the boxplot median, whiskers and quartile labels. Defaults to
+     * integer formatting.
+     * @example
+     * // format ticks to 2 decimal places
+     * chart.tickFormat(d3.format('.2f'));
+     * @method tickFormat
+     * @memberof dc.boxPlot
+     * @instance
+     * @param {Function} [tickFormat]
+     * @returns {Number|Function|dc.boxPlot}
+     */
+    _chart.tickFormat = function (tickFormat) {
+        if (!arguments.length) {
+            return _tickFormat;
+        }
+        _tickFormat = tickFormat;
         return _chart;
     };
-
-    // Returns a function to compute the interquartile range.
-    function default_whiskers_iqr(k) {
-        return function (d) {
-            var q1 = d.quartiles[0],
-                q3 = d.quartiles[2],
-                iqr = (q3 - q1) * k,
-                i = -1,
-                j = d.length;
-            while (d[++i] < q1 - iqr);
-            while (d[--j] > q3 + iqr);
-            return [i, j];
-        };
-    }
 
     return _chart.anchor(parent, chartGroup);
 };
