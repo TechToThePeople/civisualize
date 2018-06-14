@@ -69,7 +69,7 @@ function drawOpen (dom) {
     .renderArea(true)
     .group(group)
     .brushOn(false)
-    .x(d3.time.scale().domain(d3.extent(dim.top(2000), function(d) { return d.date; })))
+    .x(d3.time.scale().domain(d3.extent(dim.top(3000), function(d) { return d.date; })))
     //.round(d3.time.day.round)
     .elasticY(true)
     .xUnits(d3.time.days);
