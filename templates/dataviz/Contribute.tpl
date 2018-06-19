@@ -1,25 +1,33 @@
 {crmTitle string="Contributions"}
 <h1><span id="nbcontrib"></span> Contributions for a total of <span id="amount"></span></h1>
-<div id="type" style="width:250px;">
+<div class="row">
+<div id="recur" class="col-md-4">
+    <strong>Recurring</strong>
+    <a class="reset" href="javascript:graphs.recur.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+    <graph />
+    <div class="clearfix"></div>
+</div>
+
+<div id="contact_type" class="col-md-4 hidden">
     <strong>Type</strong>
     <a class="reset" href="javascript:pietype.filterAll();dc.redrawAll();" style="display: none;">reset</a>
     <div class="clearfix"></div>
 </div>
 
-<div id="instrument" style="width:250px;">
+<div id="instrument" class="col-md-4">
     <strong>Payment instrument</strong>
     <a class="reset" href="javascript:pieinstrument.filterAll();dc.redrawAll();" style="display: none;">reset</a>
     <div class="clearfix"></div>
 </div>
 
-<div id="day-of-week-chart">
+<div id="day-of-week-chart" class="col-md-4">
     <strong>Day of Week</strong>
     <a class="reset" href="javascript:dayOfWeekChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
     <div class="clearfix"></div>
 </div>
-
+</div>
 <div class="row clear">
-    <div id="monthly-move-chart">
+    <div id="monthly-move-chart" class="col-md-12">
         <strong>Amount by month</strong>
         <span class="reset" style="display: none;">range: <span class="filter"></span></span>
         <a class="reset" href="javascript:moveChart.filterAll();volumeChart.filterAll();dc.redrawAll();"
@@ -28,7 +36,7 @@ style="display: none;">reset</a>
     </div>
 </div>
 
-<div id="monthly-volume-chart"></div>
+<div id="monthly-volume-chart" class="col-md-12"></div>
 
 <div class="clear"></div>
 
@@ -46,10 +54,25 @@ style="display: none;">reset</a>
             });
 
             var numberFormat = d3.format(".2f");
+            var graphs = {};
             var volumeChart=null,dayOfWeekChart=null,moveChart=null,pieinstrument,pietype;  
 
-
             cj(function($) {
+
+        function drawRecur(dom){
+          var dim = ndx.dimension(function(d) {return d.recurring;});
+          var group = dim.group().reduceSum(function(d) { return d.count; });
+          var graph = dc.pieChart(dom)
+            .innerRadius(20)
+            .radius(90)
+            .dimension(dim)
+            .group(group)
+            .label(function (d) { return d.key? "Recurring":"One Off";})
+            .title(function (d) { return (d.key? "Recurring":"One Off") +": "+d.value;});
+          ;
+          return graph;
+        }
+
                 // create a pie chart under #chart-container1 element using the default global chart group
                 pietype = dc.pieChart("#type").innerRadius(20).radius(90);
                 pieinstrument = dc.pieChart("#instrument").innerRadius(50).radius(90);
@@ -189,6 +212,7 @@ style="display: none;">reset</a>
                     .round(d3.time.month.round)
                     .xUnits(d3.time.months);
 
+                graphs.recur=drawRecur("#recur graph");
                 dc.renderAll();
                 //  pietype.render();
             });//end cj
