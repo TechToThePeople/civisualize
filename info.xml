@@ -8,8 +8,8 @@
     <author>Xavier</author>
     <email>xavier@tttp.eu</email>
   </maintainer>
-  <releaseDate>2017-04-09</releaseDate>
-  <version>4.2</version>
+  <releaseDate>2019-01-22</releaseDate>
+  <version>5.0</version>
   <develStage>stable</develStage>
   <compatibility>
     <ver>4.3</ver>
@@ -23,6 +23,7 @@
     <ver>5.1</ver>
     <ver>5.2</ver>
     <ver>5.3</ver>
+    <ver>5.7</ver>
   </compatibility>
   <civix>
     <namespace>CRM/Civisualize</namespace>

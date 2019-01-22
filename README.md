@@ -139,6 +139,8 @@ xavier made this, sid helped him. You can find us on civicrm forum, [@eucampaign
 Changes
 -------
 
+### Version 5.0 brings changes that will probably break your custom visualisations.
+
 The libraries have been upgraded as follows:
 
 - d3 from 3.5.17 to 5.7.0
@@ -149,5 +151,10 @@ The d3 upgrade *requires changes to templates*. These are detailed at
 <https://github.com/d3/d3/blob/master/CHANGES.md>
 
 There's a PHP command line helper tool `updateTpl` which may help... or not. It
-doesn't cover everything (feel free to improve it).
+doesn't cover everything (feel free to improve it!), but it was able to convert
+all the bundled visualisations. Top tip: if/when you run it and you get a
+warning about `d3.time.format().parse`, it's best to revert to the backup (the
+script makes a backup for you), edit your original to a format that the
+converter can then handle. Once you've understood it, it's not difficult. Then
+run the converter and test.
 
