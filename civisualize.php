@@ -18,10 +18,10 @@ require_once 'civisualize.civix.php';
 
 function civisualize_civicrm_dashboard( $contactID, &$contentPlacement ) {
    CRM_Core_Resources::singleton()
-    ->addScriptFile('eu.tttp.civisualize', 'js/d3.v3.js', 110, 'html-header', FALSE)
-    ->addScriptFile('eu.tttp.civisualize', 'js/dc/dc.js', 110, 'html-header', FALSE)
-    ->addScriptFile('eu.tttp.civisualize', 'js/dc/crossfilter.js', 110, 'html-header', FALSE)
-    ->addStyleFile('eu.tttp.civisualize', 'js/dc/dc.css')
+    ->addScriptFile('eu.tttp.civisualize', 'js/d3.min.v5.7.0.js', 110, 'html-header', FALSE)
+    ->addScriptFile('eu.tttp.civisualize', 'js/dc/dc.min.js', 110, 'html-header', FALSE)
+    ->addScriptFile('eu.tttp.civisualize', 'js/dc/crossfilter.min.js', 110, 'html-header', FALSE)
+    ->addStyleFile('eu.tttp.civisualize', 'js/dc/dc.min.css')
     ->addStyleFile('eu.tttp.civisualize', 'css/style.css');
 }
 

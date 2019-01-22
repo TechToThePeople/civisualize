@@ -19,7 +19,7 @@
  * // create a bubble chart under #chart-container2 element using chart group A
  * var bubbleChart2 = dc.bubbleChart('#chart-container2', 'chartGroupA');
  * @param {String|node|d3.selection} parent - Any valid
- * {@link https://github.com/d3/d3-3.x-api-reference/blob/master/Selections.md#selecting-elements d3 single selector} specifying
+ * {@link https://github.com/d3/d3-selection/blob/master/README.md#select d3 single selector} specifying
  * a dom block element such as a div; or a dom element or d3 selection.
  * @param {String} [chartGroup] - The name of the chart group this chart instance should be placed in.
  * Interaction with a chart will only trigger events and redraws within the chart's group.
@@ -27,9 +27,6 @@
  */
 dc.bubbleChart = function (parent, chartGroup) {
     var _chart = dc.bubbleMixin(dc.coordinateGridMixin({}));
-
-    var _elasticRadius = false;
-    var _sortBubbleSize = false;
 
     _chart.transitionDuration(750);
 
@@ -39,67 +36,25 @@ dc.bubbleChart = function (parent, chartGroup) {
         return 'translate(' + (bubbleX(d)) + ',' + (bubbleY(d)) + ')';
     };
 
-    /**
-     * Turn on or off the elastic bubble radius feature, or return the value of the flag. If this
-     * feature is turned on, then bubble radii will be automatically rescaled to fit the chart better.
-     * @method elasticRadius
-     * @memberof dc.bubbleChart
-     * @instance
-     * @param {Boolean} [elasticRadius=false]
-     * @returns {Boolean|dc.bubbleChart}
-     */
-    _chart.elasticRadius = function (elasticRadius) {
-        if (!arguments.length) {
-            return _elasticRadius;
-        }
-        _elasticRadius = elasticRadius;
-        return _chart;
-    };
-
-    /**
-     * Turn on or off the bubble sorting feature, or return the value of the flag. If enabled,
-     * bubbles will be sorted by their radius, with smaller bubbles in front.
-     * @method sortBubbleSize
-     * @memberof dc.bubbleChart
-     * @instance
-     * @param {Boolean} [sortBubbleSize=false]
-     * @returns {Boolean|dc.bubbleChart}
-     */
-    _chart.sortBubbleSize = function (sortBubbleSize) {
-        if (!arguments.length) {
-            return _sortBubbleSize;
-        }
-        _sortBubbleSize = sortBubbleSize;
-        return _chart;
-    };
-
     _chart.plotData = function () {
-        if (_elasticRadius) {
-            _chart.r().domain([_chart.rMin(), _chart.rMax()]);
-        }
-
+        _chart.calculateRadiusDomain();
         _chart.r().range([_chart.MIN_RADIUS, _chart.xAxisLength() * _chart.maxBubbleRelativeSize()]);
 
         var data = _chart.data();
-        if (_sortBubbleSize) {
-            // sort descending so smaller bubbles are on top
-            var radiusAccessor = _chart.radiusValueAccessor();
-            data.sort(function (a, b) { return d3.descending(radiusAccessor(a), radiusAccessor(b)); });
-        }
         var bubbleG = _chart.chartBodyG().selectAll('g.' + _chart.BUBBLE_NODE_CLASS)
                 .data(data, function (d) { return d.key; });
-        if (_sortBubbleSize) {
-            // Call order here to update dom order based on sort
+        if (_chart.sortBubbleSize()) {
+            // update dom order based on sort
             bubbleG.order();
         }
 
-        renderNodes(bubbleG);
+        removeNodes(bubbleG);
+
+        bubbleG = renderNodes(bubbleG);
 
         updateNodes(bubbleG);
 
-        removeNodes(bubbleG);
-
-        _chart.fadeDeselectedArea();
+        _chart.fadeDeselectedArea(_chart.filter());
     };
 
     function renderNodes (bubbleG) {
@@ -114,6 +69,9 @@ dc.bubbleChart = function (parent, chartGroup) {
             .on('click', _chart.onClick)
             .attr('fill', _chart.getColor)
             .attr('r', 0);
+
+        bubbleG = bubbleGEnter.merge(bubbleG);
+
         dc.transition(bubbleG, _chart.transitionDuration(), _chart.transitionDelay())
             .select('circle.' + _chart.BUBBLE_CLASS)
             .attr('r', function (d) {
@@ -126,6 +84,8 @@ dc.bubbleChart = function (parent, chartGroup) {
         _chart._doRenderLabel(bubbleGEnter);
 
         _chart._doRenderTitles(bubbleGEnter);
+
+        return bubbleG;
     }
 
     function updateNodes (bubbleG) {
@@ -150,7 +110,7 @@ dc.bubbleChart = function (parent, chartGroup) {
 
     function bubbleX (d) {
         var x = _chart.x()(_chart.keyAccessor()(d));
-        if (isNaN(x)) {
+        if (isNaN(x) || !isFinite(x)) {
             x = 0;
         }
         return x;
@@ -158,7 +118,7 @@ dc.bubbleChart = function (parent, chartGroup) {
 
     function bubbleY (d) {
         var y = _chart.y()(_chart.valueAccessor()(d));
-        if (isNaN(y)) {
+        if (isNaN(y) || !isFinite(y)) {
             y = 0;
         }
         return y;
@@ -168,9 +128,9 @@ dc.bubbleChart = function (parent, chartGroup) {
         // override default x axis brush from parent chart
     };
 
-    _chart.redrawBrush = function () {
+    _chart.redrawBrush = function (brushSelection, doTransition) {
         // override default x axis brush from parent chart
-        _chart.fadeDeselectedArea();
+        _chart.fadeDeselectedArea(brushSelection);
     };
 
     return _chart.anchor(parent, chartGroup);

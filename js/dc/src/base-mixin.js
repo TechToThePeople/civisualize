@@ -33,6 +33,7 @@ dc.baseMixin = function (_chart) {
     };
     var _heightCalc = _defaultHeightCalc;
     var _width, _height;
+    var _useViewBoxResizing = false;
 
     var _keyAccessor = dc.pluck('key');
     var _valueAccessor = dc.pluck('value');
@@ -138,7 +139,7 @@ dc.baseMixin = function (_chart) {
             }
             return _height;
         }
-        _heightCalc = d3.functor(height || _defaultHeightCalc);
+        _heightCalc = height ? (typeof height === 'function' ? height : dc.utils.constant(height)) : _defaultHeightCalc;
         _height = undefined;
         return _chart;
     };
@@ -167,7 +168,7 @@ dc.baseMixin = function (_chart) {
             }
             return _width;
         }
-        _widthCalc = d3.functor(width || _defaultWidthCalc);
+        _widthCalc = width ? (typeof width === 'function' ? width : dc.utils.constant(width)) : _defaultWidthCalc;
         _width = undefined;
         return _chart;
     };
@@ -205,6 +206,37 @@ dc.baseMixin = function (_chart) {
             return _minHeight;
         }
         _minHeight = minHeight;
+        return _chart;
+    };
+
+    /**
+     * Turn on/off using the SVG
+     * {@link https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/viewBox `viewBox` attribute}.
+     * When enabled, `viewBox` will be set on the svg root element instead of `width` and `height`.
+     * Requires that the chart aspect ratio be defined using chart.width(w) and chart.height(h).
+     *
+     * This will maintain the aspect ratio while enabling the chart to resize responsively to the
+     * space given to the chart using CSS. For example, the chart can use `width: 100%; height:
+     * 100%` or absolute positioning to resize to its parent div.
+     *
+     * Since the text will be sized as if the chart is drawn according to the width and height, and
+     * will be resized if the chart is any other size, you need to set the chart width and height so
+     * that the text looks good. In practice, 600x400 seems to work pretty well for most charts.
+     *
+     * You can see examples of this resizing strategy in the [Chart Resizing
+     * Examples](http://dc-js.github.io/dc.js/resizing/); just add `?resize=viewbox` to any of the
+     * one-chart examples to enable `useViewBoxResizing`.
+     * @method useViewBoxResizing
+     * @memberof dc.baseMixin
+     * @instance
+     * @param {Boolean} [useViewBoxResizing=false]
+     * @returns {Boolean|dc.baseMixin}
+     */
+    _chart.useViewBoxResizing = function (useViewBoxResizing) {
+        if (!arguments.length) {
+            return _useViewBoxResizing;
+        }
+        _useViewBoxResizing = useViewBoxResizing;
         return _chart;
     };
 
@@ -256,7 +288,7 @@ dc.baseMixin = function (_chart) {
         if (!arguments.length) {
             return _data.call(_chart, _group);
         }
-        _data = d3.functor(callback);
+        _data = typeof callback === 'function' ? callback : dc.utils.constant(callback);
         _chart.expireCache();
         return _chart;
     };
@@ -353,7 +385,7 @@ dc.baseMixin = function (_chart) {
      * @method select
      * @memberof dc.baseMixin
      * @instance
-     * @see {@link https://github.com/d3/d3-3.x-api-reference/blob/master/Selections.md#d3_select d3.select}
+     * @see {@link https://github.com/d3/d3-selection/blob/master/README.md#select d3.select}
      * @example
      * // Has the same effect as d3.select('#chart-id').select(selector)
      * chart.select(selector)
@@ -371,7 +403,7 @@ dc.baseMixin = function (_chart) {
      * @method selectAll
      * @memberof dc.baseMixin
      * @instance
-     * @see {@link https://github.com/d3/d3-3.x-api-reference/blob/master/Selections.md#d3_selectAll d3.selectAll}
+     * @see {@link https://github.com/d3/d3-selection/blob/master/README.md#selectAll d3.selectAll}
      * @example
      * // Has the same effect as d3.select('#chart-id').selectAll(selector)
      * chart.selectAll(selector)
@@ -383,7 +415,7 @@ dc.baseMixin = function (_chart) {
 
     /**
      * Set the root SVGElement to either be an existing chart's root; or any valid [d3 single
-     * selector](https://github.com/d3/d3-3.x-api-reference/blob/master/Selections.md#selecting-elements) specifying a dom
+     * selector](https://github.com/d3/d3-selection/blob/master/README.md#selecting-elements) specifying a dom
      * block element such as a div; or a dom element or d3 selection. Optionally registers the chart
      * within the chartGroup. This class is called internally on chart initialization, but be called
      * again to relocate the chart. However, it will orphan any previously created SVGElements.
@@ -400,6 +432,9 @@ dc.baseMixin = function (_chart) {
         }
         if (dc.instanceOfChart(parent)) {
             _anchor = parent.anchor();
+            if (_anchor.children) { // is _anchor a div?
+                _anchor = '#' + parent.anchorName();
+            }
             _root = parent.root();
             _isChild = true;
         } else if (parent) {
@@ -491,9 +526,14 @@ dc.baseMixin = function (_chart) {
 
     function sizeSvg () {
         if (_svg) {
-            _svg
-                .attr('width', _chart.width())
-                .attr('height', _chart.height());
+            if (!_useViewBoxResizing) {
+                _svg
+                    .attr('width', _chart.width())
+                    .attr('height', _chart.height());
+            } else if (!_svg.attr('viewBox')) {
+                _svg
+                    .attr('viewBox', '0 0 ' + _chart.width() + ' ' + _chart.height());
+            }
         }
     }
 
@@ -543,11 +583,11 @@ dc.baseMixin = function (_chart) {
      * @param {Boolean} [controlsUseVisibility=false]
      * @returns {Boolean|dc.baseMixin}
      **/
-    _chart.controlsUseVisibility = function (_) {
+    _chart.controlsUseVisibility = function (useVisibility) {
         if (!arguments.length) {
             return _controlsUseVisibility;
         }
-        _controlsUseVisibility = _;
+        _controlsUseVisibility = useVisibility;
         return _chart;
     };
 
@@ -651,7 +691,7 @@ dc.baseMixin = function (_chart) {
      */
     _chart.render = function () {
         _height = _width = undefined; // force recalculate
-        _listeners.preRender(_chart);
+        _listeners.call('preRender', _chart, _chart);
 
         if (_mandatoryAttributes) {
             _mandatoryAttributes.forEach(checkForMandatoryAttributes);
@@ -669,19 +709,19 @@ dc.baseMixin = function (_chart) {
     };
 
     _chart._activateRenderlets = function (event) {
-        _listeners.pretransition(_chart);
+        _listeners.call('pretransition', _chart, _chart);
         if (_chart.transitionDuration() > 0 && _svg) {
             _svg.transition().duration(_chart.transitionDuration()).delay(_chart.transitionDelay())
-                .each('end', function () {
-                    _listeners.renderlet(_chart);
+                .on('end', function () {
+                    _listeners.call('renderlet', _chart, _chart);
                     if (event) {
-                        _listeners[event](_chart);
+                        _listeners.call(event, _chart, _chart);
                     }
                 });
         } else {
-            _listeners.renderlet(_chart);
+            _listeners.call('renderlet', _chart, _chart);
             if (event) {
-                _listeners[event](_chart);
+                _listeners.call(event, _chart, _chart);
             }
         }
     };
@@ -701,7 +741,7 @@ dc.baseMixin = function (_chart) {
      */
     _chart.redraw = function () {
         sizeSvg();
-        _listeners.preRedraw(_chart);
+        _listeners.call('preRedraw', _chart, _chart);
 
         var result = _chart._doRedraw();
 
@@ -784,12 +824,12 @@ dc.baseMixin = function (_chart) {
 
     _chart._invokeFilteredListener = function (f) {
         if (f !== undefined) {
-            _listeners.filtered(_chart, f);
+            _listeners.call('filtered', _chart, _chart, f);
         }
     };
 
     _chart._invokeZoomedListener = function () {
-        _listeners.zoomed(_chart);
+        _listeners.call('zoomed', _chart, _chart);
     };
 
     var _hasFilterHandler = function (filters, filter) {
@@ -802,14 +842,14 @@ dc.baseMixin = function (_chart) {
     };
 
     /**
-     * Set or get the has filter handler. The has filter handler is a function that checks to see if
-     * the chart's current filters include a specific filter.  Using a custom has filter handler allows
+     * Set or get the has-filter handler. The has-filter handler is a function that checks to see if
+     * the chart's current filters (first argument) include a specific filter (second argument).  Using a custom has-filter handler allows
      * you to change the way filters are checked for and replaced.
      * @method hasFilterHandler
      * @memberof dc.baseMixin
      * @instance
      * @example
-     * // default has filter handler
+     * // default has-filter handler
      * chart.hasFilterHandler(function (filters, filter) {
      *     if (filter === null || typeof(filter) === 'undefined') {
      *         return filters.length > 0;
@@ -864,7 +904,7 @@ dc.baseMixin = function (_chart) {
      * change how filters are removed or perform additional work when removing a filter, e.g. when
      * using a filter server other than crossfilter.
      *
-     * Any changes should modify the `filters` array argument and return that array.
+     * The handler should return a new or modified array as the result.
      * @method removeFilterHandler
      * @memberof dc.baseMixin
      * @instance
@@ -906,7 +946,7 @@ dc.baseMixin = function (_chart) {
      * are added or perform additional work when adding a filter, e.g. when using a filter server other
      * than crossfilter.
      *
-     * Any changes should modify the `filters` array argument and return that array.
+     * The handler should return a new or modified array as the result.
      * @method addFilterHandler
      * @memberof dc.baseMixin
      * @instance
@@ -942,7 +982,7 @@ dc.baseMixin = function (_chart) {
      * change the way filters are reset, or perform additional work when resetting the filters,
      * e.g. when using a filter server other than crossfilter.
      *
-     * This function should return an array.
+     * The handler should return a new or modified array as the result.
      * @method resetFilterHandler
      * @memberof dc.baseMixin
      * @instance
@@ -967,11 +1007,14 @@ dc.baseMixin = function (_chart) {
         return _chart;
     };
 
-    function applyFilters () {
+    function applyFilters (filters) {
         if (_chart.dimension() && _chart.dimension().filter) {
-            var fs = _filterHandler(_chart.dimension(), _filters);
-            _filters = fs ? fs : _filters;
+            var fs = _filterHandler(_chart.dimension(), filters);
+            if (fs) {
+                filters = fs;
+            }
         }
+        return filters;
     }
 
     /**
@@ -987,6 +1030,7 @@ dc.baseMixin = function (_chart) {
     _chart.replaceFilter = function (filter) {
         _filters = _resetFilterHandler(_filters);
         _chart.filter(filter);
+        return _chart;
     };
 
     /**
@@ -1046,24 +1090,26 @@ dc.baseMixin = function (_chart) {
         if (!arguments.length) {
             return _filters.length > 0 ? _filters[0] : null;
         }
+        var filters = _filters;
         if (filter instanceof Array && filter[0] instanceof Array && !filter.isFiltered) {
-            filter[0].forEach(function (d) {
-                if (_chart.hasFilter(d)) {
-                    _removeFilterHandler(_filters, d);
+            // toggle each filter
+            filter[0].forEach(function (f) {
+                if (_hasFilterHandler(filters, f)) {
+                    filters = _removeFilterHandler(filters, f);
                 } else {
-                    _addFilterHandler(_filters, d);
+                    filters = _addFilterHandler(filters, f);
                 }
             });
         } else if (filter === null) {
-            _filters = _resetFilterHandler(_filters);
+            filters = _resetFilterHandler(filters);
         } else {
-            if (_chart.hasFilter(filter)) {
-                _removeFilterHandler(_filters, filter);
+            if (_hasFilterHandler(filters, filter)) {
+                filters = _removeFilterHandler(filters, filter);
             } else {
-                _addFilterHandler(_filters, filter);
+                filters = _addFilterHandler(filters, filter);
             }
         }
-        applyFilters();
+        _filters = applyFilters(filters);
         _chart._invokeFilteredListener(filter);
 
         if (_root !== null && _chart.hasFilter()) {
@@ -1501,7 +1547,7 @@ dc.baseMixin = function (_chart) {
      * @method on
      * @memberof dc.baseMixin
      * @instance
-     * @see {@link https://github.com/d3/d3-3.x-api-reference/blob/master/Internals.md#dispatch_on d3.dispatch.on}
+     * @see {@link https://github.com/d3/d3-dispatch/blob/master/README.md#dispatch_on d3.dispatch.on}
      * @example
      * .on('renderlet', function(chart, filter){...})
      * .on('pretransition', function(chart, filter){...})

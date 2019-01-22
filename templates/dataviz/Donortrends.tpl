@@ -48,7 +48,7 @@
     'use strict';
 
     var data        = {crmSQL file="donors"};
-    var dateFormat  = d3.time.format("%Y-%m-%d");
+    var dateFormat  = d3.timeParse("%Y-%m-%d");
     var currentDate = new Date();
 
     {literal}
@@ -75,8 +75,8 @@
                     else{
                         d.gender_id = genderLabel[d.gender_id];
                     }
-                    d.birth_date = dateFormat.parse(d.birth_date);
-                    d.age=d3.time.years(d.birth_date, currentDate).length-1;
+                    d.birth_date = dateFormat(d.birth_date);
+                    d.age=d3.timeYears(d.birth_date, currentDate).length-1;
                 });
 
                 cj("#contactTotal").text(contactTotal);
@@ -220,7 +220,7 @@
                 var age         = ndx.dimension(function(d){
                     if(d.birth_date=="")
                         return "Unspecified";
-                    var a=d3.time.years(d.birth_date, currentDate).length-1;
+                    var a=d3.timeYears(d.birth_date, currentDate).length-1;
                     if(a<10)
                         return "1-10";
                     if(a<20)
@@ -269,7 +269,7 @@
                     .round(function(n) {
                         return Math.floor(n)+0.5}
                         )
-                    .x(d3.scale.linear().domain([minYear-1, maxYear+1]))
+                    .x(d3.scaleLinear().domain([minYear-1, maxYear+1]))
                     .legend(dc.legend().x(50).y(10).itemHeight(13).gap(5))
                     .stack(group,"Upgraded", function(d){return d.value.upgraded;})
                     .stack(group,"Downgraded", function(d){return d.value.downgraded;})

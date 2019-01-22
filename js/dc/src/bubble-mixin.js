@@ -10,6 +10,8 @@
 dc.bubbleMixin = function (_chart) {
     var _maxBubbleRelativeSize = 0.3;
     var _minRadiusWithLabel = 10;
+    var _sortBubbleSize = false;
+    var _elasticRadius = false;
 
     _chart.BUBBLE_NODE_CLASS = 'node';
     _chart.BUBBLE_CLASS = 'bubble';
@@ -20,10 +22,16 @@ dc.bubbleMixin = function (_chart) {
     _chart.renderLabel(true);
 
     _chart.data(function (group) {
-        return group.top(Infinity);
+        var data = group.all();
+        if (_sortBubbleSize) {
+            // sort descending so smaller bubbles are on top
+            var radiusAccessor = _chart.radiusValueAccessor();
+            data.sort(function (a, b) { return d3.descending(radiusAccessor(a), radiusAccessor(b)); });
+        }
+        return data;
     });
 
-    var _r = d3.scale.linear().domain([0, 100]);
+    var _r = d3.scaleLinear().domain([0, 100]);
 
     var _rValueAccessor = function (d) {
         return d.r;
@@ -31,13 +39,13 @@ dc.bubbleMixin = function (_chart) {
 
     /**
      * Get or set the bubble radius scale. By default the bubble chart uses
-     * {@link https://github.com/d3/d3-3.x-api-reference/blob/master/Quantitative-Scales.md#linear d3.scale.linear().domain([0, 100])}
+     * {@link https://github.com/d3/d3-scale/blob/master/README.md#scaleLinear d3.scaleLinear().domain([0, 100])}
      * as its radius scale.
      * @method r
      * @memberof dc.bubbleMixin
      * @instance
-     * @see {@link https://github.com/d3/d3-3.x-api-reference/blob/master/Scales.md d3.scale}
-     * @param {d3.scale} [bubbleRadiusScale=d3.scale.linear().domain([0, 100])]
+     * @see {@link https://github.com/d3/d3-scale/blob/master/README.md d3.scale}
+     * @param {d3.scale} [bubbleRadiusScale=d3.scaleLinear().domain([0, 100])]
      * @returns {d3.scale|dc.bubbleMixin}
      */
     _chart.r = function (bubbleRadiusScale) {
@@ -46,6 +54,29 @@ dc.bubbleMixin = function (_chart) {
         }
         _r = bubbleRadiusScale;
         return _chart;
+    };
+
+    /**
+     * Turn on or off the elastic bubble radius feature, or return the value of the flag. If this
+     * feature is turned on, then bubble radii will be automatically rescaled to fit the chart better.
+     * @method elasticRadius
+     * @memberof dc.bubbleChart
+     * @instance
+     * @param {Boolean} [elasticRadius=false]
+     * @returns {Boolean|dc.bubbleChart}
+     */
+    _chart.elasticRadius = function (elasticRadius) {
+        if (!arguments.length) {
+            return _elasticRadius;
+        }
+        _elasticRadius = elasticRadius;
+        return _chart;
+    };
+
+    _chart.calculateRadiusDomain = function () {
+        if (_elasticRadius) {
+            _chart.r().domain([_chart.rMin(), _chart.rMax()]);
+        }
     };
 
     /**
@@ -157,6 +188,23 @@ dc.bubbleMixin = function (_chart) {
     };
 
     /**
+     * Turn on or off the bubble sorting feature, or return the value of the flag. If enabled,
+     * bubbles will be sorted by their radius, with smaller bubbles in front.
+     * @method sortBubbleSize
+     * @memberof dc.bubbleChart
+     * @instance
+     * @param {Boolean} [sortBubbleSize=false]
+     * @returns {Boolean|dc.bubbleChart}
+     */
+    _chart.sortBubbleSize = function (sortBubbleSize) {
+        if (!arguments.length) {
+            return _sortBubbleSize;
+        }
+        _sortBubbleSize = sortBubbleSize;
+        return _chart;
+    };
+
+    /**
      * Get or set the minimum radius. This will be used to initialize the radius scale's range.
      * @method minRadius
      * @memberof dc.bubbleMixin
@@ -207,7 +255,7 @@ dc.bubbleMixin = function (_chart) {
         return _chart;
     };
 
-    _chart.fadeDeselectedArea = function () {
+    _chart.fadeDeselectedArea = function (selection) {
         if (_chart.hasFilter()) {
             _chart.selectAll('g.' + _chart.BUBBLE_NODE_CLASS).each(function (d) {
                 if (_chart.isSelectedNode(d)) {

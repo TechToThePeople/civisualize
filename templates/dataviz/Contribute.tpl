@@ -80,10 +80,11 @@ style="display: none;">reset</a>
                 dayOfWeekChart = dc.rowChart("#day-of-week-chart");
                 //var moveChart = dc.seriesChart("#monthly-move-chart");
                 moveChart = dc.lineChart("#monthly-move-chart");
-                var dateFormat = d3.time.format("%Y-%m-%d");
+                var dateFormat = d3.timeFormat("%Y-%m-%d");
+                var dateFormatParse = d3.timeParse("%Y-%m-%d");
                 //data.values.forEach(function(d){data.values[i].dd = new Date(d.receive_date)});
 
-                data.values.forEach(function(d){d.dd = dateFormat.parse(d.receive_date)});
+                data.values.forEach(function(d){d.dd = dateFormatParse(d.receive_date)});
                 var min = d3.min(data.values, function(d) { return d.dd;} );
                 var max = d3.max(data.values, function(d) { return d.dd;} );
                 var ndx                 = crossfilter(data.values),
@@ -95,7 +96,7 @@ style="display: none;">reset</a>
                 var instrument        = ndx.dimension(function(d) {return d.instrument;});
                 var instrumentGroup   = instrument.group().reduceSum(function(d) { return d.count; });
 
-                var byMonth     = ndx.dimension(function(d) { return d3.time.month(d.dd); });
+                var byMonth     = ndx.dimension(function(d) { return d3.timeMonth(d.dd); });
                 var byDay       = ndx.dimension(function(d) { return d.dd; });
                 var volumeByMonthGroup  = byMonth.group().reduceSum(function(d) { return d.count; });
                 var totalByDayGroup     = byDay.group().reduceSum(function(d) { return d.total; });
@@ -164,19 +165,19 @@ style="display: none;">reset</a>
                     .label(function(d) {
                         return instrumentLabel[d.key];
                     })
-                    .renderlet(function (chart) {
+                    .on('renderlet', function (chart) {
                     });
 
                 pietype
                     .width(200)
                     .height(200)
                     .dimension(type)
-                    .colors(d3.scale.category10())
+                    .colors(d3.scaleOrdinal(d3.schemeCategory10)())
                     .group(typeGroup)
-                    .renderlet(function (chart) {
+                    .on('renderlet', function (chart) {
                     });
 
-                //.round(d3.time.month.round)
+                //.round(d3.timeMonth.round)
                 //.interpolate('monotone')
                 moveChart.width(850)
                     .height(200)
@@ -184,8 +185,8 @@ style="display: none;">reset</a>
                     .margins({top: 30, right: 50, bottom: 25, left: 40})
                     .dimension(byDay)
                     .mouseZoomable(true)
-                    .x(d3.time.scale().domain([min,max]))
-                    .xUnits(d3.time.months)
+                    .x(d3.scaleTime().domain([min,max]))
+                    .xUnits(d3.timeMonths)
                     .elasticY(true)
                     .renderHorizontalGridLines(true)
                     .legend(dc.legend().x(800).y(10).itemHeight(13).gap(5))
@@ -208,9 +209,9 @@ style="display: none;">reset</a>
                     .group(volumeByMonthGroup)
                     .centerBar(true)
                     .gap(1)
-                    .x(d3.time.scale().domain([min, max]))
-                    .round(d3.time.month.round)
-                    .xUnits(d3.time.months);
+                    .x(d3.scaleTime().domain([min, max]))
+                    .round(d3.timeMonth.round)
+                    .xUnits(d3.timeMonths);
 
                 graphs.recur=drawRecur("#recur graph");
                 dc.renderAll();

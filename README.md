@@ -135,3 +135,19 @@ If you want to add a document, add a markdown file that has the same name as the
 We love you
 -------
 xavier made this, sid helped him. You can find us on civicrm forum, [@eucampaign](http://twitter.com/eucampaign) and [@sid0_o](http://twitter.com/sid0_o) on twitter, or in the dc mailing group. Be warned, d3 is awesome, but the learning curve is steep. Worthwhile, the view at the top is beautiful.
+
+Changes
+-------
+
+The libraries have been upgraded as follows:
+
+- d3 from 3.5.17 to 5.7.0
+- dc from 3.0.10 to 2.0.2
+- crossfilter to 1.3.12
+
+The d3 upgrade *requires changes to templates*. These are detailed at
+<https://github.com/d3/d3/blob/master/CHANGES.md>
+
+There's a PHP command line helper tool `updateTpl` which may help... or not. It
+doesn't cover everything (feel free to improve it).
+

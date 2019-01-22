@@ -1,0 +1,134 @@
+#!/usr/bin/php
+<?php
+if (php_sapi_name() !== 'cli') {
+  // Fail with 404 if not called from CLI.
+  if (isset($_SERVER['HTTP_PROTOCOL'])) {
+    header("$_SERVER[HTTP_PROTOCOL] 404 Not Found");
+  }
+  exit;
+}
+// Note: options MUST be given before positional parameters.
+
+function die_with_help($error=NULL) {
+  global $argv;
+  if ($error !== NULL) {
+    fwrite(STDERR, "$error\n");
+  }
+  echo <<<TXT
+Usage: $argv[0] [-h] path/to/your/dataviz/template.tpl [another.tpl ...]
+
+This attempts to convert d3 from version 3 to 5 which has a different API.
+
+TXT;
+  exit(1);
+}
+
+$optind = null;
+// getopt format:
+//
+// - single letter on its own is a boolean
+// - follow with : for a required value
+// - follow with :: for an optional value
+//
+// Test for an option with isset()
+// @see http://php.net/getopt
+$options = getopt('u::p::s');
+$optind = 1 + count($options);
+$pos_args = array_slice($argv, $optind);
+
+if (count($pos_args) === 0) {
+  die_with_help("No template filename.");
+}
+
+foreach ($pos_args as $tpl) {
+  $warnings = [];
+
+  if (!file_exists($tpl)) {
+    fwrite(STDERR, "Skipping file: Not found: '$tpl'\n");
+    continue;
+  }
+  if (!is_writeable($tpl)) {
+    fwrite(STDERR, "Skipping file: Missing write permission: '$tpl'\n");
+    continue;
+  }
+  if (!is_writeable(dirname($tpl))) {
+    fwrite(STDERR, "Skipping file: Missing write permission on the directory: '" . dirname($tpl) . "'\n");
+    continue;
+  }
+  // Create a backup.
+  $i = 1;
+  while (file_exists("$tpl.backup.$i")) { $i++; }
+  if (!copy($tpl, "$tpl.backup.$i")) {
+    fwrite(STDERR, "Skipping file: failed to create backup file for '$tpl'\n");
+    continue;
+  }
+
+  // Go go go.
+  $html = file_get_contents($tpl);
+  //"timeFormat, timeParse, timeInterval, timeMillisecond, timeMilliseconds, timeSecond, timeSeconds, timeMinute, timeMinutes, timeHour, timeHours, timeDay, timeDays, timeWeek, timeWeeks, timeSunday, timeSundays, timeMonday, timeMondays, timeTuesday, timeTuesdays, timeWednesday, timeWednesdays, timeThursday, timeThursdays, timeFriday, timeFridays, timeSaturday, timeSaturdays, timeMonth, timeMonths, timeYear, timeYears, timeFormatDefaultLocale, timeFormatLocale, timer, timerFlush, timeout"
+
+  // Convert time.format(...).parse to timeParse(...)
+  $html = preg_replace('/d3\.time\.format(\([^)]+\)).parse/', 'd3.timeParse$1', $html);
+
+  // Convert remaining time.format to timeFormat, along with these others.
+  // Convert time.something to timeSomething.
+  $html = preg_replace_callback('/d3\.time\.(format|interval|millisecond|milliseconds|second|seconds|minute|minutes|hour|hours|day|days|week|weeks|sunday|sundays|monday|mondays|tuesday|tuesdays|wednesday|wednesdays|thursday|thursdays|friday|fridays|saturday|saturdays|month|months|year|years|formatdefaultlocale|formatlocale)/', 
+    function ($matches) {
+      return 'd3.time' . ucfirst($matches[1]);
+    },
+    $html);
+
+  if (strpos($html, '.parse') !== FALSE) {
+    $warnings[] = "Search for .parse, this may be something that needs changing.\n"
+      ."\td3.time.format(...).parse needs to be replaced with d3.timeParse(...)\n"
+      ."\tIf you revert to the original and change code like\n"
+      ."\t\tvar f = d3.time.format('%y');\n"
+      ."\t\tvar d = f.parse(mydate);\n"
+      ."\twith code like\n"
+      ."\t\tvar f = d3.time.format('%y').parse;\n"
+      ."\t\tvar d = f(mydate);\n"
+      ."\tthen this converter should handle it ok\n";
+  }
+
+  // Convert time.scale.utc to scaleUtc
+  $html = str_replace('d3.time.scale.utc', 'd3.scaleUtc', $html);
+  // Convert time.scale to scaleTime
+  $html = str_replace('d3.time.scale', 'd3.scaleTime', $html);
+
+  // Convert time.scale.linear to scaleLinear etc.
+  $html = preg_replace_callback('/d3\.scale\.(linear|sqrt|pow|log|quantize|threshold|quantile|identity|ordinal)/',
+    function ($matches) {
+      return 'd3.scale' . ucfirst($matches[1]);
+    },
+    $html);
+
+  // schemeCategory (whatever that is!)
+  $html = preg_replace_callback('/d3\.scale\.(category(?:10|20[bc]?))/',
+    function ($matches) {
+      return 'd3.scaleOrdinal(d3.scheme' . ucfirst($matches[1]) . ')';
+    },
+    $html);
+
+
+  // renderlet(function) -> on('renderlet', function)
+  $html = str_replace('.renderlet(', ".on('renderlet', ", $html);
+
+  if (!$html) {
+    // Just in case.
+    fwrite(STDERR, "Failed to convert file '$tpl'\n");
+    continue;
+  }
+
+  print "$tpl: ";
+  if ($warnings) {
+    print "WARNINGS\n";
+    foreach ($warnings as $_) { print "Warning: $_\n";}
+    print "\n";
+  }
+  else {
+    print "no errors or warnings.\n";
+  }
+  if (!file_put_contents($tpl, $html)) {
+    fwrite(STDERR, "Failed to write file '$tpl'\n");
+  }
+}

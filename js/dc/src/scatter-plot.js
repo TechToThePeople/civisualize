@@ -15,7 +15,7 @@
  * // create a sub-chart under a composite parent chart
  * var chart3 = dc.scatterPlot(compositeChart);
  * @param {String|node|d3.selection} parent - Any valid
- * {@link https://github.com/d3/d3-3.x-api-reference/blob/master/Selections.md#selecting-elements d3 single selector} specifying
+ * {@link https://github.com/d3/d3-selection/blob/master/README.md#select d3 single selector} specifying
  * a dom block element such as a div; or a dom element or d3 selection.
  * @param {String} [chartGroup] - The name of the chart group this chart instance should be placed in.
  * Interaction with a chart will only trigger events and redraws within the chart's group.
@@ -23,7 +23,7 @@
  */
 dc.scatterPlot = function (parent, chartGroup) {
     var _chart = dc.coordinateGridMixin({});
-    var _symbol = d3.svg.symbol();
+    var _symbol = d3.symbol();
 
     var _existenceAccessor = function (d) { return d.value; };
 
@@ -55,7 +55,10 @@ dc.scatterPlot = function (parent, chartGroup) {
     var _emptyColor = null;
     var _filtered = [];
 
-    _symbol.size(function (d, i) {
+    // Use a 2 dimensional brush
+    _chart.brush(d3.brush());
+
+    function elementSize (d, i) {
         if (!_existenceAccessor(d)) {
             return Math.pow(_emptySize, 2);
         } else if (_filtered[i]) {
@@ -63,7 +66,8 @@ dc.scatterPlot = function (parent, chartGroup) {
         } else {
             return Math.pow(_excludedSize, 2);
         }
-    });
+    }
+    _symbol.size(elementSize);
 
     dc.override(_chart, '_filter', function (filter) {
         if (!arguments.length) {
@@ -77,18 +81,22 @@ dc.scatterPlot = function (parent, chartGroup) {
         var symbols = _chart.chartBodyG().selectAll('path.symbol')
             .data(_chart.data());
 
-        symbols
+        dc.transition(symbols.exit(), _chart.transitionDuration(), _chart.transitionDelay())
+            .attr('opacity', 0).remove();
+
+        symbols = symbols
             .enter()
-        .append('path')
-            .attr('class', 'symbol')
-            .attr('opacity', 0)
-            .attr('fill', _chart.getColor)
-            .attr('transform', _locator);
+                .append('path')
+                .attr('class', 'symbol')
+                .attr('opacity', 0)
+                .attr('fill', _chart.getColor)
+                .attr('transform', _locator)
+            .merge(symbols);
 
         symbols.call(renderTitles, _chart.data());
 
         symbols.each(function (d, i) {
-            _filtered[i] = !_chart.filter() || _chart.filter().isFiltered([d.key[0], d.key[1]]);
+            _filtered[i] = !_chart.filter() || _chart.filter().isFiltered([_chart.keyAccessor()(d), _chart.valueAccessor()(d)]);
         });
 
         dc.transition(symbols, _chart.transitionDuration(), _chart.transitionDelay())
@@ -112,9 +120,6 @@ dc.scatterPlot = function (parent, chartGroup) {
             })
             .attr('transform', _locator)
             .attr('d', _symbol);
-
-        dc.transition(symbols.exit(), _chart.transitionDuration(), _chart.transitionDelay())
-            .attr('opacity', 0).remove();
     };
 
     function renderTitles (symbol, d) {
@@ -152,19 +157,19 @@ dc.scatterPlot = function (parent, chartGroup) {
     };
 
     /**
-     * Get or set the symbol type used for each point. By default the symbol is a circle.
+     * Get or set the symbol type used for each point. By default the symbol is a circle (d3.symbolCircle).
      * Type can be a constant or an accessor.
      * @method symbol
      * @memberof dc.scatterPlot
      * @instance
-     * @see {@link https://github.com/d3/d3-3.x-api-reference/blob/master/SVG-Shapes.md#symbol_type d3.svg.symbol.type}
+     * @see {@link https://github.com/d3/d3-shape/blob/master/README.md#symbol_type symbol.type}
      * @example
      * // Circle type
-     * chart.symbol('circle');
+     * chart.symbol(d3.symbolCircle);
      * // Square type
-     * chart.symbol('square');
-     * @param {String|Function} [type='circle']
-     * @returns {String|Function|dc.scatterPlot}
+     * chart.symbol(d3.symbolSquare);
+     * @param {Function} [type=d3.symbolCircle]
+     * @returns {Function|dc.scatterPlot}
      */
     _chart.symbol = function (type) {
         if (!arguments.length) {
@@ -175,11 +180,34 @@ dc.scatterPlot = function (parent, chartGroup) {
     };
 
     /**
+     * Get or set the symbol generator. By default `dc.scatterPlot` will use
+     * {@link https://github.com/d3/d3-shape/blob/master/README.md#symbol d3.symbol()}
+     * to generate symbols. `dc.scatterPlot` will set the
+     * {@link https://github.com/d3/d3-shape/blob/master/README.md#symbol_size symbol size accessor}
+     * on the symbol generator.
+     * @method customSymbol
+     * @memberof dc.scatterPlot
+     * @instance
+     * @see {@link https://github.com/d3/d3-shape/blob/master/README.md#symbol d3.symbol}
+     * @see {@link https://stackoverflow.com/questions/25332120/create-additional-d3-js-symbols Create additional D3.js symbols}
+     * @param {String|Function} [customSymbol=d3.symbol()]
+     * @returns {String|Function|dc.scatterPlot}
+     */
+    _chart.customSymbol = function (customSymbol) {
+        if (!arguments.length) {
+            return _symbol;
+        }
+        _symbol = customSymbol;
+        _symbol.size(elementSize);
+        return _chart;
+    };
+
+    /**
      * Set or get radius for symbols.
      * @method symbolSize
      * @memberof dc.scatterPlot
      * @instance
-     * @see {@link https://github.com/d3/d3-3.x-api-reference/blob/master/SVG-Shapes.md#symbol_size d3.svg.symbol.size}
+     * @see {@link https://github.com/d3/d3-shape/blob/master/README.md#symbol_size d3.symbol.size}
      * @param {Number} [symbolSize=3]
      * @returns {Number|dc.scatterPlot}
      */
@@ -196,7 +224,7 @@ dc.scatterPlot = function (parent, chartGroup) {
      * @method highlightedSize
      * @memberof dc.scatterPlot
      * @instance
-     * @see {@link https://github.com/d3/d3-3.x-api-reference/blob/master/SVG-Shapes.md#symbol_size d3.svg.symbol.size}
+     * @see {@link https://github.com/d3/d3-shape/blob/master/README.md#symbol_size d3.symbol.size}
      * @param {Number} [highlightedSize=5]
      * @returns {Number|dc.scatterPlot}
      */
@@ -214,7 +242,7 @@ dc.scatterPlot = function (parent, chartGroup) {
      * @method excludedSize
      * @memberof dc.scatterPlot
      * @instance
-     * @see {@link https://github.com/d3/d3-3.x-api-reference/blob/master/SVG-Shapes.md#symbol_size d3.svg.symbol.size}
+     * @see {@link https://github.com/d3/d3-shape/blob/master/README.md#symbol_size d3.symbol.size}
      * @param {Number} [excludedSize=null]
      * @returns {Number|dc.scatterPlot}
      */
@@ -264,7 +292,7 @@ dc.scatterPlot = function (parent, chartGroup) {
      * @method emptySize
      * @memberof dc.scatterPlot
      * @instance
-     * @see {@link https://github.com/d3/d3-3.x-api-reference/blob/master/SVG-Shapes.md#symbol_size d3.svg.symbol.size}
+     * @see {@link https://github.com/d3/d3-shape/blob/master/README.md#symbol_size d3.symbol.size}
      * @param {Number} [emptySize=0]
      * @returns {Number|dc.scatterPlot}
      */
@@ -336,7 +364,7 @@ dc.scatterPlot = function (parent, chartGroup) {
         resizeSymbolsWhere(function (symbol) {
             return symbol.attr('fill') === d.color;
         }, _highlightedSize);
-        _chart.selectAll('.chart-body path.symbol').filter(function () {
+        _chart.chartBodyG().selectAll('.chart-body path.symbol').filter(function () {
             return d3.select(this).attr('fill') !== d.color;
         }).classed('fadeout', true);
     };
@@ -345,13 +373,13 @@ dc.scatterPlot = function (parent, chartGroup) {
         resizeSymbolsWhere(function (symbol) {
             return symbol.attr('fill') === d.color;
         }, _symbolSize);
-        _chart.selectAll('.chart-body path.symbol').filter(function () {
+        _chart.chartBodyG().selectAll('.chart-body path.symbol').filter(function () {
             return d3.select(this).attr('fill') !== d.color;
         }).classed('fadeout', false);
     };
 
     function resizeSymbolsWhere (condition, size) {
-        var symbols = _chart.selectAll('.chart-body path.symbol').filter(function () {
+        var symbols = _chart.chartBodyG().selectAll('.chart-body path.symbol').filter(function () {
             return condition(d3.select(this));
         });
         var oldSize = _symbol.size();
@@ -360,46 +388,96 @@ dc.scatterPlot = function (parent, chartGroup) {
         _symbol.size(oldSize);
     }
 
-    _chart.setHandlePaths = function () {
+    _chart.createBrushHandlePaths = function () {
         // no handle paths for poly-brushes
     };
 
-    _chart.extendBrush = function () {
-        var extent = _chart.brush().extent();
+    _chart.extendBrush = function (brushSelection) {
         if (_chart.round()) {
-            extent[0] = extent[0].map(_chart.round());
-            extent[1] = extent[1].map(_chart.round());
-
-            _chart.g().select('.brush')
-                .call(_chart.brush().extent(extent));
+            brushSelection[0] = brushSelection[0].map(_chart.round());
+            brushSelection[1] = brushSelection[1].map(_chart.round());
         }
-        return extent;
+        return brushSelection;
     };
 
-    _chart.brushIsEmpty = function (extent) {
-        return _chart.brush().empty() || !extent || extent[0][0] >= extent[1][0] || extent[0][1] >= extent[1][1];
+    _chart.brushIsEmpty = function (brushSelection) {
+        return !brushSelection || brushSelection[0][0] >= brushSelection[1][0] || brushSelection[0][1] >= brushSelection[1][1];
     };
 
     _chart._brushing = function () {
-        var extent = _chart.extendBrush();
+        // Avoids infinite recursion (mutual recursion between range and focus operations)
+        // Source Event will be null when brush.move is called programmatically (see below as well).
+        if (!d3.event.sourceEvent) { return; }
 
-        _chart.redrawBrush(_chart.g());
+        // Ignore event if recursive event - i.e. not directly generated by user action (like mouse/touch etc.)
+        // In this case we are more worried about this handler causing brush move programmatically which will
+        // cause this handler to be invoked again with a new d3.event (and current event set as sourceEvent)
+        // This check avoids recursive calls
+        if (d3.event.sourceEvent.type && ['start', 'brush', 'end'].indexOf(d3.event.sourceEvent.type) !== -1) {
+            return;
+        }
 
-        if (_chart.brushIsEmpty(extent)) {
-            dc.events.trigger(function () {
-                _chart.filter(null);
-                _chart.redrawGroup();
+        var brushSelection = d3.event.selection;
+
+        // Testing with pixels is more reliable
+        var brushIsEmpty = _chart.brushIsEmpty(brushSelection);
+
+        if (brushSelection) {
+            brushSelection = brushSelection.map(function (point) {
+                return point.map(function (coord, i) {
+                    var scale = i === 0 ? _chart.x() : _chart.y();
+                    return scale.invert(coord);
+                });
             });
 
-        } else {
-            var ranged2DFilter = dc.filters.RangedTwoDimensionalFilter(extent);
-            dc.events.trigger(function () {
-                _chart.filter(null);
-                _chart.filter(ranged2DFilter);
-                _chart.redrawGroup();
-            }, dc.constants.EVENT_DELAY);
+            brushSelection = _chart.extendBrush(brushSelection);
 
+            // The rounding process might have made brushSelection empty, so we need to recheck
+            brushIsEmpty = brushIsEmpty && _chart.brushIsEmpty(brushSelection);
         }
+
+        _chart.redrawBrush(brushSelection, false);
+
+        var ranged2DFilter = brushIsEmpty ? null : dc.filters.RangedTwoDimensionalFilter(brushSelection);
+
+        dc.events.trigger(function () {
+            _chart.replaceFilter(ranged2DFilter);
+            _chart.redrawGroup();
+        }, dc.constants.EVENT_DELAY);
+    };
+
+    _chart.redrawBrush = function (brushSelection, doTransition) {
+        // override default x axis brush from parent chart
+        var _brush = _chart.brush();
+        var _gBrush = _chart.gBrush();
+
+        if (_chart.brushOn() && _gBrush) {
+            if (_chart.resizing()) {
+                _chart.setBrushExtents(doTransition);
+            }
+
+            if (!brushSelection) {
+                _gBrush
+                    .call(_brush.move, brushSelection);
+
+            } else {
+                brushSelection = brushSelection.map(function (point) {
+                    return point.map(function (coord, i) {
+                        var scale = i === 0 ? _chart.x() : _chart.y();
+                        return scale(coord);
+                    });
+                });
+
+                var gBrush =
+                    dc.optionalTransition(doTransition, _chart.transitionDuration(), _chart.transitionDelay())(_gBrush);
+
+                gBrush
+                    .call(_brush.move, brushSelection);
+
+            }
+        }
+
+        _chart.fadeDeselectedArea(brushSelection);
     };
 
     _chart.setBrushY = function (gBrush) {
