@@ -55,12 +55,12 @@ class CRM_Civisualize_Page_Main extends CRM_Core_Page {
     $smarty->assign_by_ref("request", $param);
 
    CRM_Core_Resources::singleton()
-    ->addScriptFile('eu.tttp.civisualize', 'js/d3.v3.js', 110, 'html-header', FALSE)
-    ->addScriptFile('eu.tttp.civisualize', 'js/dc/dc.js', 110, 'html-header', FALSE)
-    ->addScriptFile('eu.tttp.civisualize', 'js/dc/crossfilter.js', 110, 'html-header', FALSE)
+    ->addScriptFile('eu.tttp.civisualize', 'js/d3.min.v5.7.0.js', 110, 'html-header', FALSE)
+    ->addScriptFile('eu.tttp.civisualize', 'js/dc/dc.min.js', 110, 'html-header', FALSE)
+    ->addScriptFile('eu.tttp.civisualize', 'js/dc/crossfilter.min.js', 110, 'html-header', FALSE)
     ->addScriptFile('eu.tttp.civisualize', 'js/filesaver.js', 110, 'html-header', FALSE)
     ->addScriptFile('eu.tttp.civisualize', 'js/common.js', 110, 'html-header', FALSE)
-    ->addStyleFile('eu.tttp.civisualize', 'js/dc/dc.css')
+    ->addStyleFile('eu.tttp.civisualize', 'js/dc/dc.min.css')
     ->addStyleFile('eu.tttp.civisualize', 'css/style.css')
     ->addVars('civisualize', array(
        'baseUrl' => CRM_Core_Resources::singleton()->getUrl('eu.tttp.civisualize'),

@@ -51,7 +51,7 @@
 				genderLabel[d.key]=d.value;
 			});
 
-			var dateFormat = d3.time.format("%Y-%m-%d");
+			var dateFormat = d3.timeParse("%Y-%m-%d");
 
 			var genderPie=null, typePie=null, sourceRow=null, monthLine=null, weekRow=null;
 
@@ -61,7 +61,7 @@
 				data.values.forEach(function(d){ 
 					totalContacts+=d.count;
 					d.gender=genderLabel[d.gender_id];
-					d.dd = dateFormat.parse(d.created_date);
+					d.dd = dateFormat(d.created_date);
 					if(d.source=="")
 						d.source='None';
 					if(d.gender_id=="")
@@ -72,8 +72,8 @@
 				// 	console.log(d);
 				// });
 
-				var min = d3.time.day.offset(d3.min(data.values, function(d) { return d.dd;} ),-2);
-				var max = d3.time.day.offset(d3.max(data.values, function(d) { return d.dd;} ), 2);
+				var min = d3.timeDay.offset(d3.min(data.values, function(d) { return d.dd;} ),-2);
+				var max = d3.timeDay.offset(d3.max(data.values, function(d) { return d.dd;} ), 2);
 
 				typePie 	= dc.pieChart("#type").innerRadius(10).radius(90);
 				genderPie 	= dc.pieChart('#gender').innerRadius(10).radius(90);
@@ -126,28 +126,28 @@
 					.width(250)
 					.height(200)
 					.dimension(type)
-					.colors(d3.scale.category10())
+					.colors(d3.scaleOrdinal(d3.schemeCategory10)())
 					.group(typeGroup)
 					.label(function(d){
 						if (typePie.hasFilter() && !typePie.hasFilter(d.key))
 			                return d.key + "(0%)";
 						return d.key+"(" + Math.floor(d.value / all.reduceSum(function(d) {return d.count;}).value() * 100) + "%)";
 					})
-					.renderlet(function (chart) {			
+					.on('renderlet', function (chart) {			
 					});
 
 				genderPie
 					.width(250)
 					.height(200)
 					.dimension(gender)
-					.colors(d3.scale.category10())
+					.colors(d3.scaleOrdinal(d3.schemeCategory10)())
 					.group(genderGroup)
 					.label(function(d) {
 						if (genderPie.hasFilter() && !genderPie.hasFilter(d.key))
 			                return d.key + "(0%)";
 						return d.key+"(" + Math.floor(d.value / all.reduceSum(function(d) {return d.count;}).value() * 100) + "%)";;
 					})
-					.renderlet(function (chart) {			
+					.on('renderlet', function (chart) {			
 					});
 
 				sourceRow
@@ -157,7 +157,7 @@
 					.dimension(source)
 					.cap(5)
           .ordering (function(d) {return d.count;})
-					.colors(d3.scale.category10())
+					.colors(d3.scaleOrdinal(d3.schemeCategory10)())
 					.group(sourceGroup)
 					.label(function(d){
 						if (sourceRow.hasFilter() && !sourceRow.hasFilter(d.key))
@@ -188,10 +188,10 @@
            .margins({top: 10, right: 50, bottom: 30, left: 50})
 					.dimension(creationMonth)
 					.group(group)
-					.x(d3.time.scale().domain([min, max]))
-					.round(d3.time.day.round)
+					.x(d3.scaleTime().domain([min, max]))
+					.round(d3.timeDay.round)
 					.elasticY(true)
-					.xUnits(d3.time.days);
+					.xUnits(d3.timeDays);
 				
 				dc.renderAll();
 

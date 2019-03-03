@@ -30,7 +30,7 @@
 
 <script>
 var data = {crmSQL json="mailings"};
-var dateFormat = d3.time.format("%Y-%m-%d %H:%M:%S");
+var dateFormat = d3.timeParse("%Y-%m-%d %H:%M:%S");
 var currentDate = new Date();
 
 
@@ -53,7 +53,7 @@ function lookupTable(data,key,value) {
 }
 
 data.values.forEach(function(d){
-  d.date = dateFormat.parse(d.date);
+  d.date = dateFormat(d.date);
 });
 
 
@@ -73,7 +73,7 @@ function drawCampaign (dom) {
     .width(100)
     .height(100)
     .dimension(dim)
-    .colors(d3.scale.category20())
+    .colors(d3.scaleOrdinal(d3.schemeCategory20)())
     .group(group);
 
   return graph;
@@ -87,7 +87,7 @@ function drawSender (dom) {
     .width(100)
     .height(100)
     .dimension(dim)
-    .colors(d3.scale.category10())
+    .colors(d3.scaleOrdinal(d3.schemeCategory10)())
     .group(group);
 
   return graph;
@@ -100,14 +100,14 @@ function drawType (dom) {
     .width(250)
     .height(200)
     .dimension(dim)
-    .colors(d3.scale.category20b())
+    .colors(d3.scaleOrdinal(d3.schemeCategory20b)())
     .group(group);
 
   return graph;
 }
 
 function drawDate (dom) {
-  var dim = ndx.dimension(function(d){return d3.time.day(d.date)});
+  var dim = ndx.dimension(function(d){return d3.timeDay(d.date)});
   //var group = dim.group().reduceSum(function(d){return 1;});
   var group = dim.group().reduceSum(function(d){return d.recipients;});
   var graph=dc.lineChart(dom)
@@ -117,10 +117,10 @@ function drawDate (dom) {
     .renderArea(true)
     .group(group)
     .brushOn(true)
-    .x(d3.time.scale().domain(d3.extent(dim.top(2000), function(d) { return d.date; })))
-    .round(d3.time.day.round)
+    .x(d3.scaleTime().domain(d3.extent(dim.top(2000), function(d) { return d.date; })))
+    .round(d3.timeDay.round)
     .elasticY(true)
-    .xUnits(d3.time.days);
+    .xUnits(d3.timeDays);
 
    graph.yAxis().ticks(3);
    graph.xAxis().ticks(5);
@@ -143,14 +143,14 @@ function drawPercent (dom,attr,name) {
     .colorCalculator(function(d, i) {
         return "#f85631";
         })
-    .x(d3.scale.ordinal())
+    .x(d3.scaleOrdinal())
     .xUnits(dc.units.ordinal)
     .brushOn(false)
     .elasticY(true)
     .yAxisLabel(name)
     .dimension(dim)
     .group(group)
-    .renderlet(function(chart) {
+    .on('renderlet', function(chart) {
 	    var d = chart.dimension().top(Number.POSITIVE_INFINITY);
 	    var total = nb = recipients = 0;
 	    d.forEach(function(a) {

@@ -80,16 +80,16 @@
             i=null;
 
             var numberFormat = d3.format(".2f");
-            var datetimeFormat = d3.time.format("%Y-%m-%d %H:%M:%S");
-            var dateFormat = d3.time.format("%Y-%m-%d");
+            var datetimeFormat = d3.timeParse("%Y-%m-%d %H:%M:%S");
+            var dateFormat = d3.timeParse("%Y-%m-%d");
             var currentDate = new Date();
 
             var Events={};
 
             data.values.forEach(function(d){
-                d.rd = dateFormat.parse(d.rd);
-                d.ed = datetimeFormat.parse(d.ed);
-                d.sd = datetimeFormat.parse(d.sd);
+                d.rd = dateFormat(d.rd);
+                d.ed = datetimeFormat(d.ed);
+                d.sd = datetimeFormat(d.sd);
                 if(d.im==1)
                     d.im='Monetory';
                 else
@@ -138,8 +138,8 @@
                     return {events:eventlist, eventcount:0, participantcount:0};
                 }
 
-                var min = d3.time.month.offset(d3.min(data.values, function(d) { return d.rd;} ),-1);
-                var max = d3.time.month.offset(d3.max(data.values, function(d) { return d.ed;} ), 1);
+                var min = d3.timeMonth.offset(d3.min(data.values, function(d) { return d.rd;} ),-1);
+                var max = d3.timeMonth.offset(d3.max(data.values, function(d) { return d.ed;} ), 1);
 
                 var firstEvent = d3.min(data.values, function(d) {return d.id});
 
@@ -154,10 +154,10 @@
                 dataTable = dc.dataTable("#dc-data-table");
                 monetoryPie = dc.pieChart("#ismonetory").innerRadius(20).radius(70);
 
-                var startMonth = ndx.dimension(function(d) { return d3.time.month(d.sd);});
+                var startMonth = ndx.dimension(function(d) { return d3.timeMonth(d.sd);});
                 var startMonthGroup = startMonth.group().reduce(eventReduceAdd,eventReduceRemove,eventReduceInitial);
                 
-                var registrationMonth = ndx.dimension(function(d) { return d3.time.month(d.rd);});
+                var registrationMonth = ndx.dimension(function(d) { return d3.timeMonth(d.rd);});
                 var registrationMonthGroup = registrationMonth.group().reduce(eventReduceAdd,eventReduceRemove,eventReduceInitial);
 
 
@@ -261,12 +261,12 @@
                     .group(startMonthGroup)
                     .centerBar(true)
                     .gap(1)
-                    .x(d3.time.scale().domain([min, max]))
-                    .round(d3.time.month.round)
+                    .x(d3.scaleTime().domain([min, max]))
+                    .round(d3.timeMonth.round)
                     .valueAccessor(function (d) {
                         return d.value.eventcount;
                     })
-                    .xUnits(d3.time.months);
+                    .xUnits(d3.timeMonths);
 
                 participantsLine
                     .margins({top: 0, right: 50, bottom: 20, left:40})
@@ -276,11 +276,11 @@
                         return d.value.events[firstEvent];
                     })
                     .brushOn(false)
-                    .x(d3.time.scale().domain([min, max]))
-                    .round(d3.time.month.round)
+                    .x(d3.scaleTime().domain([min, max]))
+                    .round(d3.timeMonth.round)
                     .elasticY(true)
                     .elasticX(true)
-                    .xUnits(d3.time.months);
+                    .xUnits(d3.timeMonths);
 
                 var flag=1;
 
@@ -310,7 +310,7 @@
                         return d.value.eventcount;
                     })
                     .legend(dc.legend().x(200).y(10).itemHeight(13).gap(5))
-                    .renderlet(function(chart){});
+                    .on('renderlet', function(chart){});
 
                 startdayRow
                     .width(300)
@@ -330,7 +330,7 @@
                     .valueAccessor(function(d){
                         return d.value.eventcount;
                     })
-                    .renderlet(function(chart){});
+                    .on('renderlet', function(chart){});
 
                 dataTable
                     .dimension(pseudoList)
