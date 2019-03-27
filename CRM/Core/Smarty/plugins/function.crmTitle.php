@@ -4,6 +4,10 @@ function smarty_function_crmTitle($params, &$smarty) {
 		CRM_Utils_System::setTitle($params['string']);
 		return;
 	}
+	if (array_key_exists('title', $params)) {
+		CRM_Utils_System::setTitle($params['title']);
+		return;
+	}
 	if (array_key_exists('array', $params)&&array_key_exists('field', $params)) {
 		CRM_Utils_System::setTitle($params['array'][0][$params['field']]);
 		return;

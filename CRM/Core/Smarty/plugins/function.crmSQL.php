@@ -16,12 +16,23 @@ function smarty_function_crmSQL($params, &$smarty) {
 
     try{
 	    if(array_key_exists('json', $params)){
-
-		$json=json_decode(str_replace(array("\r\n","\r","\n")," ",file_get_contents('queries/'.$params["json"].".json", true)));
+                    $content=trim(str_replace(array("\t","\r\n","\r","\n")," ",file_get_contents('queries/'.$params["json"].".json", FILE_USE_INCLUDE_PATH)));
+		    $json=json_decode($content);
+                if (!$content){
+                   $smarty->trigger_error("assign: invalid json file"); 
+		   $error = "crmSQL: empty json file";
+                   return json_encode(array("is_error"=>1, "file"=> 'queries/'.$params["json"].".json", "error"=>$error, "values" => null), JSON_NUMERIC_CHECK);
+                }
+                if (!$json){
+                   $smarty->trigger_error("assign: invalid json file"); 
+		   $error = "crmSQL: empty json file";
+                   return json_encode(array("is_error"=>1, "file"=> 'queries/'.$params["json"].".json", "error"=>$error, "content"=>$content,"values" => null), JSON_NUMERIC_CHECK);
+                }
 		$sql=$json->query;
                 if (!$sql){
                    $smarty->trigger_error("assign: missing 'query' in the json file"); 
-                   $error = "crmAPI: missing 'query' in the json"; 
+		   $error = "crSQL: missing 'query' in the json"; 
+                   return json_encode(array("is_error"=>1, "file"=> 'queries/'.$params["json"].".json", "error"=>$error, "values" => null), JSON_NUMERIC_CHECK);
                 }
 		foreach ($json->params as $key => $value) {
 		    $var=intval($key);
@@ -60,7 +71,7 @@ function smarty_function_crmSQL($params, &$smarty) {
 
         if($is_error==0){
             $errorScope = CRM_Core_TemporaryErrorScope::useException();
-            CRM_Core_DAO::executeQuery("SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED ;");
+	    CRM_Core_DAO::executeQuery("SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED ;");
             $dao = CRM_Core_DAO::executeQuery($sql,$parameters);
             $values = array();
             $keys= null;
