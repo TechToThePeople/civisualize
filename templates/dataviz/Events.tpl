@@ -2,8 +2,8 @@
 
 <div class="eventsoverview">
     <div style="font-size:20px; float:left; width:100%; text-align:center; height:90px;">
-        <span id="pastevents"></span>, 
-        <span id="currentevents"></span> and 
+        <span id="pastevents"></span>,
+        <span id="currentevents"></span> and
         <span id="upcomingevents"></span>
         with a total of <span id="nparticipants" style="color:steelblue; font-size:50px; line-height:80px"></span> Participants.
     </div>
@@ -13,7 +13,7 @@
         <a class="reset" href="javascript:eventsBar.filterAll();dc.redrawAll();" style="display: none;">reset</a>
         <div class="clearfix"></div>
     </div>
-    
+
     <div id="participants" style="width:100%;">
         <strong>Participants</strong>
         <a class="reset" href="javascript:participantsLine.filterAll();dc.redrawAll();" style="display: none;">reset</a>
@@ -34,9 +34,9 @@
         <div class="clearfix"></div>
     </div>
 
-    <div id="ismonetory">
-        <strong>Is Monetory</strong>
-        <a class="reset" href="javascript:monetoryPie.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+    <div id="ispaid">
+        <strong>Paid event</strong>
+        <a class="reset" href="javascript:ispaidPie.filterAll();dc.redrawAll();" style="display: none;">reset</a>
         <div class="clearfix"></div>
     </div>
 
@@ -91,11 +91,11 @@
                 d.ed = datetimeFormat(d.ed);
                 d.sd = datetimeFormat(d.sd);
                 if(d.im==1)
-                    d.im='Monetory';
+                    d.im='Paid';
                 else
                     d.im='Free';
                 if(d.tid!="")
-                    d.tid = typeLabel[d.tid];  
+                    d.tid = typeLabel[d.tid];
                 else
                     d.tid = "Unspecified";
                 Events[d.id]={'title':d.title,'sd':d.sd,'ed':d.ed};
@@ -103,7 +103,7 @@
 
             console.log(data.values);
 
-            var eventsBar, upcomingNumber, pastNumber, participantsLine, typePie, startdayRow, eventStatusPie, monetoryPie, dataTable;
+            var eventsBar, upcomingNumber, pastNumber, participantsLine, typePie, startdayRow, eventStatusPie, ispaidPie, dataTable;
 
             cj(function($) {
 
@@ -152,11 +152,11 @@
                 typePie = dc.pieChart("#type").innerRadius(0).radius(90);
                 startdayRow = dc.rowChart("#duration");
                 dataTable = dc.dataTable("#dc-data-table");
-                monetoryPie = dc.pieChart("#ismonetory").innerRadius(20).radius(70);
+                ispaidPie = dc.pieChart("#ispaid").innerRadius(20).radius(70);
 
                 var startMonth = ndx.dimension(function(d) { return d3.timeMonth(d.sd);});
                 var startMonthGroup = startMonth.group().reduce(eventReduceAdd,eventReduceRemove,eventReduceInitial);
-                
+
                 var registrationMonth = ndx.dimension(function(d) { return d3.timeMonth(d.rd);});
                 var registrationMonthGroup = registrationMonth.group().reduce(eventReduceAdd,eventReduceRemove,eventReduceInitial);
 
@@ -186,8 +186,8 @@
                 });
                 var startDayGroup = startDay.group().reduce(eventReduceAdd,eventReduceRemove,eventReduceInitial);
 
-                var monetory = ndx.dimension(function(d){ return d.im; });
-                var monetoryGroup = monetory.group().reduce(eventReduceAdd,eventReduceRemove,eventReduceInitial);
+                var ispaid = ndx.dimension(function(d){ return d.im; });
+                var ispaidGroup = ispaid.group().reduce(eventReduceAdd,eventReduceRemove,eventReduceInitial);
 
                 var list = ndx.dimension(function(d){return d.id});
                 var listGroup = list.group().reduceSum(function(d){return d.count});
@@ -215,7 +215,7 @@
                         value:function(){
                             var v = {'value':0};
                             eventStatusGroup.all().forEach(function(d,i){
-                                if (d.key == status) 
+                                if (d.key == status)
                                     {v.value=d.value.eventcount;}
                             });
                             return v;
@@ -289,13 +289,13 @@
                         participantsLine
                             .group(registrationMonthGroup);
                             flag=2;
-                    }   
+                    }
                     else{
                         if(a!=firstEvent){
                             participantsLine
                                 .stack(registrationMonthGroup,Events[a],function(d){return d.value.events[a];})
-                                .title(Events[a], function(d) { 
-                                    return Events[a]+" "+d.value.events[a]; 
+                                .title(Events[a], function(d) {
+                                    return Events[a]+" "+d.value.events[a];
                                 });
                         }
                     }
@@ -322,11 +322,11 @@
                     })
                     .xAxis().ticks(1);
 
-                monetoryPie
+                ispaidPie
                     .width(200)
                     .height(200)
-                    .dimension(monetory)
-                    .group(monetoryGroup)
+                    .dimension(ispaid)
+                    .group(ispaidGroup)
                     .valueAccessor(function(d){
                         return d.value.eventcount;
                     })
