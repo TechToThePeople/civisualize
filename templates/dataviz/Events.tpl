@@ -2,8 +2,8 @@
 
 <div class="eventsoverview">
     <div style="font-size:20px; float:left; width:100%; text-align:center; height:90px;">
-        <span id="pastevents"></span>, 
-        <span id="currentevents"></span> and 
+        <span id="pastevents"></span>,
+        <span id="currentevents"></span> and
         <span id="upcomingevents"></span>
         with a total of <span id="nparticipants" style="color:steelblue; font-size:50px; line-height:80px"></span> Participants.
     </div>
@@ -13,7 +13,7 @@
         <a class="reset" href="javascript:eventsBar.filterAll();dc.redrawAll();" style="display: none;">reset</a>
         <div class="clearfix"></div>
     </div>
-    
+
     <div id="participants" style="width:100%;">
         <strong>Participants</strong>
         <a class="reset" href="javascript:participantsLine.filterAll();dc.redrawAll();" style="display: none;">reset</a>
@@ -58,7 +58,7 @@
     'use strict';
 
     var data = {crmSQL file="events"};
-    var i = {crmAPI entity="OptionValue" option_group_id="14"}; {*todo on 4.4, use the event-type as id *}
+    var i = {crmAPI entity="OptionValue" option_group_id="event_type"};
     var s = {crmAPI entity='ParticipantStatusType' option_sort="is_counted desc"};
     var URL = "{crmURL p='civicrm/dataviz/event/xx'}";
     console.log(URL);
@@ -95,7 +95,7 @@
                 else
                     d.im='Free';
                 if(d.tid!="")
-                    d.tid = typeLabel[d.tid];  
+                    d.tid = typeLabel[d.tid];
                 else
                     d.tid = "Unspecified";
                 Events[d.id]={'title':d.title,'sd':d.sd,'ed':d.ed};
@@ -156,7 +156,7 @@
 
                 var startMonth = ndx.dimension(function(d) { return d3.timeMonth(d.sd);});
                 var startMonthGroup = startMonth.group().reduce(eventReduceAdd,eventReduceRemove,eventReduceInitial);
-                
+
                 var registrationMonth = ndx.dimension(function(d) { return d3.timeMonth(d.rd);});
                 var registrationMonthGroup = registrationMonth.group().reduce(eventReduceAdd,eventReduceRemove,eventReduceInitial);
 
@@ -215,7 +215,7 @@
                         value:function(){
                             var v = {'value':0};
                             eventStatusGroup.all().forEach(function(d,i){
-                                if (d.key == status) 
+                                if (d.key == status)
                                     {v.value=d.value.eventcount;}
                             });
                             return v;
@@ -289,13 +289,13 @@
                         participantsLine
                             .group(registrationMonthGroup);
                             flag=2;
-                    }   
+                    }
                     else{
                         if(a!=firstEvent){
                             participantsLine
                                 .stack(registrationMonthGroup,Events[a],function(d){return d.value.events[a];})
-                                .title(Events[a], function(d) { 
-                                    return Events[a]+" "+d.value.events[a]; 
+                                .title(Events[a], function(d) {
+                                    return Events[a]+" "+d.value.events[a];
                                 });
                         }
                     }
