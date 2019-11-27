@@ -22,18 +22,18 @@
         }
 
         .detailfield{
-            font-size:14px; 
-            color:steelblue; 
+            font-size:14px;
+            color:steelblue;
             display:inline;
             font-weight: 800;
             padding-right: 5px;
         }
         .detailvalue{
-            font-size:14px; 
+            font-size:14px;
             display:inline;
             font-weight: 800;
         }
-        .detail{ 
+        .detail{
             clear:both;
         }
         #noofparticipants{
@@ -95,12 +95,12 @@
     //console.log({$id});
 
     var eventDetails        = {crmSQL json="eventdetails" eventid=$id set="event"};
-    
+
     var participantDetails  = {crmSQL json="eventparticipants" eventid=$id};
 
     {crmTitle array=$event field="title"}
 
-    
+
 
     var i = {crmAPI entity="OptionValue" option_group_id="14"};
     var s = {crmAPI entity='ParticipantStatusType' option_sort="is_counted desc"};
@@ -145,14 +145,14 @@
             );
 
             var numberFormat        = d3.format("d");
-            var birthdateFormat     = d3.time.format("%Y-%m-%d");
-            var registerdateFormat  = d3.time.format("%Y-%m-%d %H:%M:%S");
+            var birthdateFormat     = d3.timeParse("%Y-%m-%d");
+            var registerdateFormat  = d3.timeParse("%Y-%m-%d %H:%M:%S");
             var currentDate         = new Date();
 
 
             participantDetails.values.forEach(function(d){
-                d.bd = birthdateFormat.parse(d.birth_date);
-                d.rd = registerdateFormat.parse(d.register_date);s
+                d.bd = birthdateFormat(d.birth_date);
+                d.rd = registerdateFormat(d.register_date);s
                 d.status = statusLabel[d.status_id];
                 if(d.gender_id!==""){
                     d.gender_id=genderLabel[d.gender_id];
@@ -174,8 +174,8 @@
                 var ndx = crossfilter(participantDetails.values), all = ndx.groupAll();
                 var grouped=ndx.groupAll().reduce(function(p,v){ ++p.count; return p; }, function(p,v){p.count-=1;return p;}, function(){return {count:0};});
 
-                var min = d3.time.day.offset(d3.min(participantDetails.values, function(d) { return d.rd;} ),-1);
-                var max = d3.time.day.offset(d3.max(participantDetails.values, function(d) { return d.rd;} ), 1);
+                var min = d3.timeDay.offset(d3.min(participantDetails.values, function(d) { return d.rd;} ),-1);
+                var max = d3.timeDay.offset(d3.max(participantDetails.values, function(d) { return d.rd;} ), 1);
 
                 participantsLine    = dc.lineChart("#participants");
                 genderPie           = dc.pieChart("#gender").radius(100);
@@ -185,7 +185,7 @@
                 participantsNumber  = dc.numberDisplay("#noofparticipants");
                 participantsCount   = dc.dataCount("#participantsCount");
 
-                var RByDay      = ndx.dimension(function(d) { return d3.time.day(d.rd);});
+                var RByDay      = ndx.dimension(function(d) { return d3.timeDay(d.rd);});
                 var RByDayGroup = RByDay.group().reduceCount();
                 var group       = {
                     all:function () {
@@ -197,7 +197,7 @@
                     });
                     return g;
                     }
-                };  
+                };
 
                 var gender      = ndx.dimension(function(d){return d.gender_id});
                 var genderGroup = gender.group().reduceCount();
@@ -221,10 +221,10 @@
                     .dimension(RByDay)
                     .group(group)
                     .brushOn(true)
-                    .x(d3.time.scale().domain([min, max]))
-                    .round(d3.time.day.round)
+                    .x(d3.scaleTime().domain([min, max]))
+                    .round(d3.timeDay.round)
                     .elasticY(true)
-                    .xUnits(d3.time.days);
+                    .xUnits(d3.timeDays);
 
                 genderPie
                     .width(220)
