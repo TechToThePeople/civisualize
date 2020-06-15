@@ -3,26 +3,26 @@
 <div class="row">
 <div id="recur" class="col-md-4">
     <strong>Recurring</strong>
-    <a class="reset" href="javascript:graphs.recur.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+    <a class="reset civisualize-reset" data-chart-name="contributeRecur" >reset</a>
     <graph />
     <div class="clearfix"></div>
 </div>
 
 <div id="contact_type" class="col-md-4 hidden">
     <strong>Type</strong>
-    <a class="reset" href="javascript:pietype.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+    <a class="reset civisualize-reset" data-chart-name="contributePieType" >reset</a>
     <div class="clearfix"></div>
 </div>
 
 <div id="instrument" class="col-md-4">
     <strong>Payment instrument</strong>
-    <a class="reset" href="javascript:pieinstrument.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+    <a class="reset civisualize-reset" data-chart-name="contributePieInstrument" >reset</a>
     <div class="clearfix"></div>
 </div>
 
 <div id="day-of-week-chart" class="col-md-4">
     <strong>Day of Week</strong>
-    <a class="reset" href="javascript:dayOfWeekChart.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+    <a class="reset civisualize-reset" data-chart-name="contributeDayOfWeekChart" >reset</a>
     <div class="clearfix"></div>
 </div>
 </div>
@@ -30,8 +30,7 @@
     <div id="monthly-move-chart" class="col-md-12">
         <strong>Amount by month</strong>
         <span class="reset" style="display: none;">range: <span class="filter"></span></span>
-        <a class="reset" href="javascript:moveChart.filterAll();volumeChart.filterAll();dc.redrawAll();"
-style="display: none;">reset</a>
+        <a class="reset civisualize-reset" data-chart-name="contributeMoveChart,contributionVolumeChart" >reset</a>
         <div class="clearfix"></div>
     </div>
 </div>
@@ -46,7 +45,7 @@ style="display: none;">reset</a>
     var i = {crmAPI entity="OptionValue" option_group_id="10"}; {*todo on 4.4, use the payment_instrument as id *}
 
     {literal}
-    document.addEventListener('DOMContentLoaded', function() {
+(function() { function bootViz() {
       // Use our versions of the libraries.
       var d3 = CRM.civisualize.d3, dc = CRM.civisualize.dc, crossfilter = CRM.civisualize.crossfilter;
 
@@ -219,12 +218,30 @@ style="display: none;">reset</a>
                 graphs.recur=drawRecur("#recur graph");
                 dc.renderAll();
                 //  pietype.render();
+
+                CRM.civisualize.charts['contributeRecur'] = graphs.recur;
+                CRM.civisualize.charts['contributePieType'] = pietype;
+                CRM.civisualize.charts['contributePieInstrument'] = pieinstrument;
+                CRM.civisualize.charts['contributeDayOfWeekChart'] = dayOfWeekChart;
+                CRM.civisualize.charts['contributeMoveChart'] = moveChart;
+                CRM.civisualize.charts['contributeVolumeChart'] = volumeChart;
+                CRM.civisualize.bindResetLinks();
+                
             });//end cj
         }
         else{
             cj('.eventsoverview').html('<div style="color:red; font-size:18px;">Civisualize Error. Please contact Admin.'+data.error+'</div>');
         }
-    });
+  }
+
+  if (document.readyState === 'complete') {
+    bootViz();
+  }
+  else {
+    // We need all our libraries loaded before we start.
+    document.addEventListener('DOMContentLoaded', bootViz);
+  }
+})();
     {/literal}
 </script>
 <div class="clear"></div>

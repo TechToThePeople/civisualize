@@ -7,29 +7,29 @@
 	<div style="clear:both"></div>
 	<div id="type" style="width:350px;">
 	    <strong>Type</strong>
-	    <a class="reset" href="javascript:typePie.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+	    <a class="reset civisualize-reset" data-chart-name="contactsTypePie" >reset</a>
 	    <div class="clearfix"></div>
 	</div>
 		<div class="source">
 	    <strong>Source of Contact</strong>
-	    <a class="reset" href="javascript:sourceRow.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+	    <a class="reset civisualize-reset" data-chart-name="contactsSourceRow" >reset</a>
 	    <div class="clearfix"></div>
 	</div>
 	<div class="clear"></div>
 	<div id="gender" style="width:350px;">
 	    <strong>Gender</strong>
-	    <a class="reset" href="javascript:genderPie.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+	    <a class="reset civisualize-reset" data-chart-name="contactsGenderPie" >reset</a>
 	    <div class="clearfix"></div>
 	</div>
 	<div id="dayofweek">
 	    <strong>Day - Contact Created</strong>
-	    <a class="reset" href="javascript:weekRow.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+	    <a class="reset civisualize-reset" data-chart-name="contactsWeekRow" >reset</a>
 	    <div class="clearfix"></div>
 	</div>
 	<div class="clear"></div>
 	<div id="contacts-by-month">
 	    <strong>Date - Contact Created</strong>
-	    <a class="reset" href="javascript:monthLine.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+	    <a class="reset civisualize-reset" data-chart-name="contactsMonthLine" >reset</a>
 	    <div class="clearfix"></div>
 	</div>
 </div>
@@ -37,7 +37,7 @@
 <script>
 {literal}
 'use strict';
-document.addEventListener('DOMContentLoaded', function() {
+(function() { function bootViz() {
 (function(guid) {
   // Use our versions of the libraries.
   var d3 = CRM.civisualize.d3, dc = CRM.civisualize.dc, crossfilter = CRM.civisualize.crossfilter;
@@ -199,13 +199,31 @@ document.addEventListener('DOMContentLoaded', function() {
 				
 				dc.renderAll();
 
+        // Provide access to our objects under unique names for the reset links.
+        CRM.civisualize.charts['contactsTypePie'] = typePie;
+        CRM.civisualize.charts['contactsSourceRow'] = sourceRow;
+        CRM.civisualize.charts['contactsGenderPie'] = genderPie;
+        CRM.civisualize.charts['contactsWeekRow'] = weekRow;
+        CRM.civisualize.charts['contactsMonthLine'] = monthLine;
+        CRM.civisualize.bindResetLinks();
 			});
 		}
 		else{
 			cj('.dc_contacts').html('<div style="color:red; font-size:18px;">There is a database error. Please Contact the administrator as soon as possible.</div>');
 		}
 })("#dataviz-contacts");
-});
+
+    CRM.civisualize.bindResetLinks();
+  }
+
+  if (document.readyState === 'complete') {
+    bootViz();
+  }
+  else {
+    // We need all our libraries loaded before we start.
+    document.addEventListener('DOMContentLoaded', bootViz);
+  }
+})();
 {/literal}
 </script>
 <div class="clear"></div>

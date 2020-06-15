@@ -3,7 +3,7 @@
 
 <script>
 {literal}
-document.addEventListener('DOMContentLoaded', function() {
+(function() { function bootViz() {
   // Use our versions of the libraries.
   var d3 = CRM.civisualize.d3, dc = CRM.civisualize.dc, crossfilter = CRM.civisualize.crossfilter;
   (function () {
@@ -156,7 +156,16 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   }());
-});
+  }
+
+  if (document.readyState === 'complete') {
+    bootViz();
+  }
+  else {
+    // We need all our libraries loaded before we start.
+    document.addEventListener('DOMContentLoaded', bootViz);
+  }
+})();
 </script>
 
 <style>

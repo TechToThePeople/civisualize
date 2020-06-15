@@ -12,7 +12,7 @@
 'use strict';
 //var data = {crmAPI entity="reportinstance"...};
 {literal}
-document.addEventListener('DOMContentLoaded', function() {
+(function() { function bootViz() {
 // Use our versions of the libraries.
 var d3 = CRM.civisualize.d3, dc = CRM.civisualize.dc, crossfilter = CRM.civisualize.crossfilter;
 
@@ -42,7 +42,16 @@ dc.pieChart("#prior")
   .data(function() { return data.values});
 
 dc.renderAll();
-});
+  }
+
+  if (document.readyState === 'complete') {
+    bootViz();
+  }
+  else {
+    // We need all our libraries loaded before we start.
+    document.addEventListener('DOMContentLoaded', bootViz);
+  }
+})();
 {/literal}
 //http://wiki.civicrm.org/confluence/display/CRM/CiviEngage+Enhancements+for+fund-raising#CiviEngageEnhancementsforfund-raising-2.LapsedandRecoveredDonorsChart
 </script>

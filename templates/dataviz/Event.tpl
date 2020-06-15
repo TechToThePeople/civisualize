@@ -58,22 +58,22 @@
     <div id="participantsCount" style="font-size:14px; margin-bottom:10px;"></div>
     <div id="participants">
         <strong>Participants</strong>
-        <a class="reset" href="javascript:participantsLine.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+        <a class="reset civisualize-reset" data-chart-name="eventParticipantsLine" >reset</a>
         <div class="clearfix"></div>
     </div>
     <div id="gender">
         <strong>Gender</strong>
-        <a class="reset" href="javascript:genderPie.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+        <a class="reset civisualize-reset" data-chart-name="eventGenderPie" >reset</a>
         <div class="clearfix"></div>
     </div>
     <div id="status">
         <strong>Participant Status</strong>
-        <a class="reset" href="javascript:statusPie.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+        <a class="reset civisualize-reset" data-chart-name="eventStatusPie" >reset</a>
         <div class="clearfix"></div>
     </div>
     <div id="feeRow">
         <strong>Fee Paid</strong>
-        <a class="reset" href="javascript:feeRow.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+        <a class="reset civisualize-reset" data-chart-name="eventFeeRow" >reset</a>
         <div class="clearfix"></div>
     </div>
     <table id="participantTable">
@@ -91,7 +91,7 @@
 <script>
 {literal}
 'use strict';
-document.addEventListener('DOMContentLoaded', function() {
+(function() { function bootViz() {
   // Use our versions of the libraries.
   var d3 = CRM.civisualize.d3, dc = CRM.civisualize.dc, crossfilter = CRM.civisualize.crossfilter;
 
@@ -280,12 +280,29 @@ all:function () {
 
         dc.renderAll();
 
+        CRM.civisualize.charts['eventParticipantsLine'] = participantsLine;
+        CRM.civisualize.charts['eventGenderPie'] = genderPie;
+        CRM.civisualize.charts['eventStatusPie'] = statusPie;
+        CRM.civisualize.charts['eventFeeRow'] = feeRow;
+        CRM.civisualize.bindResetLinks();
+
+
+
   });
 }
 else{
   cj('#eventoverview').html('<div style="color:red; font-size:18px;">Civisualize Error. Please contact Admin.'+eventDetails.error+participantDetails.error+'</div>');
 }
+  }
+
+  if (document.readyState === 'complete') {
+    bootViz();
+  }
+  else {
+    // We need all our libraries loaded before we start.
+    document.addEventListener('DOMContentLoaded', bootViz);
+  }
+})();
 {/literal}
-});
 </script>
 <div class="clear"></div>

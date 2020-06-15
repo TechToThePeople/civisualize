@@ -39,20 +39,25 @@ class CRM_Civisualize_VisualBundle {
       return;
     }
 
-    $content = "CRM.civisualize = {v:'1.0'};(function(){\n";
+    $file = E::path('js/civisualize.js');
+    $content = "// File: $file\n" . file_get_contents($file) . "\n";
+    $content .= "var crossfilter = this.crossfilter;\n";
+
+    $content .= "(function(){\n";
 
     // Add crossfilter
     $file = E::path('js/dc/crossfilter.min.js');
     $content .= "// File: $file\n" . file_get_contents($file) . "\n";
+    $content .= "var crossfilter = this.crossfilter;\n";
 
     // Add d3
     $file = E::path('js/d3.min.v5.7.0.js');
     $content .= "// File: $file\n" . file_get_contents($file) . "\n";
+    $content .= "var d3 = this.d3;\n";
 
     // Add dc
     $file = E::path('js/dc/dc.min.js');
     $content .= "// File: $file\n" . file_get_contents($file) . "\n";
-
     $content .= "this.dc = dc;\n";
 
     // End the anon function and call it with CRM.civisualize as its 'this' object.

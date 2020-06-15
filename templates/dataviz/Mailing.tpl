@@ -1,6 +1,6 @@
 {crmTitle string="Mailing details"}
 
-<a class="reset" href="javascript:sourceRow.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+<a class="reset civisualize-reset" data-chart-name="mailingSourceRow" >reset</a>
 
 <div class="row">
 <div id="open" class="col-md-12"><h3>Date Open</h3><div class="graph"></div><div class="avg"></div></div>
@@ -13,7 +13,7 @@
 var data = {crmSQL json="mailing_open" mailing_id=$id};
 
 {literal}
-document.addEventListener('DOMContentLoaded', function() {
+(function() { function bootViz() {
 // Use our versions of the libraries.
 var d3 = CRM.civisualize.d3, dc = CRM.civisualize.dc, crossfilter = CRM.civisualize.crossfilter;
 
@@ -88,7 +88,20 @@ function drawOpen (dom) {
 drawOpen("#open .graph");
 
 dc.renderAll();
-});
+
+CRM.civisualize.charts['mailingSourceRow'] = sourceRow;
+CRM.civisualize.bindResetLinks();
+
+  }
+
+  if (document.readyState === 'complete') {
+    bootViz();
+  }
+  else {
+    // We need all our libraries loaded before we start.
+    document.addEventListener('DOMContentLoaded', bootViz);
+  }
+})();
 </script>
 
 <style>

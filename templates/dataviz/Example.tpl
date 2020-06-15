@@ -3,13 +3,13 @@ This is a demo
 
     <div id="type" class="clear">
       <strong>Musician</strong>
-      <a class="reset" href="javascript:sourceRow.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+      <a class="reset civisualize-reset" data-chart-name="exampleTypePie" >reset</a>
       <div class="clearfix"></div>
   </div>
   <div class="clear"></div>
   <div id="gender" style="width:350px;">
       <strong>Gender</strong>
-      <a class="reset" href="javascript:genderPie.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+      <a class="reset civisualize-reset" data-chart-name="exampleGenderPie" >reset</a>
       <div class="clearfix"></div>
   </div>
   <div class="clear"></div>
@@ -19,7 +19,7 @@ This is a demo
 //var data = {crmSQL sql="SELECT something, somethingelse, count(*) as total from civicrm_table where whatever group by something, somethingelse"};
 
 {literal}
-document.addEventListener('DOMContentLoaded', function() {
+(function() { function bootViz() {
   // Use our versions of the libraries.
   var d3 = CRM.civisualize.d3, dc = CRM.civisualize.dc, crossfilter = CRM.civisualize.crossfilter;
 
@@ -76,8 +76,20 @@ is_error:0,
 
   //var typePie   = dc.pieChart("#type").innerRadius(10).radius(90);
   dc.renderAll();
+  CRM.civisualize.charts['exampleTypePie'] = typePie;
+  CRM.civisualize.charts['exampleGenderPie'] = genderPie;
+  CRM.civisualize.bindResetLinks();
 
-});
+  }
+
+  if (document.readyState === 'complete') {
+    bootViz();
+  }
+  else {
+    // We need all our libraries loaded before we start.
+    document.addEventListener('DOMContentLoaded', bootViz);
+  }
+})();
 </script>
 
 <style>

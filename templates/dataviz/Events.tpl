@@ -58,8 +58,7 @@
     'use strict';
 
 {literal}
-// We need all our libraries loaded before we start.
-document.addEventListener('DOMContentLoaded', function() {
+(function() { function bootViz() {
     // Use our versions of the libraries.
     var d3 = CRM.civisualize.d3, dc = CRM.civisualize.dc, crossfilter = CRM.civisualize.crossfilter;
 {/literal}
@@ -361,7 +360,16 @@ document.addEventListener('DOMContentLoaded', function() {
         else{
             cj('.eventsoverview').html('<div style="color:red; font-size:18px;">Civisualize Error. Please contact Admin.'+data.error+'</div>')
         }
-  });
-    {/literal}
+  }
+
+  if (document.readyState === 'complete') {
+    bootViz();
+  }
+  else {
+    // We need all our libraries loaded before we start.
+    document.addEventListener('DOMContentLoaded', bootViz);
+  }
+})();
+{/literal}
 </script>
 <div class="clear"></div>

@@ -3,7 +3,7 @@
 <script>
 var data={crmAPI entity="tag" action="getstat"};
 {literal}
-document.addEventListener('DOMContentLoaded', function() {
+(function() { function bootViz() {
 // Use our versions of the libraries.
 var d3 = CRM.civisualize.d3, dc = CRM.civisualize.dc, crossfilter = CRM.civisualize.crossfilter;
 
@@ -110,6 +110,15 @@ var svg = d3.select("body").append("svg")
 
 };
 
-});
+  }
+
+  if (document.readyState === 'complete') {
+    bootViz();
+  }
+  else {
+    // We need all our libraries loaded before we start.
+    document.addEventListener('DOMContentLoaded', bootViz);
+  }
+})();
 {/literal}
 </script>

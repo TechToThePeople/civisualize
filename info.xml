@@ -8,22 +8,11 @@
     <author>Xavier</author>
     <email>xavier@tttp.eu</email>
   </maintainer>
-  <releaseDate>2019-01-22</releaseDate>
-  <version>5.0</version>
+  <releaseDate>2020-06-15</releaseDate>
+  <version>6.0</version>
   <develStage>stable</develStage>
   <compatibility>
-    <ver>4.3</ver>
-    <ver>4.4</ver>
-    <ver>4.5</ver>
-    <ver>4.6</ver>
-    <ver>4.7</ver>
-    <ver>4.8</ver>
-    <ver>4.9</ver>
-    <ver>5.0</ver>
-    <ver>5.1</ver>
-    <ver>5.2</ver>
-    <ver>5.3</ver>
-    <ver>5.7</ver>
+    <ver>5.24</ver>
   </compatibility>
   <civix>
     <namespace>CRM/Civisualize</namespace>

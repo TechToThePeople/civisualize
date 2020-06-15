@@ -55,7 +55,7 @@ svg {
 <script>
 
 // We need all our libraries loaded before we start.
-document.addEventListener('DOMContentLoaded', function() {
+(function() { function bootViz() {
   // Use our versions of the libraries.
   var d3 = CRM.civisualize.d3, dc = CRM.civisualize.dc, crossfilter = CRM.civisualize.crossfilter;
 
@@ -135,6 +135,15 @@ values: rand2,
     }
   ];
 }
-});
+  }
+
+  if (document.readyState === 'complete') {
+    bootViz();
+  }
+  else {
+    // We need all our libraries loaded before we start.
+    document.addEventListener('DOMContentLoaded', bootViz);
+  }
+})();
 </script>
 {/literal}

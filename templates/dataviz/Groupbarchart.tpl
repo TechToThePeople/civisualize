@@ -5,7 +5,7 @@
 
 <script>
 {literal}
-document.addEventListener('DOMContentLoaded', function() {
+(function() { function bootViz() {
 // Use our versions of the libraries.
 var d3 = CRM.civisualize.d3, dc = CRM.civisualize.dc, crossfilter = CRM.civisualize.crossfilter;
 
@@ -94,8 +94,17 @@ function drawGroup (data) {
     window[name]=this;
   }
 
-}("{$name}"));
-});
+}{/literal}("{$name}"));{literal}
+  }
+
+  if (document.readyState === 'complete') {
+    bootViz();
+  }
+  else {
+    // We need all our libraries loaded before we start.
+    document.addEventListener('DOMContentLoaded', bootViz);
+  }
+})();
 {/literal}
 </script>
 

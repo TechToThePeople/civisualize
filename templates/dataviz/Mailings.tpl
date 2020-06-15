@@ -1,7 +1,5 @@
 {crmTitle string="<span class='data_count'><span class='filter-count'></span> Mailings out of <span class='total-count'></span></span>"}
 
-<a class="reset" href="javascript:sourceRow.filterAll();dc.redrawAll();" style="display: none;">reset</a>
-
 <div class="row" >
 <div id="campaign" class="col-md-2"><h3>Campaign</h3><div class="graph"></div></div>
 <div id="sender" class="col-md-2"><h3>Crew</h3><div class="graph"></div></div>
@@ -30,7 +28,7 @@
 
 <script>
 {literal}
-document.addEventListener('DOMContentLoaded', function() {
+(function() { function bootViz() {
 // Use our versions of the libraries.
 var d3 = CRM.civisualize.d3, dc = CRM.civisualize.dc, crossfilter = CRM.civisualize.crossfilter;
 
@@ -228,7 +226,16 @@ drawSender("#sender .graph");
 drawCampaign("#campaign .graph");
 
 dc.renderAll();
-});
+  }
+
+  if (document.readyState === 'complete') {
+    bootViz();
+  }
+  else {
+    // We need all our libraries loaded before we start.
+    document.addEventListener('DOMContentLoaded', bootViz);
+  }
+})();
 </script>
 
 <style>
