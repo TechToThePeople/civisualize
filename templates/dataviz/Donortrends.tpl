@@ -44,14 +44,18 @@
 
 
 <script>
+{literal}
+'use strict';
+document.addEventListener('DOMContentLoaded', function() {
+    // Use our versions of the libraries.
+    var d3 = CRM.civisualize.d3, dc = CRM.civisualize.dc, crossfilter = CRM.civisualize.crossfilter;
 
-    'use strict';
-
+    {/literal}
     var data        = {crmSQL file="donors"};
+    {literal}
+
     var dateFormat  = d3.timeParse("%Y-%m-%d");
     var currentDate = new Date();
-
-    {literal}
 
         if(!data.is_error){
 
@@ -313,5 +317,6 @@
         else {
             cj('#donortrends').html('<div style="color:red; font-size:18px;">Civisualize Error. Please contact Admin.'+data.error+'</div>');
         }
+        });
     {/literal}
 </script>

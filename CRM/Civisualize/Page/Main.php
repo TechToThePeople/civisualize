@@ -39,6 +39,7 @@ class CRM_Civisualize_Page_Main extends CRM_Core_Page {
 
   function run() {
     $smarty= CRM_Core_Smarty::singleton( );
+    CRM_Civisualize_VisualBundle::register();
 
     $dummy = NULL;
     if (array_key_exists('id',$_GET)) {// special treatmenent, because it's often used

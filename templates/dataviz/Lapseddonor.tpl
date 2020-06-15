@@ -12,6 +12,9 @@
 'use strict';
 //var data = {crmAPI entity="reportinstance"...};
 {literal}
+document.addEventListener('DOMContentLoaded', function() {
+// Use our versions of the libraries.
+var d3 = CRM.civisualize.d3, dc = CRM.civisualize.dc, crossfilter = CRM.civisualize.crossfilter;
 
 var data = {"is_error":0,"version":3,"count":2,"values":[{"from_date":"2010-01-01","to_date":"2011-07-01","recovered":780,"prior":"508"},{"from_date":"2011-07-01","to_date":"2012-12-30","recovered":"9999","prior":"845"}]};
 
@@ -39,7 +42,7 @@ dc.pieChart("#prior")
   .data(function() { return data.values});
 
 dc.renderAll();
-
+});
 {/literal}
 //http://wiki.civicrm.org/confluence/display/CRM/CiviEngage+Enhancements+for+fund-raising#CiviEngageEnhancementsforfund-raising-2.LapsedandRecoveredDonorsChart
 </script>

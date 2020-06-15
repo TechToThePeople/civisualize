@@ -6,12 +6,17 @@
 
 
 <script>
-(function (name,options) {ldelim}
+{literal}
+document.addEventListener('DOMContentLoaded', function() {
+  // Use our versions of the libraries.
+  var d3 = CRM.civisualize.d3, dc = CRM.civisualize.dc, crossfilter = CRM.civisualize.crossfilter;
+(function (name,options) {
+{/literal}
 var types = {crmAPI entity="contact" action="getstat" return="contact_type"};
+{literal}
 
   drawPie(types,options);
 
-{literal}
 function drawPie(types,options) {
   options = options || {};
   width = options.width || 300;
@@ -20,14 +25,14 @@ function drawPie(types,options) {
 
   radius = Math.min(width, height) / 2;
 
-  var color = d3.scale.ordinal()
+  var color = d3.scaleOrdinal()
       .range(["#98abc5", "#8a89a6", "#7b6888", "#6b486b", "#a05d56", "#d0743c", "#ff8c00"]);
 
-  var arc = d3.svg.arc()
+  var arc = d3.arc()
       .outerRadius(radius - 10)
       .innerRadius(radius - 60);
 
-  var pie = d3.layout.pie()
+  var pie = d3.pie()
       .sort(null)
       .value(function(d) { return d.total; });
 
@@ -76,6 +81,7 @@ function drawPie(types,options) {
   }
 {/literal}
 }("{$name}",{$options|@json_encode}));
+});
 </script>
 
 <style>

@@ -35,12 +35,16 @@
 </div>
 
 <script>
-(function(guid){ldelim}
-	'use strict';
+{literal}
+'use strict';
+document.addEventListener('DOMContentLoaded', function() {
+(function(guid) {
+  // Use our versions of the libraries.
+  var d3 = CRM.civisualize.d3, dc = CRM.civisualize.dc, crossfilter = CRM.civisualize.crossfilter;
 
+  {/literal}
 	var data = {crmSQL file="contacts"};
 	var gender = {crmAPI entity="contact" action="getoptions" field="gender_id"};
-
 	{literal}
 
 		if(!data.is_error){//Check for database error
@@ -126,7 +130,7 @@
 					.width(250)
 					.height(200)
 					.dimension(type)
-					.colors(d3.scaleOrdinal(d3.schemeCategory10)())
+					.colors(d3.scaleOrdinal(d3.schemeCategory10))
 					.group(typeGroup)
 					.label(function(d){
 						if (typePie.hasFilter() && !typePie.hasFilter(d.key))
@@ -140,7 +144,7 @@
 					.width(250)
 					.height(200)
 					.dimension(gender)
-					.colors(d3.scaleOrdinal(d3.schemeCategory10)())
+					.colors(d3.scaleOrdinal(d3.schemeCategory10))
 					.group(genderGroup)
 					.label(function(d) {
 						if (genderPie.hasFilter() && !genderPie.hasFilter(d.key))
@@ -157,7 +161,7 @@
 					.dimension(source)
 					.cap(5)
           .ordering (function(d) {return d.count;})
-					.colors(d3.scaleOrdinal(d3.schemeCategory10)())
+					.colors(d3.scaleOrdinal(d3.schemeCategory10))
 					.group(sourceGroup)
 					.label(function(d){
 						if (sourceRow.hasFilter() && !sourceRow.hasFilter(d.key))
@@ -200,7 +204,8 @@
 		else{
 			cj('.dc_contacts').html('<div style="color:red; font-size:18px;">There is a database error. Please Contact the administrator as soon as possible.</div>');
 		}
-	{/literal}
-{rdelim})("#dataviz-contacts ");
+})("#dataviz-contacts");
+});
+{/literal}
 </script>
 <div class="clear"></div>

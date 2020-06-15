@@ -94,6 +94,9 @@ foreach ($pos_args as $tpl) {
   $html = str_replace('d3.time.scale.utc', 'd3.scaleUtc', $html);
   // Convert time.scale to scaleTime
   $html = str_replace('d3.time.scale', 'd3.scaleTime', $html);
+  // svg.arc
+  $html = str_replace('d3.svg.arc', 'd3.arc', $html);
+  $html = str_replace('d3.layout.pie', 'd3.pie', $html);
 
   // Convert time.scale.linear to scaleLinear etc.
   $html = preg_replace_callback('/d3\.scale\.(linear|sqrt|pow|log|quantize|threshold|quantile|identity|ordinal)/',
@@ -102,8 +105,9 @@ foreach ($pos_args as $tpl) {
     },
     $html);
 
+
   // schemeCategory (whatever that is!)
-  $html = preg_replace_callback('/d3\.scale\.(category(?:10|20[bc]?))/',
+  $html = preg_replace_callback('/d3\.scale\.(category(?:10|20[bc]?))\(\)/',
     function ($matches) {
       return 'd3.scaleOrdinal(d3.scheme' . ucfirst($matches[1]) . ')';
     },

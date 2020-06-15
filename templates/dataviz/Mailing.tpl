@@ -11,11 +11,16 @@
 
 <script>
 var data = {crmSQL json="mailing_open" mailing_id=$id};
-var dateFormat = d3.time.format("%Y-%m-%d %H:%M");
+
+{literal}
+document.addEventListener('DOMContentLoaded', function() {
+// Use our versions of the libraries.
+var d3 = CRM.civisualize.d3, dc = CRM.civisualize.dc, crossfilter = CRM.civisualize.crossfilter;
+
+var dateFormatParser = d3.timeParse("%Y-%m-%d %H:%M");
 var currentDate = new Date();
 
 
-{literal}
 
 var prettyDate = function (dateString){
   var date = new Date(dateString);
@@ -34,7 +39,7 @@ function lookupTable(data,key,value) {
 }
 
 data.values.forEach(function(d){
-  d.date = dateFormat.parse(d.date);
+  d.date = dateFormatParser(d.date);
 });
 
 
@@ -69,10 +74,10 @@ function drawOpen (dom) {
     .renderArea(true)
     .group(group)
     .brushOn(false)
-    .x(d3.time.scale().domain(d3.extent(dim.top(3000), function(d) { return d.date; })))
+    .x(d3.scaleTime().domain(d3.extent(dim.top(3000), function(d) { return d.date; })))
     //.round(d3.time.day.round)
     .elasticY(true)
-    .xUnits(d3.time.days);
+    .xUnits(d3.timeDays);
 
    graph.yAxis().ticks(5);
    graph.xAxis().ticks(12);
@@ -83,7 +88,7 @@ function drawOpen (dom) {
 drawOpen("#open .graph");
 
 dc.renderAll();
-
+});
 </script>
 
 <style>

@@ -42,11 +42,14 @@ style="display: none;">reset</a>
 
 <script>
     'use strict';
-
     var data = {crmSQL file="contribution_by_date"};
     var i = {crmAPI entity="OptionValue" option_group_id="10"}; {*todo on 4.4, use the payment_instrument as id *}
 
     {literal}
+    document.addEventListener('DOMContentLoaded', function() {
+      // Use our versions of the libraries.
+      var d3 = CRM.civisualize.d3, dc = CRM.civisualize.dc, crossfilter = CRM.civisualize.crossfilter;
+
         if(!data.is_error){
             var instrumentLabel = {};
             i.values.forEach (function(d) {
@@ -221,6 +224,7 @@ style="display: none;">reset</a>
         else{
             cj('.eventsoverview').html('<div style="color:red; font-size:18px;">Civisualize Error. Please contact Admin.'+data.error+'</div>');
         }
+    });
     {/literal}
 </script>
 <div class="clear"></div>

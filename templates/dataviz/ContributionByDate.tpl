@@ -23,7 +23,14 @@
 
 <script>
 
-cj(function($) {ldelim}
+{literal}
+cj(function($) {
+  // Use our versions of the libraries.
+  var d3 = CRM.civisualize.d3, dc = CRM.civisualize.dc, crossfilter = CRM.civisualize.crossfilter;
+
+{/literal}
+var data={crmSQL file="contribution_by_date"}.values;
+{literal}
 
 var gainOrLossChart = dc.pieChart("#gain-loss-chart");
 var fluctuationChart = dc.barChart("#fluctuation-chart");
@@ -33,10 +40,6 @@ var moveChart = dc.compositeChart("#monthly-move-chart");
 var volumeChart = dc.barChart("#monthly-volume-chart");
 var yearlyBubbleChart = dc.bubbleChart("#yearly-bubble-chart");
 
-
-var data={crmSQL file="contribution_by_date"}.values;
-
-{literal}
 dateFormat = d3.time.format("%Y-%m-%d");
 data.forEach(function(e) { e.dd = dateFormat.parse(e.receive_date); });
 

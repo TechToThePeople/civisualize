@@ -2,7 +2,7 @@
 
 <a class="reset" href="javascript:sourceRow.filterAll();dc.redrawAll();" style="display: none;">reset</a>
 
-<div class="row">
+<div class="row" >
 <div id="campaign" class="col-md-2"><h3>Campaign</h3><div class="graph"></div></div>
 <div id="sender" class="col-md-2"><h3>Crew</h3><div class="graph"></div></div>
 <div id="open" class="col-md-2"><h3>% Open</h3><div class="graph"></div><div class="avg"></div></div>
@@ -29,12 +29,16 @@
 </div>
 
 <script>
+{literal}
+document.addEventListener('DOMContentLoaded', function() {
+// Use our versions of the libraries.
+var d3 = CRM.civisualize.d3, dc = CRM.civisualize.dc, crossfilter = CRM.civisualize.crossfilter;
+
+{/literal}
 var data = {crmSQL json="mailings"};
+{literal}
 var dateFormat = d3.timeParse("%Y-%m-%d %H:%M:%S");
 var currentDate = new Date();
-
-
-{literal}
 
 var prettyDate = function (dateString){
   var date = new Date(dateString);
@@ -73,7 +77,7 @@ function drawCampaign (dom) {
     .width(100)
     .height(100)
     .dimension(dim)
-    .colors(d3.scaleOrdinal(d3.schemeCategory20)())
+    .colors(d3.scaleOrdinal(d3.schemeCategory10))
     .group(group);
 
   return graph;
@@ -87,7 +91,7 @@ function drawSender (dom) {
     .width(100)
     .height(100)
     .dimension(dim)
-    .colors(d3.scaleOrdinal(d3.schemeCategory10)())
+    .colors(d3.scaleOrdinal(d3.schemeCategory10))
     .group(group);
 
   return graph;
@@ -100,7 +104,7 @@ function drawType (dom) {
     .width(250)
     .height(200)
     .dimension(dim)
-    .colors(d3.scaleOrdinal(d3.schemeCategory20b)())
+    .colors(d3.scaleOrdinal(d3.schemeCategory10))
     .group(group);
 
   return graph;
@@ -224,11 +228,18 @@ drawSender("#sender .graph");
 drawCampaign("#campaign .graph");
 
 dc.renderAll();
-
+});
 </script>
 
 <style>
-.clear {clear:both;}
-
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -1rem;
+}
+.row > div {
+  padding: 1rem;
+  flex: 1 0 auto;
+}
 </style>
 {/literal}
