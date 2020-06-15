@@ -7,29 +7,29 @@
 	<div style="clear:both"></div>
 	<div id="type" style="width:350px;">
 	    <strong>Type</strong>
-	    <a class="reset civisualize-reset" data-chart-name="contactsTypePie" >reset</a>
+	    <a class="reset civisualize-reset" href data-chart-name="contactsTypePie" >reset</a>
 	    <div class="clearfix"></div>
 	</div>
 		<div class="source">
 	    <strong>Source of Contact</strong>
-	    <a class="reset civisualize-reset" data-chart-name="contactsSourceRow" >reset</a>
+	    <a class="reset civisualize-reset" href data-chart-name="contactsSourceRow" >reset</a>
 	    <div class="clearfix"></div>
 	</div>
 	<div class="clear"></div>
 	<div id="gender" style="width:350px;">
 	    <strong>Gender</strong>
-	    <a class="reset civisualize-reset" data-chart-name="contactsGenderPie" >reset</a>
+	    <a class="reset civisualize-reset" href data-chart-name="contactsGenderPie" >reset</a>
 	    <div class="clearfix"></div>
 	</div>
 	<div id="dayofweek">
 	    <strong>Day - Contact Created</strong>
-	    <a class="reset civisualize-reset" data-chart-name="contactsWeekRow" >reset</a>
+	    <a class="reset civisualize-reset" href data-chart-name="contactsWeekRow" >reset</a>
 	    <div class="clearfix"></div>
 	</div>
 	<div class="clear"></div>
 	<div id="contacts-by-month">
 	    <strong>Date - Contact Created</strong>
-	    <a class="reset civisualize-reset" data-chart-name="contactsMonthLine" >reset</a>
+	    <a class="reset civisualize-reset" href data-chart-name="contactsMonthLine" >reset</a>
 	    <div class="clearfix"></div>
 	</div>
 </div>

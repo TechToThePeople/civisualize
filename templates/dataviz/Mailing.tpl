@@ -1,6 +1,6 @@
 {crmTitle string="Mailing details"}
 
-<a class="reset civisualize-reset" data-chart-name="mailingGraph" >reset</a>
+<a class="reset civisualize-reset" href data-chart-name="mailingGraph" >reset</a>
 
 <div class="row">
 <div id="open" class="col-md-12"><h3>Date Open</h3><div class="graph"></div><div class="avg"></div></div>

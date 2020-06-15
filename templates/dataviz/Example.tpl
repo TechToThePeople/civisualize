@@ -3,13 +3,13 @@ This is a demo
 
     <div id="type" class="clear">
       <strong>Musician</strong>
-      <a class="reset civisualize-reset" data-chart-name="exampleTypePie" >reset</a>
+      <a class="reset civisualize-reset" href data-chart-name="exampleTypePie" >reset</a>
       <div class="clearfix"></div>
   </div>
   <div class="clear"></div>
   <div id="gender" style="width:350px;">
       <strong>Gender</strong>
-      <a class="reset civisualize-reset" data-chart-name="exampleGenderPie" >reset</a>
+      <a class="reset civisualize-reset" href data-chart-name="exampleGenderPie" >reset</a>
       <div class="clearfix"></div>
   </div>
   <div class="clear"></div>

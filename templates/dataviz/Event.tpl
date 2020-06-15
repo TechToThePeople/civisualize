@@ -58,22 +58,22 @@
     <div id="participantsCount" style="font-size:14px; margin-bottom:10px;"></div>
     <div id="participants">
         <strong>Participants</strong>
-        <a class="reset civisualize-reset" data-chart-name="eventParticipantsLine" >reset</a>
+        <a class="reset civisualize-reset" href data-chart-name="eventParticipantsLine" >reset</a>
         <div class="clearfix"></div>
     </div>
     <div id="gender">
         <strong>Gender</strong>
-        <a class="reset civisualize-reset" data-chart-name="eventGenderPie" >reset</a>
+        <a class="reset civisualize-reset" href data-chart-name="eventGenderPie" >reset</a>
         <div class="clearfix"></div>
     </div>
     <div id="status">
         <strong>Participant Status</strong>
-        <a class="reset civisualize-reset" data-chart-name="eventStatusPie" >reset</a>
+        <a class="reset civisualize-reset" href data-chart-name="eventStatusPie" >reset</a>
         <div class="clearfix"></div>
     </div>
     <div id="feeRow">
         <strong>Fee Paid</strong>
-        <a class="reset civisualize-reset" data-chart-name="eventFeeRow" >reset</a>
+        <a class="reset civisualize-reset" href data-chart-name="eventFeeRow" >reset</a>
         <div class="clearfix"></div>
     </div>
     <table id="participantTable">

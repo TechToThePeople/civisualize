@@ -15,17 +15,17 @@
     <div id="donorsCount" style="font-size:14px; margin-bottom:5px;"><span id="contactNumber"></span> selected from a total of <span id="contactTotal" style="font-weight:800;"></span>.</div>
     <div id="donorBar">
         <strong>Donor Trends</strong>
-        <a class="reset civisualize-reset" data-chart-name="donortrendsDonorBar" >reset</a>
+        <a class="reset civisualize-reset" href data-chart-name="donortrendsDonorBar" >reset</a>
         <div class="clearfix"></div>
     </div>
     <div id="genderPie">
         <strong>Gender</strong>
-        <a class="reset civisualize-reset" data-chart-name="donortrendsGenderPie" >reset</a>
+        <a class="reset civisualize-reset" href data-chart-name="donortrendsGenderPie" >reset</a>
         <div class="clearfix"></div>
     </div>
     <div id="ageRow">
         <strong>Age</strong>
-        <a class="reset civisualize-reset" data-chart-name="donortrendsAgeRow" >reset</a>
+        <a class="reset civisualize-reset" href data-chart-name="donortrendsAgeRow" >reset</a>
         <div class="clearfix"></div>
     </div>
     <div class="clear"></div>

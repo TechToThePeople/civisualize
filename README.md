@@ -164,7 +164,7 @@ You can include reset links in your charts to reset all the filters for a partic
 2. At the end of these, call `CRM.civisualize.bindResetLinks();` to make sure all the reset links are ready.
 
 3. Include links in your chart's container div like so:  
-   `<a class="reset civisualize-reset" data-chart-name="yourChartsUniqueName" >Reset</a>`
+   `<a class="reset civisualize-reset" href data-chart-name="yourChartsUniqueName" >Reset</a>`
 
 The links should normally be hidden until you click to add a filter. See Contacts.tpl for an example use.
 

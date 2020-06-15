@@ -3,26 +3,26 @@
 <div class="row">
 <div id="recur" class="col-md-4">
     <strong>Recurring</strong>
-    <a class="reset civisualize-reset" data-chart-name="contributeRecur" >reset</a>
+    <a class="reset civisualize-reset" href data-chart-name="contributeRecur" >reset</a>
     <graph />
     <div class="clearfix"></div>
 </div>
 
 <div id="contact_type" class="col-md-4 hidden">
     <strong>Type</strong>
-    <a class="reset civisualize-reset" data-chart-name="contributePieType" >reset</a>
+    <a class="reset civisualize-reset" href data-chart-name="contributePieType" >reset</a>
     <div class="clearfix"></div>
 </div>
 
 <div id="instrument" class="col-md-4">
     <strong>Payment instrument</strong>
-    <a class="reset civisualize-reset" data-chart-name="contributePieInstrument" >reset</a>
+    <a class="reset civisualize-reset" href data-chart-name="contributePieInstrument" >reset</a>
     <div class="clearfix"></div>
 </div>
 
 <div id="day-of-week-chart" class="col-md-4">
     <strong>Day of Week</strong>
-    <a class="reset civisualize-reset" data-chart-name="contributeDayOfWeekChart" >reset</a>
+    <a class="reset civisualize-reset" href data-chart-name="contributeDayOfWeekChart" >reset</a>
     <div class="clearfix"></div>
 </div>
 </div>
@@ -30,7 +30,7 @@
     <div id="monthly-move-chart" class="col-md-12">
         <strong>Amount by month</strong>
         <span class="reset" style="display: none;">range: <span class="filter"></span></span>
-        <a class="reset civisualize-reset" data-chart-name="contributeMoveChart,contributionVolumeChart" >reset</a>
+        <a class="reset civisualize-reset" href data-chart-name="contributeMoveChart,contributionVolumeChart" >reset</a>
         <div class="clearfix"></div>
     </div>
 </div>
