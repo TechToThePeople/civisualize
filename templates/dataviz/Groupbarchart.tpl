@@ -4,10 +4,17 @@
 {/if}
 
 <script>
-(function (name) {ldelim}
-var groups = {crmAPI entity="group_contact" action="getstat"};
-
 {literal}
+(function() { function bootViz() {
+// Use our versions of the libraries.
+var d3 = CRM.civisualize.d3, dc = CRM.civisualize.dc, crossfilter = CRM.civisualize.crossfilter;
+
+(function (name) {
+
+{/literal}
+var groups = {crmAPI entity="group_contact" action="getstat"};
+{literal}
+
 drawGroup(groups.values);
 
 function drawGroup (data) {
@@ -23,10 +30,11 @@ function drawGroup (data) {
   var barValue = function(d) { return parseFloat(d.total) };
   
 // scales
-  var yScale = d3.scale.ordinal().domain(d3.range(0, data.length)).rangeBands([0, data.length * barHeight]);
+  var yScale = d3.scaleBand().domain(d3.range(0, data.length)).range([0, data.length * barHeight]);
+
   var y = function(d, i) { return yScale(i); };
-  var yText = function(d, i) { return y(d, i) + yScale.rangeBand() / 2; };
-  var x = d3.scale.linear().domain([0, d3.max(data, barValue)]).range([0, maxBarWidth]);
+  var yText = function(d, i) { return y(d, i) + yScale.bandwidth() / 2; };
+  var x = d3.scaleLinear().domain([0, d3.max(data, barValue)]).range([0, maxBarWidth]);
 
   var chart = d3.select('#dataviz').append("svg")
     .attr("id",name)
@@ -45,7 +53,7 @@ function drawGroup (data) {
     .attr("x1", x)
     .attr("x2", x)
     .attr("y1", 0)
-    .attr("y2", yScale.rangeExtent()[1] + gridChartOffset)
+    .attr("y2", yScale.range()[1] + gridChartOffset)
     .style("stroke", "#ccc");
   // bar labels
   var labelsContainer = chart.append('g')
@@ -62,7 +70,7 @@ function drawGroup (data) {
     .attr('transform', 'translate(' + barLabelWidth + ',' + (gridLabelHeight + gridChartOffset) + ')'); 
   barsContainer.selectAll("rect").data(data).enter().append("rect")
     .attr('y', y)
-    .attr('height', yScale.rangeBand())
+    .attr('height', yScale.bandwidth())
     .attr('width', function(d) { return x(barValue(d)); })
     .attr('stroke', 'white')
     .attr('fill', 'steelblue');
@@ -79,14 +87,20 @@ function drawGroup (data) {
   // start line
   barsContainer.append("line")
     .attr("y1", -gridChartOffset)
-    .attr("y2", yScale.rangeExtent()[1] + gridChartOffset)
+    .attr("y2", yScale.range()[1] + gridChartOffset)
     .style("stroke", "#000");
 }
   if (name) {
     window[name]=this;
   }
 
+}{/literal}("{$name}"));{literal}
+  }
+
+  // Boot our script as soon as ready.
+  CRM.civisualizeQueue = CRM.civisualizeQueue || [];
+  CRM.civisualizeQueue.push(bootViz);
+})();
 {/literal}
-}("{$name}"));
 </script>
 

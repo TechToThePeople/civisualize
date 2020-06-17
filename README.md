@@ -117,17 +117,51 @@ This is using the wondefully magic dc, that is a layer of love on the top of d3 
 
 In the template, put
 
-```javascript
-   <div id="theplacetograph"></div>
-   <script>
-     var mydata={crmAPI or crmSQL};
-    {literal}
-    d3("#theplacetograph").selectAll(...).data(mydata.values).domagic(...);
-```    
+```html
+<div id="theplacetograph"></div>
+<script>
+  // Load the data into 'mydata' from Smarty.
+  var mydata={crmAPI or crmSQL};
+  // Turn off Smarty's interpretator from here, it gets confused by Javascript and CSS.
+  {literal}
+  // We do everything in an anonymous function so we are free to use any
+  // variable names we need without clobbering those in the global scope.
+  (function() {
+    // Define the function that will make your charts etc.
+    function bootViz() {
+      // Ensure we're using the up-to-date libraries, not the CiviCRM core ones.
+      var d3 = CRM.civisualize.d3, dc = CRM.civisualize.dc, crossfilter = CRM.civisualize.crossfilter;
+
+      //
+      // This is where you do your stuff.
+      //
+      d3("#theplacetograph").selectAll(...).data(mydata.values).domagic(...);
+    }
+
+    // Boot our script as soon as ready.
+    CRM.civisualizeQueue = CRM.civisualizeQueue || [];
+    CRM.civisualizeQueue.push(bootViz);
+
+  })(); // Immediately call our anonymous function.
+```
 
 We have also used {crmTitle} function which let you set the title of the page, and a print_filter function that will help you in playing around with crossfilter.
 
-Checkour resources at [dc.js](http://dc-js.github.io/dc.js/) and create your first visualization.
+Check our resources at [dc.js](http://dc-js.github.io/dc.js/) and create your first visualization.
+
+### Reset links
+
+You can include reset links in your charts to reset all the filters for a particular chart.
+
+1. after defining your chart, save a reference to it using a unique name like so:  
+   `CRM.civisualize.charts.yourChartsUniqueName = yourPieChart;`
+
+2. At the end of these, call `CRM.civisualize.bindResetLinks();` to make sure all the reset links are ready.
+
+3. Include links in your chart's container div like so:  
+   `<a class="reset civisualize-reset" href data-chart-name="yourChartsUniqueName" >Reset</a>`
+
+The links should normally be hidden until you click to add a filter. See Contacts.tpl for an example use.
 
 ## Documentation and help
 If you want to add a document, add a markdown file that has the same name as the template into the doc folder
@@ -138,6 +172,30 @@ xavier made this, sid helped him. You can find us on civicrm forum, [@eucampaign
 
 Changes
 -------
+
+### Version 6.0 brings changes that will probably break your custom visualisations.
+
+It became apparent that version 5's library updates conflicted with CiviCRM's
+core libraries. To avoid this v6 now puts its own versions of dc, d3 and
+crossfilter under `CRM.civisualize` as a namespace.
+
+There were also loading problems: we need the DOM loaded (not as simple as it
+sounds, given the three types: normal page loads, cached dashboard,
+refreshed/new dashboard) and we need CRM.civisualize to have been created
+already, which is might not.  To fix this we've implemented a queue similar to
+Google analytics etc.
+
+And some issues with scripts using the global namespace for their vars.
+
+And we tidied up the reset links.
+
+So whereas before you might have just put your code in a `<script>` block and
+started calling `d3....` now you should wrap your code and boot it as shown
+above (Create your own visualisations).
+
+**Note** you might find this breaks your dashboards. If this happens you'll
+need to clear your browser's "local storage".
+
 
 ### Version 5.0 brings changes that will probably break your custom visualisations.
 

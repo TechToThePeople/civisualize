@@ -57,11 +57,16 @@
 <script>
     'use strict';
 
+{literal}
+(function() { function bootViz() {
+    // Use our versions of the libraries.
+    var d3 = CRM.civisualize.d3, dc = CRM.civisualize.dc, crossfilter = CRM.civisualize.crossfilter;
+{/literal}
+
     var data = {crmSQL file="events"};
     var i = {crmAPI entity="OptionValue" option_group_id="event_type"};
     var s = {crmAPI entity='ParticipantStatusType' option_sort="is_counted desc"};
     var URL = "{crmURL p='civicrm/dataviz/event/xx'}";
-    console.log(URL);
 
     {literal}
 
@@ -355,6 +360,12 @@
         else{
             cj('.eventsoverview').html('<div style="color:red; font-size:18px;">Civisualize Error. Please contact Admin.'+data.error+'</div>')
         }
-    {/literal}
+  }
+
+  // Boot our script as soon as ready.
+  CRM.civisualizeQueue = CRM.civisualizeQueue || [];
+  CRM.civisualizeQueue.push(bootViz);
+})();
+{/literal}
 </script>
 <div class="clear"></div>

@@ -7,40 +7,45 @@
 	<div style="clear:both"></div>
 	<div id="type" style="width:350px;">
 	    <strong>Type</strong>
-	    <a class="reset" href="javascript:typePie.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+	    <a class="reset civisualize-reset" href data-chart-name="contactsTypePie" >reset</a>
 	    <div class="clearfix"></div>
 	</div>
 		<div class="source">
 	    <strong>Source of Contact</strong>
-	    <a class="reset" href="javascript:sourceRow.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+	    <a class="reset civisualize-reset" href data-chart-name="contactsSourceRow" >reset</a>
 	    <div class="clearfix"></div>
 	</div>
 	<div class="clear"></div>
 	<div id="gender" style="width:350px;">
 	    <strong>Gender</strong>
-	    <a class="reset" href="javascript:genderPie.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+	    <a class="reset civisualize-reset" href data-chart-name="contactsGenderPie" >reset</a>
 	    <div class="clearfix"></div>
 	</div>
 	<div id="dayofweek">
 	    <strong>Day - Contact Created</strong>
-	    <a class="reset" href="javascript:weekRow.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+	    <a class="reset civisualize-reset" href data-chart-name="contactsWeekRow" >reset</a>
 	    <div class="clearfix"></div>
 	</div>
 	<div class="clear"></div>
 	<div id="contacts-by-month">
 	    <strong>Date - Contact Created</strong>
-	    <a class="reset" href="javascript:monthLine.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+	    <a class="reset civisualize-reset" href data-chart-name="contactsMonthLine" >reset</a>
 	    <div class="clearfix"></div>
 	</div>
 </div>
 
 <script>
-(function(guid){ldelim}
-	'use strict';
+{literal}
+'use strict';
+(function() { function bootViz() {
+    console.log("Contacts dataviz: bootViz running");
+(function(guid) {
+  // Use our versions of the libraries.
+  var d3 = CRM.civisualize.d3, dc = CRM.civisualize.dc, crossfilter = CRM.civisualize.crossfilter;
 
+  {/literal}
 	var data = {crmSQL file="contacts"};
 	var gender = {crmAPI entity="contact" action="getoptions" field="gender_id"};
-
 	{literal}
 
 		if(!data.is_error){//Check for database error
@@ -126,7 +131,7 @@
 					.width(250)
 					.height(200)
 					.dimension(type)
-					.colors(d3.scaleOrdinal(d3.schemeCategory10)())
+					.colors(d3.scaleOrdinal(d3.schemeCategory10))
 					.group(typeGroup)
 					.label(function(d){
 						if (typePie.hasFilter() && !typePie.hasFilter(d.key))
@@ -140,7 +145,7 @@
 					.width(250)
 					.height(200)
 					.dimension(gender)
-					.colors(d3.scaleOrdinal(d3.schemeCategory10)())
+					.colors(d3.scaleOrdinal(d3.schemeCategory10))
 					.group(genderGroup)
 					.label(function(d) {
 						if (genderPie.hasFilter() && !genderPie.hasFilter(d.key))
@@ -157,7 +162,7 @@
 					.dimension(source)
 					.cap(5)
           .ordering (function(d) {return d.count;})
-					.colors(d3.scaleOrdinal(d3.schemeCategory10)())
+					.colors(d3.scaleOrdinal(d3.schemeCategory10))
 					.group(sourceGroup)
 					.label(function(d){
 						if (sourceRow.hasFilter() && !sourceRow.hasFilter(d.key))
@@ -195,12 +200,26 @@
 				
 				dc.renderAll();
 
+        // Provide access to our objects under unique names for the reset links.
+        CRM.civisualize.charts['contactsTypePie'] = typePie;
+        CRM.civisualize.charts['contactsSourceRow'] = sourceRow;
+        CRM.civisualize.charts['contactsGenderPie'] = genderPie;
+        CRM.civisualize.charts['contactsWeekRow'] = weekRow;
+        CRM.civisualize.charts['contactsMonthLine'] = monthLine;
+        CRM.civisualize.bindResetLinks();
 			});
 		}
 		else{
 			cj('.dc_contacts').html('<div style="color:red; font-size:18px;">There is a database error. Please Contact the administrator as soon as possible.</div>');
 		}
-	{/literal}
-{rdelim})("#dataviz-contacts ");
+})("#dataviz-contacts");
+
+  }
+
+  // Boot our script as soon as ready.
+  CRM.civisualizeQueue = CRM.civisualizeQueue || [];
+  CRM.civisualizeQueue.push(bootViz);
+})();
+{/literal}
 </script>
 <div class="clear"></div>

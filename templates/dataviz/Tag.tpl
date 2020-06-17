@@ -3,8 +3,11 @@
 <script>
 var data={crmAPI entity="tag" action="getstat"};
 {literal}
+(function() { function bootViz() {
+// Use our versions of the libraries.
+var d3 = CRM.civisualize.d3, dc = CRM.civisualize.dc, crossfilter = CRM.civisualize.crossfilter;
 
-function tree(nodes,p) 
+function tree(nodes,p) {
   var p = p || function (d){return d.parent_id};
   var nodeById = {};
 
@@ -107,5 +110,11 @@ var svg = d3.select("body").append("svg")
 
 };
 
+  }
+
+  // Boot our script as soon as ready.
+  CRM.civisualizeQueue = CRM.civisualizeQueue || [];
+  CRM.civisualizeQueue.push(bootViz);
+})();
 {/literal}
 </script>

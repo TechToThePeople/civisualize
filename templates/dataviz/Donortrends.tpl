@@ -15,17 +15,17 @@
     <div id="donorsCount" style="font-size:14px; margin-bottom:5px;"><span id="contactNumber"></span> selected from a total of <span id="contactTotal" style="font-weight:800;"></span>.</div>
     <div id="donorBar">
         <strong>Donor Trends</strong>
-        <a class="reset" href="javascript:donorBar.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+        <a class="reset civisualize-reset" href data-chart-name="donortrendsDonorBar" >reset</a>
         <div class="clearfix"></div>
     </div>
     <div id="genderPie">
         <strong>Gender</strong>
-        <a class="reset" href="javascript:genderPie.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+        <a class="reset civisualize-reset" href data-chart-name="donortrendsGenderPie" >reset</a>
         <div class="clearfix"></div>
     </div>
     <div id="ageRow">
         <strong>Age</strong>
-        <a class="reset" href="javascript:ageRow.filterAll();dc.redrawAll();" style="display: none;">reset</a>
+        <a class="reset civisualize-reset" href data-chart-name="donortrendsAgeRow" >reset</a>
         <div class="clearfix"></div>
     </div>
     <div class="clear"></div>
@@ -44,14 +44,18 @@
 
 
 <script>
+{literal}
+'use strict';
+(function() { function bootViz() {
+    // Use our versions of the libraries.
+    var d3 = CRM.civisualize.d3, dc = CRM.civisualize.dc, crossfilter = CRM.civisualize.crossfilter;
 
-    'use strict';
-
+    {/literal}
     var data        = {crmSQL file="donors"};
+    {literal}
+
     var dateFormat  = d3.timeParse("%Y-%m-%d");
     var currentDate = new Date();
-
-    {literal}
 
         if(!data.is_error){
 
@@ -308,10 +312,21 @@
                     });
 
                 dc.renderAll();
+
+                CRM.civisualize.charts['donortrendsDonorBar'] = donorBar;
+                CRM.civisualize.charts['donortrendsGenderPie'] = genderPie;
+                CRM.civisualize.charts['donortrendsAgeRow'] = ageRow;
+                CRM.civisualize.bindResetLinks();
             });
         }
         else {
             cj('#donortrends').html('<div style="color:red; font-size:18px;">Civisualize Error. Please contact Admin.'+data.error+'</div>');
         }
+  }
+
+  // Boot our script as soon as ready.
+  CRM.civisualizeQueue = CRM.civisualizeQueue || [];
+  CRM.civisualizeQueue.push(bootViz);
+})();
     {/literal}
 </script>
