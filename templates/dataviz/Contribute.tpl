@@ -225,8 +225,6 @@
                 CRM.civisualize.charts['contributeDayOfWeekChart'] = dayOfWeekChart;
                 CRM.civisualize.charts['contributeMoveChart'] = moveChart;
                 CRM.civisualize.charts['contributeVolumeChart'] = volumeChart;
-                CRM.civisualize.bindResetLinks();
-                
             });//end cj
         }
         else{
@@ -234,13 +232,9 @@
         }
   }
 
-  if (document.readyState === 'complete') {
-    bootViz();
-  }
-  else {
-    // We need all our libraries loaded before we start.
-    document.addEventListener('DOMContentLoaded', bootViz);
-  }
+  // Boot our script as soon as ready.
+  CRM.civisualizeQueue = CRM.civisualizeQueue || [];
+  CRM.civisualizeQueue.push(bootViz);
 })();
     {/literal}
 </script>

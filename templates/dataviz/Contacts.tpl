@@ -38,6 +38,7 @@
 {literal}
 'use strict';
 (function() { function bootViz() {
+    console.log("Contacts dataviz: bootViz running");
 (function(guid) {
   // Use our versions of the libraries.
   var d3 = CRM.civisualize.d3, dc = CRM.civisualize.dc, crossfilter = CRM.civisualize.crossfilter;
@@ -213,16 +214,11 @@
 		}
 })("#dataviz-contacts");
 
-    CRM.civisualize.bindResetLinks();
   }
 
-  if (document.readyState === 'complete') {
-    bootViz();
-  }
-  else {
-    // We need all our libraries loaded before we start.
-    document.addEventListener('DOMContentLoaded', bootViz);
-  }
+  // Boot our script as soon as ready.
+  CRM.civisualizeQueue = CRM.civisualizeQueue || [];
+  CRM.civisualizeQueue.push(bootViz);
 })();
 {/literal}
 </script>

@@ -92,13 +92,9 @@ CRM.civisualize.bindResetLinks();
 
   }
 
-  if (document.readyState === 'complete') {
-    bootViz();
-  }
-  else {
-    // We need all our libraries loaded before we start.
-    document.addEventListener('DOMContentLoaded', bootViz);
-  }
+  // Boot our script as soon as ready.
+  CRM.civisualizeQueue = CRM.civisualizeQueue || [];
+  CRM.civisualizeQueue.push(bootViz);
 })();
 </script>
 

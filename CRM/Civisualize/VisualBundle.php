@@ -23,8 +23,9 @@ use CRM_Civisualize_ExtensionUtil as E;
 class CRM_Civisualize_VisualBundle {
 
   public static function register() {
-    Civi::resources()->addScriptUrl(Civi::service('asset_builder')->getUrl('civisualize-bundle.js'));
-    Civi::resources()->addStyleUrl(Civi::service('asset_builder')->getUrl('civisualize-bundle.css'));
+    // We put the weight as -1 as we wish to be loaded before the scripts in our page run.
+    Civi::resources()->addScriptUrl(Civi::service('asset_builder')->getUrl('civisualize-bundle.js'), CRM_Core_Resources::DEFAULT_WEIGHT -1);
+    Civi::resources()->addStyleUrl(Civi::service('asset_builder')->getUrl('civisualize-bundle.css'), CRM_Core_Resources::DEFAULT_WEIGHT -1);
   }
 
   /**

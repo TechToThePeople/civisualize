@@ -138,15 +138,10 @@ In the template, put
       d3("#theplacetograph").selectAll(...).data(mydata.values).domagic(...);
     }
 
-    // Now call this function as soon as possible, after everything is loaded.
-    if (document.readyState === 'complete') {
-      // Already ready, let's go! (This is the case for use as a Dashboard Dashlet)
-      bootViz();
-    }
-    else {
-      // Normal use as a page - we need all our libraries loaded before we start.
-      document.addEventListener('DOMContentLoaded', bootViz);
-    }
+    // Boot our script as soon as ready.
+    CRM.civisualizeQueue = CRM.civisualizeQueue || [];
+    CRM.civisualizeQueue.push(bootViz);
+
   })(); // Immediately call our anonymous function.
 ```
 
@@ -177,6 +172,30 @@ xavier made this, sid helped him. You can find us on civicrm forum, [@eucampaign
 
 Changes
 -------
+
+### Version 6.0 brings changes that will probably break your custom visualisations.
+
+It became apparent that version 5's library updates conflicted with CiviCRM's
+core libraries. To avoid this v6 now puts its own versions of dc, d3 and
+crossfilter under `CRM.civisualize` as a namespace.
+
+There were also loading problems: we need the DOM loaded (not as simple as it
+sounds, given the three types: normal page loads, cached dashboard,
+refreshed/new dashboard) and we need CRM.civisualize to have been created
+already, which is might not.  To fix this we've implemented a queue similar to
+Google analytics etc.
+
+And some issues with scripts using the global namespace for their vars.
+
+And we tidied up the reset links.
+
+So whereas before you might have just put your code in a `<script>` block and
+started calling `d3....` now you should wrap your code and boot it as shown
+above (Create your own visualisations).
+
+**Note** you might find this breaks your dashboards. If this happens you'll
+need to clear your browser's "local storage".
+
 
 ### Version 5.0 brings changes that will probably break your custom visualisations.
 
