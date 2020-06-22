@@ -13,15 +13,11 @@ Civisualize will help you out with ready to use visualizations that we have crea
 ***
 Installation
 ------------
-You can directly clone to your civiCRM extension directory using
+Civisualize can be installed directly from within the CiviCRM user interface. See the user manual for details: [Installing extensions](https://docs.civicrm.org/user/en/latest/introduction/extensions/#installing-extensions).
+
+If you are a developer you can clone Civisualize into your CiviCRM extension directory using:
 
 `git clone https://github.com/TechToThePeople/civisualize.git`
-
-You can also download a zip file from 
-
-`https://codeload.github.com/TechToThePeople/civisualize/zip/master`
-
-and extract in your extension directory. The next step is enabling the extension which can be done from `"Administer -> Customize -> Manage CiviCRM Extensions".`
 
 Ready to Use Visualizations
 ---------------------------
