@@ -42,7 +42,7 @@ This table further links to specific event overview (/dataviz/event/<id>) showin
 
 ![alt tag](https://raw.githubusercontent.com/TechToThePeople/civisualize/master/examples/event.jpg)
 
-##Donor Trends (/dataviz/donortrends)
+## Donor Trends (/dataviz/donortrends)
 
 ![alt tag](https://raw.githubusercontent.com/TechToThePeople/civisualize/master/examples/donortrends.jpg)
 Based on the idea of [CiviCRM Donor Trends Extension](https://github.com/leez/org.eff.donortrends/), the donor trends overview showcases a Bar Chart with new, lapsed, upgraded, downgraded and maintained donors over the years. This further showcases the gender and age of the donors and a list of all the donors.  
