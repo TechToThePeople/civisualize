@@ -24,7 +24,7 @@ class CRM_Civisualize_VisualBundle {
 
   public static function register() {
     // We put the weight as -1 as we wish to be loaded before the scripts in our page run.
-    Civi::resources()->addScriptUrl(Civi::service('asset_builder')->getUrl('civisualize-bundle.js'), CRM_Core_Resources::DEFAULT_WEIGHT -1);
+    Civi::resources()->addScriptUrl(Civi::service('asset_builder')->getUrl('civisualize-bundle.min.js'), CRM_Core_Resources::DEFAULT_WEIGHT -1);
     Civi::resources()->addStyleUrl(Civi::service('asset_builder')->getUrl('civisualize-bundle.css'), CRM_Core_Resources::DEFAULT_WEIGHT -1);
   }
 
@@ -36,7 +36,7 @@ class CRM_Civisualize_VisualBundle {
    * @see \Civi\Core\AssetBuilder
    */
   public static function buildAssetJs($event) {
-    if ($event->asset !== 'civisualize-bundle.js') {
+    if ($event->asset !== 'civisualize-bundle.min.js') {
       return;
     }
 
