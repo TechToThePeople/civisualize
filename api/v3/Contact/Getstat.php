@@ -46,7 +46,6 @@ function civicrm_api3_contact_getstat ($params) {
   $query->generatePermissionClause(FALSE, $count);
   list($select, $from, $where, $having) = $query->query($count);
 
-  $options = $query->_options;
   if(!empty($query->_permissionWhereClause)){
     if (empty($where)) {
       $where = "WHERE $query->_permissionWhereClause";
