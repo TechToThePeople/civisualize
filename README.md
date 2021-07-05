@@ -176,6 +176,10 @@ xavier made this, sid helped him. You can find us on CiviCRM forum, [@eucampaign
 Changes
 -------
 
+## Version 6.1
+
+- Update civix boilerplate to work with PHP 7.4 without warnings.
+
 ## Version 6.0 brings changes that will probably break your custom visualisations.
 
 It became apparent that version 5's library updates conflicted with CiviCRM's
