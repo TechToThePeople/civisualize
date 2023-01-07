@@ -10,6 +10,9 @@ Civisualize will help you out with ready to use visualizations that we have crea
 - [Create your own visualizations](#create-your-own-visualizations)
 - [Suggestions](#we-love-you)
 
+Since 2023 this extension is now hosted on CiviCRM's Gitlab:  
+https://lab.civicrm.org/extensions/civisualize
+
 ***
 Installation
 ------------
@@ -17,7 +20,7 @@ Civisualize can be installed directly from within the CiviCRM user interface. Se
 
 If you are a developer you can clone Civisualize into your CiviCRM extension directory using:
 
-`git clone https://github.com/TechToThePeople/civisualize.git`
+`git clone https://lab.civicrm.org/extensions/civisualize.git`
 
 Ready to Use Visualizations
 ---------------------------
