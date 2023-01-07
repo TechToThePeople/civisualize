@@ -8,7 +8,7 @@
     <author>Xavier</author>
     <email>xavier@tttp.eu</email>
   </maintainer>
-  <releaseDate>2020-06-15</releaseDate>
+  <releaseDate>2023-01-07</releaseDate>
   <version>6.1</version>
   <develStage>stable</develStage>
   <compatibility>
@@ -18,9 +18,9 @@
     <namespace>CRM/Civisualize</namespace>
   </civix>
   <urls>
-    <url desc="Main Extension Page">https://github.com/TechToThePeople/civisualize</url>
-    <url desc="Documentation">https://github.com/TechToThePeople/civisualize</url>
-    <url desc="Support">https://chat.civicrm.org</url>
+    <url desc="Main Extension Page">https://civicrm.org/extensions/civisualize-missing-data-visualization-extension</url>
+    <url desc="Documentation">https://lab.civicrm.org/extensions/civisualize/-/blob/master/README.md</url>
+    <url desc="Support">https://lab.civicrm.org/extensions/civisualize/-/issues</url>
     <url desc="Licensing">https://civicrm.org/licensing</url>
   </urls>
 </extension>
