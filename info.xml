@@ -12,10 +12,11 @@
   <version>6.1</version>
   <develStage>stable</develStage>
   <compatibility>
-    <ver>5.24</ver>
+    <ver>5.27</ver>
   </compatibility>
   <civix>
     <namespace>CRM/Civisualize</namespace>
+    <format>23.02.1</format>
   </civix>
   <urls>
     <url desc="Main Extension Page">https://civicrm.org/extensions/civisualize-missing-data-visualization-extension</url>
@@ -23,4 +24,13 @@
     <url desc="Support">https://lab.civicrm.org/extensions/civisualize/-/issues</url>
     <url desc="Licensing">https://civicrm.org/licensing</url>
   </urls>
+  <mixins>
+    <mixin>menu-xml@1.0.0</mixin>
+    <mixin>mgd-php@1.0.0</mixin>
+    <mixin>smarty-v2@1.0.1</mixin>
+  </mixins>
+  <classloader>
+    <psr0 prefix="CRM_" path="."/>
+    <psr4 prefix="Civi\" path="Civi"/>
+  </classloader>
 </extension>
